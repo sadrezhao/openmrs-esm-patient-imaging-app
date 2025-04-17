@@ -30,38 +30,36 @@ import {
 } from '@openmrs/esm-framework';
 
 import { useTranslation } from 'react-i18next';
-import { RequestProcedureStep } from '../../types';
-import { procedureStepFormWorkspace } from '../constants';
+import { RequestProcedure, RequestProcedureStep } from '../../types';
+import { addNewProcedureStepWorkspace, procedureStepCount } from '../constants';
 import styles from './details-table.scss';
 import { useProcedureStep } from '../../api';
 
 export interface ProcedureStepTableProps {
-    requestProcedure;
-    patient: fhir.Patient;
+    requestProcedure: RequestProcedure;
+    patientUuid: string;
 }
 
   const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({
     requestProcedure,
-    patient
+    patientUuid
   }) => {
 
     const {
         data: stepList,
-        error: seriesError,
+        error: stepError,
         isLoading: isLoadingStep,
         isValidating: isValidatingStep,
     } = useProcedureStep(requestProcedure)
 
-    const pageSize = 5;
     const { t } = useTranslation();
     const displayText = t('procedureStep', 'ProcedureStep');
-    const headerTitle = t('procedureStep', 'ProcedureSteo');
-    const { results, goTo, currentPage } = usePagination(stepList, pageSize);
-    const [expandedRows, setExpandedRows] = useState({});
+    const headerTitle = t('procedureStep', 'ProcedureStep');
+    const { results, goTo, currentPage } = usePagination(stepList, procedureStepCount);
+    const launchProcedureStepForm = useCallback(() => launchPatientWorkspace(addNewProcedureStepWorkspace), []);
 
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
-    const launchProcedureStepForm = useCallback(() => launchPatientWorkspace(procedureStepFormWorkspace), []);
 
     const tableHeaders = [
         { key: 'id', header: t('stepID', 'StepID')},
@@ -131,10 +129,22 @@ export interface ProcedureStepTableProps {
         return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
     }
     
-
     if (stepList?.length) {
         return (
-            <div className={'dataTableDiv'}>
+            <div className={styles.widgetCard}>
+            <CardHeader title={headerTitle}>
+                <span>{isValidatingStep ? <InlineLoading/>: null}</span>
+                <div className={styles.buttons}>
+                    <Button
+                        kind="ghost"
+                        renderIcon={(props) => <AddIcon size={16} {...props} />}
+                        iconDescription={t('add', 'Add')}
+                        onClick={launchProcedureStepForm}
+                    >
+                    {t('Add', 'Add')}
+                    </Button>
+                </div>
+                </CardHeader>
                 <DataTable
                     rows={tableRows} 
                     headers={tableHeaders}
@@ -164,14 +174,11 @@ export interface ProcedureStepTableProps {
                          </TableHead>
                          <TableBody>
                             {rows.map((row, rowIndex) => {
-                                const isExpanded = expandedRows[rowIndex];
                                 return (
                                     <React.Fragment key={rowIndex}>
                                         <TableRow>
                                             {row.cells.map((cell, cellIndex) => (
-                                                <TableCell className={styles.tableCell} key={cellIndex}
-                                                    style={cellIndex===4?{ width: '15%'}:{width: '22%'}}
-                                                >
+                                                <TableCell className={styles.tableCell} key={cellIndex}>
                                                     {cell.value?.content ?? cell.value}
                                                 </TableCell>
                                                 ))}
@@ -183,7 +190,13 @@ export interface ProcedureStepTableProps {
                       </TableContainer>
                 )}
                 </DataTable>
-
+                <PatientChartPagination
+                    pageNumber={currentPage}
+                    totalItems={stepList.length}
+                    currentItems={results.length}
+                    pageSize={procedureStepCount}
+                    onPageNumberChange={({ page }) => goTo(page)}
+                />
             </div>
         )
     }

@@ -2,19 +2,18 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRequests, useStudies } from '../../api'
 import { DataTableSkeleton } from '@carbon/react';
-import { EmptyState, ErrorState, launchPatientWorkspace} from '@openmrs/esm-patient-common-lib';
+import { EmptyState, ErrorState } from '@openmrs/esm-patient-common-lib';
 import { useLayoutType } from '@openmrs/esm-framework';
 import PatientStudiesTable from '../components/studies-details-table.component';
 import RequestProcedureTable from '../components/requests-details-table.component';
 
 interface ImagingDetailedSummaryProps {
     patient: fhir.Patient;
+    patientUuid: string;
 }
 
-export default function ImagingDetailedSummary({patient}: ImagingDetailedSummaryProps) {
+export default function ImagingDetailedSummary({patient, patientUuid}: ImagingDetailedSummaryProps) {
   const { t } = useTranslation();
-  const launchUploadStudiesForm = useCallback(() => launchPatientWorkspace("upload-studies-workspace"), []);
-  const launchAddRequestProcedureForm = useCallback(() => launchPatientWorkspace("add-requestProcedure-workspace"), []);
   const layout = useLayoutType();
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
 
@@ -23,18 +22,18 @@ export default function ImagingDetailedSummary({patient}: ImagingDetailedSummary
     error: studiesError,
     isLoading: isLoadingPatientStudies,
     isValidating: isValidatingStudies,
-  } = useStudies(patient?.id);
+  } = useStudies(patientUuid);
 
   const {
     data: requests,
     error: requestError,
     isLoading: isLoadingRequests,
     isValidating: isValidatingRequest,
-  } = useRequests(patient?.id)
+  } = useRequests(patientUuid)
 
   return (
     <div>
-      <div style={{ marginBottom: '1.5rem'}}>
+      <div style={{ marginBottom: '2rem'}}>
         {(() => {
           const displayText = t('studies', 'studies');
           const headerTitle = t('Studies', 'Studies');
@@ -46,14 +45,14 @@ export default function ImagingDetailedSummary({patient}: ImagingDetailedSummary
           if (studies?.length) {
             return (
                 <PatientStudiesTable 
-                  isValidating={isValidatingStudies}
-                  studies={studies}
-                  showDeleteButton={true}
-                  patient={patient}              
-              />
-            );
+                isValidating={isValidatingStudies}
+                studies={studies}
+                showDeleteButton={true}
+                patientUuid={patientUuid} 
+                />
+              )
           }
-          return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchUploadStudiesForm} />;
+          return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
         })()}
       </div>
       <div>
@@ -70,11 +69,11 @@ export default function ImagingDetailedSummary({patient}: ImagingDetailedSummary
                   isValidating={isValidatingRequest}
                   requests={requests}
                   showDeleteButton={true}
-                  patient={patient}
+                  patientUuid={patientUuid}
                 />
               )
             }
-            return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchAddRequestProcedureForm} />;
+            return <EmptyState displayText={displayText} headerTitle={headerTitle}/>;
         })()}
       </div>
     </div>

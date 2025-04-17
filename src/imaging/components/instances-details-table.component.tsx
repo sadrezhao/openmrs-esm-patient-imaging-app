@@ -23,15 +23,16 @@ import { useLayoutType, usePagination} from '@openmrs/esm-framework';
 import { useStudyInstances } from '../../api';
 import preview from '../../assets/preview.png';
 import styles from './details-table.scss'
+import { instancesCount } from '../constants';
 
 export interface InstancesDetailsTableProps {
     series: Series;
-    patient: fhir.Patient;
+    patientUuid: string
 }
 
 const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
     series,
-    patient
+    patientUuid
 }) => {
     const {
         data: instances,
@@ -40,11 +41,10 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
         isValidating: isValidatingSeries,
     } = useStudyInstances(series);
 
-    const pageSize = 5;
     const { t } = useTranslation();
     const displayText = t('instances', 'Instances');
     const headerTitle = t('instances', 'Instances');
-    const { results, goTo, currentPage } = usePagination(instances, pageSize);
+    const { results, goTo, currentPage } = usePagination(instances, instancesCount);
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
 
@@ -103,7 +103,7 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
     }
 
     return (
-        <div className={'dataTableDiv'}>
+        <div className={'studiesTableDiv'}>
             <DataTable
                 rows={tableRows} 
                 headers={tableHeaders}
@@ -154,7 +154,7 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                 pageNumber={currentPage}
                 totalItems={instances.length}
                 currentItems={results.length}
-                pageSize={pageSize}
+                pageSize={instancesCount}
                 onPageNumberChange={({ page }) => goTo(page)}
             />
         </div>

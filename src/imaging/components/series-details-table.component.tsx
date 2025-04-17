@@ -24,18 +24,18 @@ import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
 import { useLayoutType, usePagination, formatDate, TrashCanIcon} from '@openmrs/esm-framework';
 import { useStudySeries } from '../../api';
-import styles from './details-table.scss'
 import InstancesDetailsTable from './instances-details-table.component';
-import { TextAlignCenter } from '@carbon/react/icons';
+import styles from './details-table.scss'
+import { seriesCount } from '../constants';
 
 export interface SeriesDetailsTableProps {
     study: DicomStudy;
-    patient: fhir.Patient;
+    patientUuid: string;
 }
 
 const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
     study,
-    patient
+    patientUuid
 }) => {
     const {
         data: seriesList,
@@ -44,11 +44,10 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
         isValidating: isValidatingSeries,
       } = useStudySeries(study);
     
-    const pageSize = 5;
     const { t } = useTranslation();
     const displayText = t('series', 'Series');
     const headerTitle = t('series', 'Series');
-    const { results, goTo, currentPage } = usePagination(seriesList, pageSize);
+    const { results, goTo, currentPage } = usePagination(seriesList, seriesCount);
     const [expandedRows, setExpandedRows] = useState({});
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
@@ -180,7 +179,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                                             <div className={styles.instanceTableDiv}>
                                                 <InstancesDetailsTable 
                                                     series={row}
-                                                    patient={patient}
+                                                    patientUuid={patientUuid}
                                                 /> 
                                             </div>
                                         </TableCell>
@@ -198,7 +197,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                 pageNumber={currentPage}
                 totalItems={seriesList.length}
                 currentItems={results.length}
-                pageSize={pageSize}
+                pageSize={seriesCount}
                 onPageNumberChange={({ page }) => goTo(page)}
             />
         </div>

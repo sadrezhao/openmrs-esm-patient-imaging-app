@@ -29,23 +29,36 @@
       }
     }
   ],
+  "modals": [
+    {
+      "name": "synchronize-studies-dialog",
+      "component": "synchronizedStudiesModal"
+    }
+  ],
+
   "workspaces": [
     {
-      "name": "patientStudiesFormWorkspace",
-      "title": "studiesWorkspace",
-      "component": "studiesFormWorkspace",
+      "name": "upload-studies-form-workspace",
+      "title": "uploadStudy",
+      "component": "uploadStudiesFormWorkspace",
       "type": "form"
     },
     {
-      "name": "procedureStepFormWorkspace",
-      "title": "procedureStepWorkspace",
-      "component": "procedureStepFormWorkspace",
+      "name": "synchronize-studies-form-workspace",
+      "title": "synchronizeStudies",
+      "component": "synchronizeStudiesFormWorkspace",
       "type": "form"
     },
     {
-      "name": "requstProcedureFormWorkspace",
-      "title": "requestProcedureWorkspace",
-      "component": "requestProcedureFormWorkspace",
+      "name": "add-requst-form-workspace",
+      "title": "addRequest",
+      "component": "addNewRequestWorkspace",
+      "type": "form"
+    },
+    {
+      "name": "add-procedureStep-form-workspace",
+      "title": "addProcedureStep",
+      "component": "addNewProcedureStepWorkspace",
       "type": "form"
     }
   ]

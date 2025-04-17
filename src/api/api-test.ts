@@ -1,50 +1,51 @@
-import { DicomStudy, Instance, RequestProcedure, RequestProcedureStep, Series } from "../types";
+import { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from "../types";
 
 export const testStudy: Array<DicomStudy> = [{
     id: 0,
     studyInstanceUID: "2.16.840.1.113669.632.20.1211.10000098591",
     orthancStudyUID: "abc123def456",
-    mrsPatient: {
-        uuid: 'f2439e62-8f0d-4a4f-85a1-cad42b0dfb62', // from OpenmrsResourceStrict
-        display: 'John Doe',                          // from OpenmrsResourceStrict
-        identifiers: [
-          {
-              identifier: '1001A',
-              identifierType: {
-                  uuid: 'abc-def-123',
-                  display: 'National ID',
-              },
-              preferred: true,
-              voided: false,
-              uuid: '1000HM2'
-          },
-        ],
-        person: {
-          uuid: '789e1234-e89b-42f1-b2a2-123456789abc',
-          display: 'John Doe',
-          gender: 'M',
-          birthdate: '1985-05-15',
-          birthdateEstimated: false,
-          dead: false,
-          age: 39,
-          names: [
-            {
-                givenName: 'John',
-                familyName: 'Doe',
-                uuid: ''
-            },
-          ],
-          addresses: [
-            {
-                address1: '123 Main St',
-                cityVillage: 'Springfield',
-                country: 'USA',
-                uuid: ''
-            },
-          ],
-        },
-        voided: false,
-      },
+    patientUuid: "f2439e62-8f0d-4a4f-85a1-cad42b0dfb62",
+    // mrsPatient: {
+    //     uuid: 'f2439e62-8f0d-4a4f-85a1-cad42b0dfb62', // from OpenmrsResourceStrict
+    //     display: 'John Doe',                          // from OpenmrsResourceStrict
+    //     identifiers: [
+    //       {
+    //           identifier: '1001A',
+    //           identifierType: {
+    //               uuid: 'abc-def-123',
+    //               display: 'National ID',
+    //           },
+    //           preferred: true,
+    //           voided: false,
+    //           uuid: '1000HM2'
+    //       },
+    //     ],
+    //     person: {
+    //       uuid: '789e1234-e89b-42f1-b2a2-123456789abc',
+    //       display: 'John Doe',
+    //       gender: 'M',
+    //       birthdate: '1985-05-15',
+    //       birthdateEstimated: false,
+    //       dead: false,
+    //       age: 39,
+    //       names: [
+    //         {
+    //             givenName: 'John',
+    //             familyName: 'Doe',
+    //             uuid: ''
+    //         },
+    //       ],
+    //       addresses: [
+    //         {
+    //             address1: '123 Main St',
+    //             cityVillage: 'Springfield',
+    //             country: 'USA',
+    //             uuid: ''
+    //         },
+    //       ],
+    //     },
+    //     voided: false,
+    //   },
     orthancConfiguration: {
         id: 1,
         lastChangedIndex: -1,
@@ -105,53 +106,28 @@ export const testRequestProcedure: Array<RequestProcedure> = [
             orthancProxyUrl: "",
             orthancBaseUrl: "http://localhost:8042",
         },
-        mrsPatient: {
-            uuid: 'f2439e62-8f0d-4a4f-85a1-cad42b0dfb62', // from OpenmrsResourceStrict
-            display: 'John Doe',                          // from OpenmrsResourceStrict
-            identifiers: [
-              {
-                  identifier: '1001A',
-                  identifierType: {
-                      uuid: 'abc-def-123',
-                      display: 'National ID',
-                  },
-                  preferred: true,
-                  voided: false,
-                  uuid: '1000HM2'
-              },
-            ],
-            person: {
-              uuid: '789e1234-e89b-42f1-b2a2-123456789abc',
-              display: 'John Doe',
-              gender: 'M',
-              birthdate: '1985-05-15',
-              birthdateEstimated: false,
-              dead: false,
-              age: 39,
-              names: [
-                {
-                    givenName: 'John',
-                    familyName: 'Doe',
-                    uuid: ''
-                },
-              ],
-              addresses: [
-                {
-                    address1: '123 Main St',
-                    cityVillage: 'Springfield',
-                    country: 'USA',
-                    uuid: ''
-                },
-              ],
-            },
-            voided: false,
-        },
+        patientUuid: "f2439e62-8f0d-4a4f-85a1-cad42b0dfb62",
         accessionNumber: "ACC12345678",
         studyInstanceUID: "2.16.840.1.113669.632.20.1211.10000098591",
         requestingPhysician: "Dr. John Smith",
         requestDescription: "MRI Brain with contrast",
         priority: "High"
     }
+]
+
+export const testConfigurations: Array<OrthancConfiguration> = [
+  {
+    id: 1,
+    orthancBaseUrl: "http://localhost:8042",
+    orthancProxyUrl: "",
+    lastChangedIndex: -1,
+  },
+  {
+    id: 2,
+    orthancBaseUrl: "http://localhost:8062",
+    orthancProxyUrl: "",
+    lastChangedIndex: -1,
+  }
 ]
 
 export const testInstances: Array<Instance> = [
@@ -309,3 +285,47 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
     procedureStepLocation: 'X-Ray Room B'
   }
 ];
+
+export const testMrsPatient = {
+  mrsPatient: {
+        uuid: 'f2439e62-8f0d-4a4f-85a1-cad42b0dfb62', // from OpenmrsResourceStrict
+        display: 'John Doe',                          // from OpenmrsResourceStrict
+        identifiers: [
+          {
+              identifier: '1001A',
+              identifierType: {
+                  uuid: 'abc-def-123',
+                  display: 'National ID',
+              },
+              preferred: true,
+              voided: false,
+              uuid: '1000HM2'
+          },
+        ],
+        person: {
+          uuid: '789e1234-e89b-42f1-b2a2-123456789abc',
+          display: 'John Doe',
+          gender: 'M',
+          birthdate: '1985-05-15',
+          birthdateEstimated: false,
+          dead: false,
+          age: 39,
+          names: [
+            {
+                givenName: 'John',
+                familyName: 'Doe',
+                uuid: ''
+            },
+          ],
+          addresses: [
+            {
+                address1: '123 Main St',
+                cityVillage: 'Springfield',
+                country: 'USA',
+                uuid: ''
+            },
+          ],
+        },
+        voided: false,
+      },
+}

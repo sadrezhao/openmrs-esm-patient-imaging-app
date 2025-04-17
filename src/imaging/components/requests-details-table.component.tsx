@@ -30,7 +30,7 @@ import {
 
   import { useTranslation } from 'react-i18next';
   import { RequestProcedure } from '../../types';
-  import { requestProcedureFormWorkspace } from '../constants';
+  import { addNewRequestWorkspace, requestCount } from '../constants';
   import styles from './details-table.scss';
 import ProcedureStepTable from './procedureStep-details-table.component';
 
@@ -38,25 +38,24 @@ import ProcedureStepTable from './procedureStep-details-table.component';
     isValidating?: boolean;
     requests?: Array<RequestProcedure> | null;
     showDeleteButton?: boolean;
-    patient: fhir.Patient;
+    patientUuid: string;
   }
 
   const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({
     isValidating,
     requests,
     showDeleteButton,
-    patient
+    patientUuid
   }) => {
-    const pageSize = 5;
     const { t } = useTranslation();
     const displayText = t('requestProcedure', 'RequestProcedure');
     const headerTitle = t('requestProcedure', 'RequestProcedure');
-    const { results, goTo, currentPage } = usePagination(requests, pageSize);
+    const { results, goTo, currentPage } = usePagination(requests, requestCount);
     const [expandedRows, setExpandedRows] = useState({});
 
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
-    const launchRequestProcedureForm = useCallback(() => launchPatientWorkspace(requestProcedureFormWorkspace), []);
+    const launchRequestForm = useCallback(() => launchPatientWorkspace(addNewRequestWorkspace), []);
 
     const tableHeaders = [
         { key: 'id', header: t('requestID', 'RequestID')},
@@ -121,7 +120,7 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                     kind="ghost"
                     renderIcon={(props) => <AddIcon size={16} {...props} />}
                     iconDescription={t('add', 'Add')}
-                    onClick={launchRequestProcedureForm}
+                    onClick={launchRequestForm}
                     >
                     {t('Add', 'Add')}
                     </Button>
@@ -182,8 +181,8 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                                             <div className={styles.procedureStepTableDiv}>
                                                 <ProcedureStepTable 
                                                     requestProcedure={row}
-                                                    patient={patient}
-                                                />
+                                                    patientUuid={patientUuid} 
+                                                />                                           
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -200,13 +199,13 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                 pageNumber={currentPage}
                 totalItems={requests.length}
                 currentItems={results.length}
-                pageSize={pageSize}
+                pageSize={requestCount}
                 onPageNumberChange={({ page }) => goTo(page)}
             />
         </div>
         );
     }
-    return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchRequestProcedureForm} />;
+    return <EmptyState displayText={displayText} headerTitle={headerTitle}/>;
   }
 
 function onRemoveClick() {

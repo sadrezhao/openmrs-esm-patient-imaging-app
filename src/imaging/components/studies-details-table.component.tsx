@@ -18,7 +18,8 @@ import {
   compare,
   PatientChartPagination,
   launchPatientWorkspace,
-  EmptyState
+  EmptyState,
+  DefaultPatientWorkspaceProps
 } from '@openmrs/esm-patient-common-lib';
 
 import {
@@ -26,42 +27,40 @@ import {
     formatDate,
     useLayoutType,
     usePagination,
-    TrashCanIcon,
   } from '@openmrs/esm-framework';
 
 import { useTranslation } from 'react-i18next';
 import { DicomStudy } from '../../types';
 import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
-import { patientStudiesFormWorkspace } from '../constants';
 import SeriesDetailsTable  from './series-details-table.component';
 import styles from './details-table.scss';
+import { studiesCount, synchronizeStudiesFormWorkspace, uploadStudiesFormWorkspace } from '../constants';
 
 export interface StudyDetailsTableProps {
   isValidating?: boolean;
   studies?: Array<DicomStudy> | null;
   showDeleteButton?: boolean;
-  patient: fhir.Patient;
+  patientUuid: string;
 }
 
 const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
   isValidating,
   studies,
   showDeleteButton,
-  patient
+  patientUuid
 }) => {
-  const pageSize = 5;
   const { t } = useTranslation();
   const displayText = t('studies', 'studies');
   const headerTitle = t('Studies', 'Studies');
-  const { results, goTo, currentPage } = usePagination(studies, pageSize);
+  const { results, goTo, currentPage } = usePagination(studies ?? [], studiesCount);
   const [expandedRows, setExpandedRows] = useState({});
+  const launchUploadStudiesForm = useCallback(() => launchPatientWorkspace(uploadStudiesFormWorkspace), []);
+  const launchSynchronizeStudiesForm = useCallback(() => launchPatientWorkspace(synchronizeStudiesFormWorkspace), []);
 
 
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
-  const launchStudiesForm = useCallback(() => launchPatientWorkspace(patientStudiesFormWorkspace), []);
-
 
   const tableHeaders = [
     { key: 'studyInstanceUID', header: t('studyInstanceUID', 'StudyInstanceUID')},
@@ -95,7 +94,6 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
     action: {
       content:(
         <div className="flex gap-1">
-
           <IconButton
             kind="ghost"
             align="left"
@@ -126,7 +124,7 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
       : compare(cellA.sortKey, cellB.sortKey);
   };
 
-  if (studies?.length) {
+  if (studies && studies?.length) {
   return (
     <div className={styles.widgetCard}>
       <CardHeader title={headerTitle}>
@@ -136,7 +134,7 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
             kind="ghost"
             renderIcon={(props) => <AddIcon size={16} {...props} />}
             iconDescription={t('upload','Upload')}
-            onClick={launchStudiesForm}
+            onClick={launchUploadStudiesForm}
           >
             {t('upload', 'Upload')}
           </Button>
@@ -144,7 +142,7 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
             kind="ghost"
             renderIcon={(props) => <AddIcon size={16} {...props} />}
             iconDescription={t('synchronizeStudies','SynchronizeStudies')}
-            onClick={launchStudiesForm}
+            onClick={launchSynchronizeStudiesForm}
           >
             {t('synchroize', 'Synchroize')}
           </Button>
@@ -204,7 +202,7 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
                               <div className={styles.seriesTableDiv}>
                                 <SeriesDetailsTable 
                                   study = {row} 
-                                  patient={patient}
+                                  patientUuid={patientUuid}
                                   />
                               </div>
                             </TableCell>
@@ -222,13 +220,13 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
           pageNumber={currentPage}
           totalItems={studies.length}
           currentItems={results.length}
-          pageSize={pageSize}
+          pageSize={studiesCount}
           onPageNumberChange={({ page }) => goTo(page)}
         />
     </div>
   );
   }
-  return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchStudiesForm} />;
+  return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
 }
 
 export default PatientStudiesTable;

@@ -39,24 +39,13 @@
   },
   "dependencies": {
     "@carbon/react": "^1.68.0",
+    "@hookform/resolvers": "^3.x",
     "@internationalized/date": "^3.7.0",
-    "@openmrs/esm-api": "^6.2.0",
-    "@openmrs/esm-config": "^6.2.0",
-    "@openmrs/esm-context": "^6.2.0",
-    "@openmrs/esm-error-handling": "^6.2.0",
-    "@openmrs/esm-expression-evaluator": "^6.2.0",
-    "@openmrs/esm-extensions": "^6.2.0",
-    "@openmrs/esm-feature-flags": "^6.2.0",
-    "@openmrs/esm-globals": "^6.2.1-pre.2836",
-    "@openmrs/esm-navigation": "^6.2.0",
-    "@openmrs/esm-offline": "^6.2.0",
-    "@openmrs/esm-patient-common-lib": "^9.2.2",
-    "@openmrs/esm-react-utils": "^6.2.0",
-    "@openmrs/esm-state": "^6.2.0",
-    "@openmrs/esm-translations": "^6.2.0",
-    "@openmrs/esm-utils": "^6.2.0",
+    "@openmrs/esm-patient-common-lib": "next",
     "lodash-es": "^4.17.21",
-    "react-is": "^19.1.0"
+    "react-hook-form": "^7.x",
+    "react-is": "^19.1.0",
+    "zod": "^3.x"
   },
   "peerDependencies": {
     "@openmrs/esm-framework": "*",
@@ -67,7 +56,8 @@
     "rxjs": "6.x"
   },
   "devDependencies": {
-    "@openmrs/esm-framework": "6.x",
+    "@openmrs/esm-framework": "next",
+    "@openmrs/esm-patient-common-lib": "next",
     "@openmrs/esm-styleguide": "next",
     "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.3.12",

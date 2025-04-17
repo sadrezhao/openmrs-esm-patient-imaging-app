@@ -36,16 +36,63 @@ export const imagingDashboardLink = getSyncLifecycle(
   options,
 );
 
-// export const studiesWorkspace = getAsyncLifecycle(
-//  () => import('./imaging/studies/studies.workspace'),
-//  options,
-// );
 
-// export const worklistWorkspace = getAsyncLifecycle(
-//  () => import('./imaging/worklist/requestProcedure.workspace'),
-//  options,
-// );
+export const uploadStudiesFormWorkspace = getAsyncLifecycle(
+ () => import('./imaging/studies/upload-studies.workspace'),
+ options,
+);
+
+export const synchronizeStudiesFormWorkspace = getAsyncLifecycle(
+  () => import('./imaging/studies/synchronize-studies.workspace'),
+  options,
+ );
+
+export const AddNewRequestWorkspace = getAsyncLifecycle(
+ () => import('./imaging/worklist/request.workspace'),
+ options,
+);
+
+export const AddNewProcedureStepWorkspace = getAsyncLifecycle(
+  () => import('./imaging/worklist/procedure-step.workspace'),
+  options,
+ );
+
+export const SynchronizeStudiesModal = getAsyncLifecycle(
+  () => import('./imaging/studies/synchronized-studies.modal'),
+  {
+    featureName: 'Synchronize studies',
+    moduleName,
+  },
+);
 
 export const imagingDetailedSummary = getSyncLifecycle(ImagingDetailedSummaryComponent, options);
 
+export function createErrorHandler() {
+  const outgoingErr = Error();
+  return (incomingErr) => {
+    const finalErr = ensureErrorObject(incomingErr);
+    finalErr.stack += `\nAsync stacktrace:\n${outgoingErr.stack}`;
+    reportError(incomingErr);
+  };
+}
 
+function ensureErrorObject(thing: any) {
+  let message;
+
+  if (thing instanceof Error) {
+    return thing;
+  } else if (thing === null) {
+    return Error(`'null' was thrown as an error`);
+  } else if (typeof thing === 'object') {
+    try {
+      message = `Object thrown as error: ${JSON.stringify(thing)}`;
+    } catch (e) {
+      message = `Object thrown as error with the following properties: ${Object.keys(thing)}`;
+    }
+    return Error(message);
+  } else if (thing === undefined) {
+    return Error(`'undefined' was thrown as an error`);
+  } else {
+    return Error(thing.toString());
+  }
+}

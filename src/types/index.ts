@@ -6,7 +6,7 @@ export interface DicomStudy {
   orthancStudyUID: string;
   orthancConfiguration: OrthancConfiguration;
   patientName: string;
-  mrsPatient: Patient;
+  patientUuid: string;
   studyDate: string;
   studyTime: string;
   studyDescription: string;
@@ -46,7 +46,7 @@ export interface RequestProcedure {
   id: number,
   status: string,
   orthancConfiguration: OrthancConfiguration,
-  mrsPatient: Patient,
+  patientUuid: string,
   accessionNumber: string,
   studyInstanceUID: string,
   requestingPhysician: string,

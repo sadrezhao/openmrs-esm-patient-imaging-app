@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import useSWR, {mutate} from 'swr';
-import { FetchResponse,} from '@openmrs/esm-framework';
-import { openmrsFetch, openmrsObservableFetch, restBaseUrl } from '@openmrs/esm-framework';
-import type { DicomStudy, RequestProcedure, RequestProcedureStep, Series } from '../types';
-import { testSeries, testStudy, testRequestProcedure, testInstances, testProcedureSteps} from '../api/api-test';
+import { FetchResponse, Patient,} from '@openmrs/esm-framework';
+import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
+import type { DicomStudy, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from '../types';
+import { testSeries, testStudy, testRequestProcedure, testInstances, testProcedureSteps, testConfigurations, testMrsPatient} from '../api/api-test';
 
 export const careSettingUuid = 'b47d1b48-1d9f-4d3c-b44b-8f29a9b20c7d';
 
@@ -39,6 +39,20 @@ export interface SeriesResponse {
   type: string;
 }
 
+export interface OrthancConfigurationResponse {
+  results: Array<OrthancConfiguration>
+  id: string;
+  total: number;
+  type: string;
+}
+
+export interface MappingStudyResponse {
+  results: DicomStudy,
+  id: string;
+  total: number;
+  type: string
+}
+
 
 
 function sortRequestsByDate(requests: any[]) {
@@ -64,8 +78,53 @@ export function useStudies(patientUuid: string) {
         isValidating,
         mutate,
     };
+}
 
-  
+
+export async function uploadFiles(
+  files: File[], 
+  config: OrthancConfiguration,
+  abortController: AbortController,
+) {
+  const uploadUrl = `${config.orthancBaseUrl}/instaces`; //"POST"
+
+  const formData = new FormData;
+  files.forEach(file => formData.append('file', file));
+
+  const uploadResponse = await openmrsFetch(`${uploadUrl}`, {
+    method: 'POST',
+    signal: abortController.signal,
+    body: formData,
+  });
+  return uploadResponse;
+}
+
+export async function useSynchronizeStudies (
+  fetchOption: String,
+  server: String,
+  abortController: AbortController,
+){
+  // const synchronizeUrl = `` //get
+
+    // const mutateRequest = useCallback(
+  //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/worklist?patient=${patientUuid}`)),
+  //   [patientUuid],
+  // );
+
+  // const { data, error, isLoading, isValidating } = useSWR<FetchResponse<PatientStudiesResponse>, Error>(
+  //   synchronizeUrl,
+  //   openmrsFetch,
+  // );
+
+  return {
+    data: testStudy ? testStudy : null,
+    error: null,
+    isLoading: null,
+    isValidating: null,
+    // mutate: mutateRequest,
+    mutate: null,
+  };
+
 }
 
 export function useRequests(patientUuid: string) {
@@ -77,7 +136,7 @@ export function useRequests(patientUuid: string) {
   //   [patientUuid],
   // );
 
-  const { data, error, isLoading, isValidating } = useSWR<{data: RequestProcedureResponse}, Error>(
+  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<RequestProcedureResponse>, Error>(
     patientUuid ? requestsUrl : null,
     openmrsFetch,
   );
@@ -104,7 +163,7 @@ export function useProcedureStep(request: RequestProcedure) {
     [request],
   );
 
-  const { data, error, isLoading, isValidating } = useSWR<{data: ProcedureStepResponse}, Error>(
+  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<ProcedureStepResponse>, Error>(
     request? procedureStepUrl : null,
     openmrsFetch,
   );
@@ -162,7 +221,58 @@ export function useStudyInstances(series: Series) {
     isValidating,
     mutate: null,
   };
+}
 
+export function useOrthancConfigurations() {
+  const configurationUrl = `${restBaseUrl}/configurations`
+
+  const mutateInstances = useCallback(
+    () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/configurations`)),
+    [],
+  );
+
+  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<OrthancConfigurationResponse>, Error>(
+    configurationUrl,
+    openmrsFetch,
+  );
+
+  return {
+    // data: data ?? null,
+    data: testConfigurations ?? null,
+    error: null,
+    isLoading: null,
+    isValidating: null,
+    // mutate: mutateInstances,
+    mutate: null,
+  };
+}
+
+export function useMappingStudy(study: DicomStudy, patientUuid: string) {
+
+  const newStudy = study;
+  newStudy.patientUuid = patientUuid;
+
+  const mappingUrl = `${restBaseUrl}/mapping/?study=${study}`
+
+  const mutateInstances = useCallback(
+    () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/mapping/?study=${study}`)),
+    [],
+  );
+
+  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<MappingStudyResponse>, Error>(
+    mappingUrl,
+    openmrsFetch,
+  );
+
+  return {
+    // data: data ?? null,
+    data: testStudy ?? null,
+    error: null,
+    isLoading: null,
+    isValidating: null,
+    // mutate: mutateInstances,
+    mutate: null,
+  };
 }
 
 
