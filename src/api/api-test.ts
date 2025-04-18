@@ -96,7 +96,7 @@ export const testSeries: Array<Series> = [{
 
 ];
 
-export const testRequestProcedure: Array<RequestProcedure> = [
+export const testRequestProcedureList: Array<RequestProcedure> = [
     {
         id: 1,
         status: "Pending",
@@ -114,6 +114,23 @@ export const testRequestProcedure: Array<RequestProcedure> = [
         priority: "High"
     }
 ]
+
+export const testRequestProcedure: RequestProcedure = {
+      id: 1,
+      status: "Scheduled",
+      orthancConfiguration: {
+          id: 1,
+          lastChangedIndex: -1,
+          orthancProxyUrl: "",
+          orthancBaseUrl: "http://localhost:8042",
+      },
+      patientUuid: "f2439e62-8f0d-4a4f-85a1-cad42b0dfb62",
+      accessionNumber: "ACC12345678",
+      studyInstanceUID: "2.16.840.1.113669.632.20.1211.10000098591",
+      requestingPhysician: "Dr. John Smith",
+      requestDescription: "MRI Brain with contrast",
+      priority: "High"
+  }
 
 export const testConfigurations: Array<OrthancConfiguration> = [
   {
@@ -234,7 +251,7 @@ export const testInstances: Array<Instance> = [
 export const testProcedureSteps: Array<RequestProcedureStep> = [
   {
     id: 1,
-    requestProcedure: testRequestProcedure[0],
+    requestProcedure: testRequestProcedureList[0],
     modality: 'CT',
     aetTitle: 'AET_CT1',
     scheduledReferringPhysician: 'Dr. Alice Morgan',
@@ -247,7 +264,7 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 2,
-    requestProcedure: testRequestProcedure[0],
+    requestProcedure: testRequestProcedureList[0],
     modality: 'MR',
     aetTitle: 'AET_MR2',
     scheduledReferringPhysician: 'Dr. Brian Lee',
@@ -260,7 +277,7 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 3,
-    requestProcedure: testRequestProcedure[0],
+    requestProcedure: testRequestProcedureList[0],
     modality: 'US',
     aetTitle: 'AET_US3',
     scheduledReferringPhysician: 'Dr. Claire Zhang',
@@ -273,7 +290,7 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 4,
-    requestProcedure: testRequestProcedure[0],
+    requestProcedure: testRequestProcedureList[0],
     modality: 'CR',
     aetTitle: 'AET_CR4',
     scheduledReferringPhysician: 'Dr. Daniel Kim',

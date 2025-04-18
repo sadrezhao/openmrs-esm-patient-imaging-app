@@ -1,7 +1,7 @@
 import { Patient } from "@openmrs/esm-framework";
 
 export interface DicomStudy {
-  id: number,
+  id?: number,
   studyInstanceUID: string;
   orthancStudyUID: string;
   orthancConfiguration: OrthancConfiguration;
@@ -14,7 +14,7 @@ export interface DicomStudy {
 }
 
 export interface Series {
-  id: number;
+  id?: number;
   seriesInstanceUID: string;
   orthancSeriesUID: string;
   orthancConfiguration: OrthancConfiguration;
@@ -26,14 +26,14 @@ export interface Series {
 }
 
 export interface OrthancConfiguration {
-  id: number;
+  id?: number;
   orthancBaseUrl: string;
-  orthancProxyUrl: string;
+  orthancProxyUrl?: string;
   lastChangedIndex: number;
 }
 
 export interface Instance {
-  id: number,
+  id?: number,
   sopInstanceUID: string;
   orthancInstanceUID: string;
   instanceNumber: string;
@@ -43,19 +43,19 @@ export interface Instance {
 }
 
 export interface RequestProcedure {
-  id: number,
+  id?: number,
   status: string,
   orthancConfiguration: OrthancConfiguration,
   patientUuid: string,
   accessionNumber: string,
-  studyInstanceUID: string,
+  studyInstanceUID?: string,
   requestingPhysician: string,
   requestDescription: string,
   priority: string
 }
 
 export interface RequestProcedureStep {
-  id: number,
+  id?: number,
   requestProcedure: RequestProcedure,
   modality: string,
   aetTitle: string,
@@ -64,8 +64,8 @@ export interface RequestProcedureStep {
   stepStartDate: string,
   stepStartTime: string,
   performedProcedureStepStatus: string,
-  stationName: string,
-  procedureStepLocation: string
+  stationName?: string,
+  procedureStepLocation?: string
 }
 
 export enum RequestProcedureStatus {

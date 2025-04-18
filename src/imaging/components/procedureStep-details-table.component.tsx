@@ -56,10 +56,10 @@ export interface ProcedureStepTableProps {
     const displayText = t('procedureStep', 'ProcedureStep');
     const headerTitle = t('procedureStep', 'ProcedureStep');
     const { results, goTo, currentPage } = usePagination(stepList, procedureStepCount);
-    const launchProcedureStepForm = useCallback(() => launchPatientWorkspace(addNewProcedureStepWorkspace), []);
-
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
+    const shouldOnClickBeCalled = useRef(true);
+    const launchAddNewProcedureStepForm = useCallback(() => launchPatientWorkspace(addNewProcedureStepWorkspace), []);
 
     const tableHeaders = [
         { key: 'id', header: t('stepID', 'StepID')},
@@ -102,9 +102,9 @@ export interface ProcedureStepTableProps {
                         kind="ghost"
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
-                        label={t('removeStudy', 'RemoveStudy')}
+                        label={t('removeStep', 'RemoveStep')}
                         onClick={() => {
-                            // shouldOnClickBeCalled.current = false;
+                            shouldOnClickBeCalled.current = false;
                             onRemoveClick();
                         }}
                         >
@@ -139,7 +139,7 @@ export interface ProcedureStepTableProps {
                         kind="ghost"
                         renderIcon={(props) => <AddIcon size={16} {...props} />}
                         iconDescription={t('add', 'Add')}
-                        onClick={launchProcedureStepForm}
+                        onClick={launchAddNewProcedureStepForm}
                     >
                     {t('Add', 'Add')}
                     </Button>

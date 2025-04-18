@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createErrorHandler, ExtensionSlot, showSnackbar, useConfig, useLayoutType, useSession} from '@openmrs/esm-framework';
+import { createErrorHandler, ExtensionSlot, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import { launchPatientWorkspace, type DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
 import { uploadFiles, useOrthancConfigurations } from '../../api';
 import {

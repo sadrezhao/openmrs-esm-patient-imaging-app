@@ -18,11 +18,11 @@
 }
 
 .form {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
-
 
 .tabletButtons {
     margin-top: layout.$spacing-07;
@@ -33,7 +33,6 @@
 .desktopButtons {
     margin-top: layout.$spacing-07;
 }
-
 
 .backButton {
     align-items: center;
@@ -58,95 +57,6 @@
     }
 }
 
-/* Desktop */
-:global(.omrs-breakpoint-lt-desktop) .gridRow {
-    align-items: center;
-  }
-  
-  .field {
-    margin-bottom: layout.$spacing-05;
-  
-    :global(.cds--label) {
-      vertical-align: middle;
-    }
-  }
-  
-  .buttonSet {
-    margin-left: calc(layout.$spacing-05 * -1);
-  
-    :global(.cds--btn) {
-      width: 50%;
-      max-width: unset;
-    }
-  }
-  
-  .linkedInput {
-    display: flex;
-    align-items: center;
-  
-    :global(.cds--layer-one),
-    :global(.cds--layer-two),
-    :global(.cds--layer) {
-      flex: 1;
-    }
-  }
-  
-  .linkedInput::after {
-    content: '';
-    border: 0.5px solid colors.$gray-40;
-    width: layout.$spacing-05;
-    margin-right: calc(layout.$spacing-05 * -1);
-  }
-  
-  .customNumberInput {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-  
-    :global(.cds--btn) {
-      background-color: colors.$gray-80;
-    }
-  
-    .customInput {
-      input {
-        text-align: center;
-      }
-    }
-  
-    svg {
-      fill: currentColor !important;
-    }
-  }
-  
-
-/* Tablet */
-:global(.omrs-breakpoint-lt-desktop) {
-    .container {
-      height: 100%;
-    }
-  
-    .durationUnit,
-    .prn {
-      .field {
-        margin-bottom: 0;
-      }
-    }
-  
-    .orderForm {
-      background-color: #ededed;
-    }
-  
-    .stickyMedicationInfo {
-      top: layout.$spacing-09;
-    }
-  
-    .buttonSet {
-      padding: layout.$spacing-06 layout.$spacing-05;
-      background-color: colors.$white-0;
-    }
-  }
-
-
 .fieldError {
     :global(.cds--number input[type='number']):focus {
         outline: 2.5px solid colors.$red-60;
@@ -163,8 +73,20 @@
   margin-bottom: layout.$spacing-05;
 }
 
-.gridRow {
-  padding: 0px;
-  margin-left: calc(layout.$spacing-03 * -1);
+.container {
+  margin: layout.$spacing-05;
+
+  & section {
+    margin: layout.$spacing-05 0;
+  }
 }
 
+.row {
+  span {
+    margin: auto;
+  }
+
+  p {
+    padding: layout.$spacing-02 0;
+  }
+}

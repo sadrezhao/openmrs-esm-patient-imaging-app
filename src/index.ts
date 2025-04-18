@@ -47,23 +47,15 @@ export const synchronizeStudiesFormWorkspace = getAsyncLifecycle(
   options,
  );
 
-export const AddNewRequestWorkspace = getAsyncLifecycle(
- () => import('./imaging/worklist/request.workspace'),
+export const addNewRequestWorkspace = getAsyncLifecycle(
+ () => import('./imaging/worklist/add-request-form.workspace'),
  options,
 );
 
-export const AddNewProcedureStepWorkspace = getAsyncLifecycle(
-  () => import('./imaging/worklist/procedure-step.workspace'),
+export const addNewProcedureStepWorkspace = getAsyncLifecycle(
+  () => import('./imaging/worklist/add-procedureStep-form.workspace'),
   options,
  );
-
-export const SynchronizeStudiesModal = getAsyncLifecycle(
-  () => import('./imaging/studies/synchronized-studies.modal'),
-  {
-    featureName: 'Synchronize studies',
-    moduleName,
-  },
-);
 
 export const imagingDetailedSummary = getSyncLifecycle(ImagingDetailedSummaryComponent, options);
 

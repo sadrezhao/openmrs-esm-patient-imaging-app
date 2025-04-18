@@ -25,6 +25,7 @@
   "removeStudy": "Remove study",
   "removeSeries": "Remove series",
   "removeRequst": "Remove request",
+  "removeStep": "Remove procedure step",
   "requestProcedure": "Request procedures",
   "procedureStep": "Procedure step",
   "requestID": "ID",

@@ -1,9 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import useSWR, {mutate} from 'swr';
-import { FetchResponse, Patient,} from '@openmrs/esm-framework';
+import { FetchResponse, } from '@openmrs/esm-framework';
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
 import type { DicomStudy, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from '../types';
-import { testSeries, testStudy, testRequestProcedure, testInstances, testProcedureSteps, testConfigurations, testMrsPatient} from '../api/api-test';
+import { testSeries, testStudy, testRequestProcedureList, testInstances, testProcedureSteps, testConfigurations, testRequestProcedure } from '../api/api-test';
 
 export const careSettingUuid = 'b47d1b48-1d9f-4d3c-b44b-8f29a9b20c7d';
 
@@ -47,10 +47,17 @@ export interface OrthancConfigurationResponse {
 }
 
 export interface MappingStudyResponse {
-  results: DicomStudy,
+  // results: DicomStudy,
   id: string;
   total: number;
   type: string
+}
+
+export interface SaveRequestResponse {
+    // results: DicomStudy,
+    id: string;
+    total: number;
+    type: string
 }
 
 
@@ -104,7 +111,7 @@ export async function useSynchronizeStudies (
   server: String,
   abortController: AbortController,
 ){
-  // const synchronizeUrl = `` //get
+  const synchronizeUrl = `` //get
 
     // const mutateRequest = useCallback(
   //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/worklist?patient=${patientUuid}`)),
@@ -144,7 +151,7 @@ export function useRequests(patientUuid: string) {
   // const requests = useMemo(() => sortRequestsByDate(data?.data?.results) ?? null, [data]);
 
   return {
-    data: testRequestProcedure ? testRequestProcedure : null,
+    data: testRequestProcedureList ? testRequestProcedureList : null,
     error,
     isLoading,
     isValidating,
@@ -247,17 +254,19 @@ export function useOrthancConfigurations() {
   };
 }
 
-export function useMappingStudy(study: DicomStudy, patientUuid: string) {
+export function useMappingStudy(study: DicomStudy, patientUuid: string, mapping: Boolean) {
 
   const newStudy = study;
-  newStudy.patientUuid = patientUuid;
+  // newStudy.patientUuid = patientUuid;
 
-  const mappingUrl = `${restBaseUrl}/mapping/?study=${study}`
+  console.log("+++++++++++++ study: ", study)
 
-  const mutateInstances = useCallback(
-    () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/mapping/?study=${study}`)),
-    [],
-  );
+  const mappingUrl = `${restBaseUrl}/mapping/`
+
+  // const mutateInstances = useCallback(
+  //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/mapping/?study=${study}`)),
+  //   [],
+  // );
 
   const { data, error, isLoading, isValidating } = useSWR<FetchResponse<MappingStudyResponse>, Error>(
     mappingUrl,
@@ -275,5 +284,42 @@ export function useMappingStudy(study: DicomStudy, patientUuid: string) {
   };
 }
 
+export function saveRequstProcedure(
+    request: RequestProcedure, 
+    patientUuid: string,
+    abortController: AbortController
+  ){
+    const saveRequstUrl = `${restBaseUrl}/worklist/request`;
+    
+    return openmrsFetch<unknown>(saveRequstUrl,{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: abortController.signal,
+      body: {
+        patient: patientUuid,
+        request: request
+      },
+    });
+}
 
 
+export function saveRequestProcedureStep (
+  step: RequestProcedureStep,
+  patientUuid: string,
+  abortController: AbortController
+) {
+  const saveProcedureStepUrl = `${restBaseUrl}/worklist/procedureStep`;
+  return openmrsFetch<unknown>(saveProcedureStepUrl,{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    signal: abortController.signal,
+    body: {
+      patient: patientUuid,
+      request: saveProcedureStepUrl
+    },
+  });
+}

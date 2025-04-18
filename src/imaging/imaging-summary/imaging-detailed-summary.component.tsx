@@ -48,6 +48,7 @@ export default function ImagingDetailedSummary({patient, patientUuid}: ImagingDe
                 isValidating={isValidatingStudies}
                 studies={studies}
                 showDeleteButton={true}
+                showCheckboxColumn={false}
                 patientUuid={patientUuid} 
                 />
               )

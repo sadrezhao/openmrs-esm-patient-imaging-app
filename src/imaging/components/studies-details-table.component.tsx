@@ -1,4 +1,4 @@
-import React, { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import dayjs from 'dayjs';
 import {
   DataTable,
@@ -25,6 +25,7 @@ import {
 import {
     AddIcon,
     formatDate,
+    TrashCanIcon,
     useLayoutType,
     usePagination,
   } from '@openmrs/esm-framework';
@@ -35,12 +36,14 @@ import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
 import SeriesDetailsTable  from './series-details-table.component';
 import styles from './details-table.scss';
-import { studiesCount, synchronizeStudiesFormWorkspace, uploadStudiesFormWorkspace } from '../constants';
+import { addNewRequestWorkspace, studiesCount, synchronizeStudiesFormWorkspace, uploadStudiesFormWorkspace } from '../constants';
+import { useMappingStudy } from '../../api';
 
 export interface StudyDetailsTableProps {
   isValidating?: boolean;
   studies?: Array<DicomStudy> | null;
   showDeleteButton?: boolean;
+  showCheckboxColumn: boolean;
   patientUuid: string;
 }
 
@@ -48,6 +51,7 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
   isValidating,
   studies,
   showDeleteButton,
+  showCheckboxColumn,
   patientUuid
 }) => {
   const { t } = useTranslation();
@@ -57,22 +61,37 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
   const [expandedRows, setExpandedRows] = useState({});
   const launchUploadStudiesForm = useCallback(() => launchPatientWorkspace(uploadStudiesFormWorkspace), []);
   const launchSynchronizeStudiesForm = useCallback(() => launchPatientWorkspace(synchronizeStudiesFormWorkspace), []);
-
-
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
+  const shouldOnClickBeCalled = useRef(true);
 
   const tableHeaders = [
+    showCheckboxColumn? { key: 'checkbox', header: '', isSortable:false } : null,
     { key: 'studyInstanceUID', header: t('studyInstanceUID', 'StudyInstanceUID')},
-    { key: 'patientName', header: t('patientName', 'PatientName'), isSortable: true, isVisible: true},
-    { key: 'studyDate', header: t('studyDate', 'StudyDate'), isSortable: true, isVisible: true},
-    { key: 'studyDescription', header: t('description', 'description')},
-    { key: 'orthancConfiguration', header: t('orthancBaseUrl', 'OrthancBaseUrl')},
+    { key: 'patientName', header: t('patientName', 'PatientName'), isSortable: true},
+    { key: 'studyDate', header: t('studyDate', 'StudyDate'), isSortable: true},
+    { key: 'studyDescription', header: t('description', 'description'), isSortable:false },
+    { key: 'orthancConfiguration', header: t('orthancBaseUrl', 'OrthancBaseUrl'), isSortable:true},
     { key: 'action', header: t('action', 'Action')},
-  ]
+  ].filter(Boolean);
 
   const tableRows = results?.map((study, index) => ({
     id: study.id ?? `row-${index}`,
+    ...( showCheckboxColumn && {
+      checkbox: (
+        <input
+          type="checkbox"
+          value={study.id}
+          onChange={(e) =>{
+            if (e.target.checked) {
+              useMappingStudy(study, patientUuid, true)
+            } else {
+              useMappingStudy(study, patientUuid, false)
+            }
+          }}
+        />
+      )
+    }),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
     patientName: {
       sortKey: study.patientName,
@@ -94,6 +113,20 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
     action: {
       content:(
         <div className="flex gap-1">
+        {showDeleteButton && (
+            <IconButton
+              kind="ghost"
+              align="left"
+              size={isTablet ? 'lg' : 'sm'}
+              label={t('removeStudy', 'RemoveStudy')}
+              onClick={() => {
+                shouldOnClickBeCalled.current = false;
+                onRemoveClick();
+              }}
+            >
+              <TrashCanIcon className={styles.removeButton} />
+            </IconButton>
+          )}
           <IconButton
             kind="ghost"
             align="left"
@@ -144,7 +177,7 @@ const PatientStudiesTable: React.FC<StudyDetailsTableProps> = ({
             iconDescription={t('synchronizeStudies','SynchronizeStudies')}
             onClick={launchSynchronizeStudiesForm}
           >
-            {t('synchroize', 'Synchroize')}
+            {t('synchronize', 'Synchronize')}
           </Button>
         </div>
       </CardHeader>

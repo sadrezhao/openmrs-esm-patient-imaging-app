@@ -52,10 +52,10 @@ import ProcedureStepTable from './procedureStep-details-table.component';
     const headerTitle = t('requestProcedure', 'RequestProcedure');
     const { results, goTo, currentPage } = usePagination(requests, requestCount);
     const [expandedRows, setExpandedRows] = useState({});
-
+    const shouldOnClickBeCalled = useRef(true);
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
-    const launchRequestForm = useCallback(() => launchPatientWorkspace(addNewRequestWorkspace), []);
+    const launchAddNewRequestForm = useCallback(() => launchPatientWorkspace(addNewRequestWorkspace), []);
 
     const tableHeaders = [
         { key: 'id', header: t('requestID', 'RequestID')},
@@ -94,7 +94,7 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                   size={isTablet ? 'lg' : 'sm'}
                   label={t('removeRequst', 'RemoveRequst')}
                   onClick={() => {
-                    // shouldOnClickBeCalled.current = false;
+                    shouldOnClickBeCalled.current = false;
                     onRemoveClick();
                   }}
                 >
@@ -120,7 +120,7 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                     kind="ghost"
                     renderIcon={(props) => <AddIcon size={16} {...props} />}
                     iconDescription={t('add', 'Add')}
-                    onClick={launchRequestForm}
+                    onClick={launchAddNewRequestForm}
                     >
                     {t('Add', 'Add')}
                     </Button>

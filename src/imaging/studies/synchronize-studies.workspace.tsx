@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
-import { createErrorHandler, ErrorState, ExtensionSlot, showSnackbar, useLayoutType, showModal } from '@openmrs/esm-framework';
+import { createErrorHandler, ErrorState, ExtensionSlot, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import { usePatientChartStore, type DefaultPatientWorkspaceProps,} from '@openmrs/esm-patient-common-lib';
 
 import {
@@ -12,27 +12,28 @@ import {
     Stack,
 } from '@carbon/react';
 import { DicomStudy, OrthancConfiguration } from '../../types';
-import { useSynchronizeStudies, useOrthancConfigurations } from '../../api';
+import { useSynchronizeStudies, useOrthancConfigurations, useMappingStudy } from '../../api';
 import styles from './studies.scss'
 import { Row } from '@carbon/react';
 import { FormGroup } from '@carbon/react';
 import { RadioButton } from '@carbon/react';
 import { RadioButtonGroup } from '@carbon/react';
 import { ButtonSet } from '@carbon/react';
-import SynchronizedStudiesModal from './synchronized-studies.modal'
+import PatientStudiesTable from '../components/studies-details-table.component';
 
 export default function SynchronizeStudiesWorkspace(props: DefaultPatientWorkspaceProps) {
     const { t } = useTranslation();
     const { closeWorkspace, patientUuid } = props;
     const isTablet = useLayoutType() === 'tablet';
-    const [retrievedStudies, setRetrievedStudies] = useState<DicomStudy[]>([]);
-    const [selectedServer, setSelectedServer] = useState('all');
+    const [retrievedStudies, setRetrievedStudies] = useState(Array<DicomStudy>());
+    const [selectedServer, setSelectedServer] = useState();
     const orthancConfigurations = useOrthancConfigurations();
     const [fetchOption, setSelectedFetchOption] = useState('all');
     const [isLoading, setIsLoading] = useState(false);
-    // const [showModal, setShowModal] = useState(false);
+    const [isValidating, setIsValidating] = useState(false);
     const [configError, setConfigError] = useState(orthancConfigurations?.error);
-    const [hasSelectedServer, setHasSelectedServer] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [showRetrievedStudies, setShowRetrievedStudies] = useState(false);
     const { patient } = usePatientChartStore();
 
     const patientState = useMemo(() => ({ patient }), [patient]);
@@ -53,34 +54,24 @@ export default function SynchronizeStudiesWorkspace(props: DefaultPatientWorkspa
           display: t('newest', 'Newest'),
         },
     ];
-
-    const launchSynchronizeStudiesDialog = (retrievedStudies: Array<DicomStudy>) => {
-        const dispose = showModal('synchronize-studies-dialog', {
-          onClose: () => dispose(),
-          retrievedStudies,
-          patientUuid,
-        });
-    };
     
-
-    const handleSubmit = useCallback(
+    const handleSynchronize = useCallback(
         (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            setIsLoading(true);
+            setHasSubmitted(true);
             const abortController = new AbortController();
 
-            setHasSelectedServer(true);
             if (!selectedServer) {
-                setHasSelectedServer(false);
                 return;
             }
             
             useSynchronizeStudies(fetchOption, selectedServer, abortController)
             .then((response) => {
-                if (response?.data) {
+                if (!response.isLoading && !response.isValidating && response?.data ) {
                     setRetrievedStudies(response.data);
-                    // setShowModal(true);
-                    launchSynchronizeStudiesDialog(retrievedStudies);
+                    setIsLoading(response.isLoading);
+                    setIsValidating(response.isValidating);
+                    setShowRetrievedStudies(true);
                 }
                 if(response?.error) {
                     setConfigError(response.error)
@@ -98,7 +89,6 @@ export default function SynchronizeStudiesWorkspace(props: DefaultPatientWorkspa
             .finally(() => {
                 abortController.abort();
                 setIsLoading(false);
-
             })
 
     }, [closeWorkspace, selectedServer, t, retrievedStudies])
@@ -111,14 +101,13 @@ export default function SynchronizeStudiesWorkspace(props: DefaultPatientWorkspa
         <>
             {isLoading && <InlineLoading description={t('retrievingStudies', 'Retrieving studies...')} />}
             <Form
-                className={styles.formContainer} onSubmit={handleSubmit}
+                className={styles.formContainer} onSubmit={handleSynchronize}
             >
                 {isTablet ? (
                     <Row className={styles.header}>
                         <ExtensionSlot className={styles.content} name="patient-details-header-slot" state={patientState} />
                     </Row>
                 ) : null}
-
                 <div className={styles.form}>
                     <Stack gap={5} className={styles.formContent}>
                     <FormGroup legendText={t('synchronizeFetchOption', 'SynchronizeFetchOption')}>
@@ -139,35 +128,45 @@ export default function SynchronizeStudiesWorkspace(props: DefaultPatientWorkspa
                     </FormGroup>
                     <ComboBox
                         id="orthancConfigurationId"
-                        items={(orthancConfigurations && orthancConfigurations.data) ?? []}
-                        itemToString={(item: OrthancConfiguration) => item?.orthancBaseUrl || ''}
+                        items={[
+                            { orthancBaseUrl: 'all', name: 'All Servers' },
+                            ...(orthancConfigurations?.data ?? [])
+                        ]}
+                        itemToString={(item: OrthancConfiguration | undefined) => item?.orthancBaseUrl === 'all'
+                            ? 'All Servers'
+                            : item?.orthancBaseUrl || ''
+                        }
                         titleText={t('selectOrthancServer', 'SelectOrthancServer')}
+                        seletedItem={selectedServer}
                         onChange={({ selectedItem }) => setSelectedServer(selectedItem)}
                         placeholder={t('selectOrthancServer', 'SelectOrthancServer')}
-                        invalid={hasSelectedServer && !selectedServer}
+                        invalid={hasSubmitted && !selectedServer}
                         invalidText={t('orthancServerRequired', 'Please select an Orthanc server')}
                     />
+                    { showRetrievedStudies && (
+                            <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+                                <PatientStudiesTable 
+                                    isValidating={isValidating}
+                                    studies={retrievedStudies}
+                                    showDeleteButton={false}
+                                    showCheckboxColumn={true}
+                                    patientUuid={patientUuid} 
+                                />
+                            </div>
+                        )
+                    }
                     <ButtonSet
                         className={classNames(isTablet ? styles.tabletButtons : styles.desktopButtons)}>
-                        <Button type="submit" kind="primary">
-                            {t('start', 'Start')}
+                        <Button kind="primary" onClick={handleSynchronize}>
+                            {t('Synchronize', 'Synchronize')}
                         </Button>
-                        <Button kind="secondary" onClick={closeWorkspace}>
+                        <Button kind="third" onClick={closeWorkspace}>
                             {t('cancel', 'Cancel')}
                         </Button>
                     </ButtonSet>
                     </Stack>
                 </div>
             </Form>
-            {/* {showModal ? launchDeleteAllergyDialog(retrievedStudies):null } */}
-            {/* {showModal && (
-                <SynchronizedStudiesModal
-                    onClose={() => setShowModal(false)} 
-                    studies={retrievedStudies}
-                    patientUuid={patientUuid} 
-                />
-             )
-            } */}
         </>
     );
 }

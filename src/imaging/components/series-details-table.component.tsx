@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     DataTable,
     IconButton,
@@ -51,6 +51,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
     const [expandedRows, setExpandedRows] = useState({});
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
+    const shouldOnClickBeCalled = useRef(true);
     
     const tableHeaders = [
         { key: 'seriesInstanceUID', header: t('seriesUID', 'SeriesUID')},
@@ -82,7 +83,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   size={isTablet ? 'lg' : 'sm'}
                   label={t('removeSeries', 'RemoveSeries')}
                   onClick={() => {
-                    // shouldOnClickBeCalled.current = false;
+                    shouldOnClickBeCalled.current = false;
                     onRemoveClick();
                   }}
                 >
