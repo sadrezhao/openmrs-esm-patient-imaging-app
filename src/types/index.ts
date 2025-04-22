@@ -61,7 +61,7 @@ export interface RequestProcedureStep {
   aetTitle: string,
   scheduledReferringPhysician: string,
   requestedProcedureDescription: string,
-  stepStartDate: string,
+  stepStartDate: Date,
   stepStartTime: string,
   performedProcedureStepStatus: string,
   stationName?: string,
@@ -82,3 +82,22 @@ export enum StudyStatus {
   UNKNOWN = 'unknown',
   INACTIVE = 'inactive'
 }
+
+export const modalityOptions = [
+  "CR (Computed Radiography)",
+  "CT (Computed Tomography)",
+  "MR (Magnetic Resonance Imaging)",
+  "US (Ultrasound)",
+  "XA (X-ray Angiography)",
+  "DX (Digital Radiography)",
+  "MG (Mammography)",
+  "NM (Nuclear Medicine)",
+  "PT (Positron Emission Tomography)",
+  "RF (Radio Fluoroscopy)",
+  "SC (Secondary Capture)",
+  "XC (External-camera Photography)",
+  "OP (Ophthalmic Photography)",
+  "PR (Presentation State)",
+  "SR (Structured Report)",
+  "RT (Radiotherapy)"
+]

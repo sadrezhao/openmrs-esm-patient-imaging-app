@@ -52,6 +52,7 @@
   "selectOrthancServer": "Select Orthanc server",
   "synchronizeFetchOption": "Fetch studies option",
   "checkForConnection": "The connection problem between OpenMRS and Orthanc",
+  "enterRequestedProcedureDescription": "Please enter the desired procedure description.",
   
 
 

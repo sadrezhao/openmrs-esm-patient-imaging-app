@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { ConfigObject, ResponsiveWrapper, showSnackbar, useConfig, useLayoutType, useSession} from '@openmrs/esm-framework';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BehaviorSubject } from 'rxjs';
 import {
     Button,
     ButtonSet,
@@ -55,7 +54,6 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   const isTablet = useLayoutType() === 'tablet';
   const config = useConfig<ConfigObject>();
   const orthancConfigurations = useOrthancConfigurations()
-  const currentUser = useSession();
 
 
   const requestFormSchema = useMemo (() => {    
@@ -72,7 +70,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         .refine((val) => !!val.id, {
           message: t('selectConfigureUrlErrorMessage', 'Configured server is required'),
         }),
-        patientUuid: z.string().nonempty({ message: 'Status is required' }),
+        patientUuid: z.string().nonempty({ message: 'Patient UID is required' }),
         accessionNumber: z.string().nonempty({ message: 'Accession number is required' }),
         requestingPhysician: z.string().refine((value) => !!value, {
           message: t('requestingPhysicianMsg', 'Enter the requesting physician name'),
@@ -112,52 +110,13 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   const {
     control,
     handleSubmit,
-    reset,
     formState: {errors, isDirty, isSubmitting},
-    watch,
-    setValue
   } = formProps
 
   
   useEffect(() => {
     promptBeforeClosing(() => isDirty);
   }, [isDirty, promptBeforeClosing]);
-
-  const orthancConfiguration = watch('orthancConfiguration');
-  const accessionNumber = watch('accessionNumber');
-  const studyInstanceUID = watch('studyInstanceUID');
-  const requestingPhysician = watch('requestingPhysician');
-  const requestDescription = watch('requestDescription');
-  const priority = watch('priority');
-
-
-  // useEffect(() => {
-  //   setValue('accessionNumber', generateAccessionNumber());
-  // }, [setValue]);
-
-  const requestProcedureSub = new BehaviorSubject<RequestProcedure | null>(null);
-
-  useEffect(() => {
-    const sub = requestProcedureSub.subscribe((props) => {
-      if (props) {
-        reset({
-          id: props.id,
-          status: props.status,
-          orthancConfiguration: props.orthancConfiguration,
-          patientUuid: props.patientUuid,
-          accessionNumber: props.accessionNumber,
-          studyInstanceUID: props.studyInstanceUID,
-          requestingPhysician: props.requestingPhysician,
-          requestDescription: props.requestDescription,
-          priority: props.priority, 
-        });
-      }
-    });
-    return () => {
-      sub.unsubscribe();
-      requestProcedureSub.next(null);
-    }
-  }, [reset]);
 
   const onSubmit = useCallback(
     (data: NewRequestFormData) => {
@@ -176,19 +135,19 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
 
       const newRequestProcedure: RequestProcedure = {
         id,
-        status: status!,
+        status,
         orthancConfiguration: {
           id: orthancConfiguration.id,
           orthancBaseUrl: orthancConfiguration.orthancBaseUrl,
           orthancProxyUrl: orthancConfiguration.orthancProxyUrl,
           lastChangedIndex: orthancConfiguration.lastChangedIndex
         },
-        patientUuid: patientUuid!,
-        accessionNumber: accessionNumber!,
+        patientUuid,
+        accessionNumber,
         studyInstanceUID,
-        requestingPhysician: requestingPhysician!,
-        requestDescription: requestDescription!,
-        priority: priority!
+        requestingPhysician,
+        requestDescription,
+        priority
       };
 
       saveRequstProcedure(newRequestProcedure, patientUuid, abortController
@@ -213,9 +172,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
       return () => abortController.abort();
     },
     [
-      currentUser?.sessionLocation?.uuid,
       patientUuid,
-      currentUser?.currentProvider?.uuid,
       closeWorkspaceWithSavedChanges,
       t
     ],
@@ -340,7 +297,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
             </ResponsiveWrapper>
           </section>
         </Stack>
-       <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
+        <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
           <Button className={styles.button} kind="secondary" onClick={closeWorkspace}>
             {t('cancel', 'Cancel')}
           </Button>
