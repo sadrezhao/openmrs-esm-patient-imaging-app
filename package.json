@@ -40,7 +40,7 @@
   "dependencies": {
     "@carbon/react": "^1.68.0",
     "@hookform/resolvers": "^3.x",
-    "@internationalized/date": "^3.7.0",
+    "@internationalized/date": "^3.x",
     "@openmrs/esm-patient-common-lib": "next",
     "lodash-es": "^4.17.21",
     "react-hook-form": "^7.x",

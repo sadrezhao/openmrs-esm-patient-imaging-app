@@ -33,7 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { RequestProcedure, RequestProcedureStep } from '../../types';
 import { addNewProcedureStepWorkspace, procedureStepCount } from '../constants';
 import styles from './details-table.scss';
-import { useProcedureStep } from '../../api';
+import { getProcedureStep } from '../../api';
 
 export interface ProcedureStepTableProps {
     requestProcedure: RequestProcedure;
@@ -50,11 +50,11 @@ export interface ProcedureStepTableProps {
         error: stepError,
         isLoading: isLoadingStep,
         isValidating: isValidatingStep,
-    } = useProcedureStep(requestProcedure)
+    } = getProcedureStep(requestProcedure)
 
     const { t } = useTranslation();
-    const displayText = t('procedureStep', 'ProcedureStep');
-    const headerTitle = t('procedureStep', 'ProcedureStep');
+    const displayText = t('procedureStep', 'Procedure step');
+    const headerTitle = t('procedureStep', 'Procedure step');
     const { results, goTo, currentPage } = usePagination(stepList, procedureStepCount);
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
@@ -64,14 +64,14 @@ export interface ProcedureStepTableProps {
     const tableHeaders = [
         { key: 'id', header: t('stepID', 'StepID')},
         { key: 'modality', header: t('modality', 'Modality'), isSortable: true, isVisible: true},
-        { key: 'aetTitle', header: t('aetTitle', 'AetTitle')},
-        { key: 'scheduledReferringPhysician', header: t('scheduledReferringPhysician', 'ScheduledReferringPhysician'), isSortable: true, isVisible: true},
+        { key: 'aetTitle', header: t('aetTitle', 'Aet Title')},
+        { key: 'scheduledReferringPhysician', header: t('scheduledReferringPhysician', 'Scheduled referring physician'), isSortable: true, isVisible: true},
         { key: 'requestedProcedureDescription', header: t('description', 'Description')},
-        { key: 'stepStartDate', header: t('stepStartDate', 'StepStartDate'), isSortable: true, isVisible: true},
+        { key: 'stepStartDate', header: t('stepStartDate', 'Start date of the step'), isSortable: true, isVisible: true},
         { key: 'stepStartTime', header: t('time', 'Time')},
         { key: 'performedProcedureStepStatus', header: t('status', 'Status')},
-        { key: 'stationName', header: t('stationName', 'SationName')},
-        { key: 'procedureStepLocation', header: t('procedureStepLocation', 'ProcedureStepLocation')},
+        { key: 'stationName', header: t('stationName', 'Sation name')},
+        { key: 'procedureStepLocation', header: t('procedureStepLocation', 'Procedure step location')},
         { key: 'action', header: t('action', 'Action')},
     ]
 
@@ -90,7 +90,9 @@ export interface ProcedureStepTableProps {
         requestedProcedureDescription: step.requestedProcedureDescription,
         stepStartDate: {
             sortKey: dayjs(step.stepStartDate).toDate(),
-            content: (<div><span>{formatDate(new Date(step.stepStartDate))}</span></div>)
+            content: (
+            <div><span>{formatDate(new Date(step.stepStartDate))}</span></div>
+            )
         },
         stepStartTime: step.stepStartTime,
         stationName: step.stationName,
@@ -102,7 +104,7 @@ export interface ProcedureStepTableProps {
                         kind="ghost"
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
-                        label={t('removeStep', 'RemoveStep')}
+                        label={t('removeStep', 'Remove step')}
                         onClick={() => {
                             shouldOnClickBeCalled.current = false;
                             onRemoveClick();

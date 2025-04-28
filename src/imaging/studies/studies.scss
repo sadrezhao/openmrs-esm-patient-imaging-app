@@ -38,3 +38,7 @@ margin: 0;
 .desktopButtons {
     margin-top: layout.$spacing-07;
 }
+
+.buttons {
+    justify-content: flex-end;
+}

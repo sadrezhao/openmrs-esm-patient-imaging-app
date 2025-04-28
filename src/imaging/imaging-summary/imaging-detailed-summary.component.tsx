@@ -1,39 +1,65 @@
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRequests, useStudies } from '../../api'
+import { getRequestsByPatient, getStudiesByPatient } from '../../api'
 import { DataTableSkeleton } from '@carbon/react';
-import { EmptyState, ErrorState } from '@openmrs/esm-patient-common-lib';
-import { useLayoutType } from '@openmrs/esm-framework';
-import PatientStudiesTable from '../components/studies-details-table.component';
+import { CardHeader, EmptyState, ErrorState } from '@openmrs/esm-patient-common-lib';
+import { AddIcon, launchWorkspace, useLayoutType } from '@openmrs/esm-framework';
+import StudiesDetailTable from '../components/studies-details-table.component';
 import RequestProcedureTable from '../components/requests-details-table.component';
+import { addNewRequestWorkspace, linkStudiesFormWorkspace, uploadStudiesFormWorkspace } from '../constants';
+import { Button } from '@carbon/react';
+
 
 interface ImagingDetailedSummaryProps {
-    patient: fhir.Patient;
     patientUuid: string;
 }
 
-export default function ImagingDetailedSummary({patient, patientUuid}: ImagingDetailedSummaryProps) {
+export default function ImagingDetailedSummary({patientUuid}: ImagingDetailedSummaryProps) {
   const { t } = useTranslation();
   const layout = useLayoutType();
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
+  const launchUploadStudiesWorkspace = useCallback(() => launchWorkspace(uploadStudiesFormWorkspace), []);
+  const launchLinkStudiesWorkspace = useCallback(() => launchWorkspace(linkStudiesFormWorkspace), []);
+  const launchAddRequestWorkspace = useCallback(() => launchWorkspace(addNewRequestWorkspace), []);
+  const headerTitle = t('managerStudies', 'Manager studies');
 
   const {
     data: studies,
     error: studiesError,
     isLoading: isLoadingPatientStudies,
     isValidating: isValidatingStudies,
-  } = useStudies(patientUuid);
+  } = getStudiesByPatient(patientUuid);
 
   const {
     data: requests,
     error: requestError,
     isLoading: isLoadingRequests,
     isValidating: isValidatingRequest,
-  } = useRequests(patientUuid)
+  } = getRequestsByPatient(patientUuid)
 
   return (
     <div>
       <div style={{ marginBottom: '2rem'}}>
+        {/* <div> */}
+        <CardHeader title={headerTitle}>
+            <Button
+              kind="ghost"
+              renderIcon={(props) => <AddIcon size={16} {...props} />}
+              iconDescription={t('linkStudies','Studies')}
+              onClick={launchLinkStudiesWorkspace}
+            >
+              {t('linkStudie', 'Link studies')}
+            </Button>
+              <Button
+                kind="ghost"
+                renderIcon={(props) => <AddIcon size={16} {...props} />}
+                iconDescription={t('upload','Upload')}
+                onClick={launchUploadStudiesWorkspace}
+              >
+                {t('upload', 'Upload')}
+              </Button>
+        </CardHeader>
+        {/* </div> */}
         {(() => {
           const displayText = t('studies', 'studies');
           const headerTitle = t('Studies', 'Studies');
@@ -44,16 +70,15 @@ export default function ImagingDetailedSummary({patient, patientUuid}: ImagingDe
 
           if (studies?.length) {
             return (
-                <PatientStudiesTable 
-                isValidating={isValidatingStudies}
-                studies={studies}
-                showDeleteButton={true}
-                showCheckboxColumn={false}
-                patientUuid={patientUuid} 
+                <StudiesDetailTable 
+                  isValidating={isValidatingStudies}
+                  studies={studies}
+                  showDeleteButton={true}
+                  patientUuid={patientUuid}
                 />
               )
           }
-          return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
+          return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchUploadStudiesWorkspace}/>
         })()}
       </div>
       <div>
@@ -64,7 +89,7 @@ export default function ImagingDetailedSummary({patient, patientUuid}: ImagingDe
             if(isLoadingRequests) return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />
 
             if (requestError) return <ErrorState error={requestError} headerTitle={headerTitle} />
-            if (requests?.length) {
+            if (requests?.length > 0) {
               return (
                 <RequestProcedureTable
                   isValidating={isValidatingRequest}
@@ -74,7 +99,7 @@ export default function ImagingDetailedSummary({patient, patientUuid}: ImagingDe
                 />
               )
             }
-            return <EmptyState displayText={displayText} headerTitle={headerTitle}/>;
+            return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchAddRequestWorkspace}/>;
         })()}
       </div>
     </div>

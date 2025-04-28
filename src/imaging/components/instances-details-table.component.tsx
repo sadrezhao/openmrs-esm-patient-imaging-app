@@ -18,28 +18,29 @@ import {
   } from '@openmrs/esm-patient-common-lib';
 
 import { useTranslation } from 'react-i18next';
-import { Series } from '../../types';
+import { DicomStudy, Series } from '../../types';
 import { useLayoutType, usePagination} from '@openmrs/esm-framework';
-import { useStudyInstances } from '../../api';
+import { getStudyInstances } from '../../api';
 import preview from '../../assets/preview.png';
+import orthancExplorer from '../../assets/orthanc.png';
 import styles from './details-table.scss'
 import { instancesCount } from '../constants';
 
 export interface InstancesDetailsTableProps {
-    series: Series;
-    patientUuid: string
+    study: DicomStudy,
+    seriesInstanceUID: string
 }
 
 const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
-    series,
-    patientUuid
+    study,
+    seriesInstanceUID
 }) => {
     const {
         data: instances,
         error: seriesError,
         isLoading: isLoadingSeries,
         isValidating: isValidatingSeries,
-    } = useStudyInstances(series);
+    } = getStudyInstances(study.id, seriesInstanceUID);
 
     const { t } = useTranslation();
     const displayText = t('instances', 'Instances');
@@ -49,15 +50,15 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
     const isTablet = layout === 'tablet';
 
     const tableHeaders = [
-        { key: 'sopInstanceUID', header: t('sopInstanceUID', 'SopInstanceUID')},
-        { key: 'instanceNumber', header: t('instanceNumber', 'InstanceNumber')},
-        { key: 'imagePositionPatient', header: t('imagePositionPatient', 'ImagePositionPatient'), isSortable: true, isVisible: true},
-        { key: 'numberOfFrames', header: t('numberOfFrames', 'NumberOfFrames')},
+        { key: 'sopInstanceUID', header: t('sopInstanceUID', 'SOP Instance UID')},
+        { key: 'instanceNumber', header: t('instanceNumber', 'Instance number')},
+        { key: 'imagePositionPatient', header: t('imagePositionPatient', 'Image position of Patient'), isSortable: true, isVisible: true},
+        { key: 'numberOfFrames', header: t('numberOfFrames', 'Number of frames')},
         { key: 'action', header: t('action', 'Action')},
     ]
 
     const tableRows = results?.map((instance, index) => ({
-        id: instance.id ?? `row-${index}`,
+        id: instance.sopInstanceUID,
         sopInstanceUID: <div className={styles.subTableWrapText}>{ instance.sopInstanceUID}</div>,
         instanceNumber: instance.instanceNumber,
         imagePositionPatient: instance.imagePositionPatient,
@@ -70,7 +71,7 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
                         label={t('instanceViewLocal', 'InstanceViewLocal')}
-                        onClick={() => window.location.href = `${series.orthancConfiguration.orthancBaseUrl}/??/${series.id}`} 
+                        onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/??/${seriesInstanceUID}`} 
                     >
                         <img className='stone-img' src={preview} style={{width:23, height:23}}></img>
                     </IconButton>
@@ -78,10 +79,19 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                         kind="ghost"
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
-                        label={t('instanceViewInOrthanc', 'InstanceViewInOrthanc')}
-                        onClick={() => window.location.href = `${series.orthancConfiguration.orthancBaseUrl}/??/${series.id}`} 
+                        label={t('instanceViewInOrthanc', 'Instance view in Orthanc')}
+                        onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/instances/${instance.orthancInstanceUID}/preview`} 
                     >
                         <img className='orthanc-img' src={preview} style={{width:23,height:23}}></img>
+                    </IconButton> 
+                    <IconButton
+                        kind="ghost"
+                        align="left"
+                        size={isTablet ? 'lg' : 'sm'}
+                        label={t('orthancExplorer2', 'Show data in orthanc explorere')}
+                        onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ui/app/#/filtered-studies?StudyInstanceUID=${study.studyInstanceUID}&expand=series`} 
+                        >
+                        <img className='orthanc-img' src={orthancExplorer} style={{width:26,height:26, marginTop:0}}></img>
                     </IconButton> 
               </div>
             )

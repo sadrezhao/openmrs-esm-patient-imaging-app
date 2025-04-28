@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createErrorHandler, ExtensionSlot, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
-import { launchPatientWorkspace, type DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
-import { uploadFiles, useOrthancConfigurations } from '../../api';
+import { createErrorHandler, ExtensionSlot, ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
+import { type DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
+import { uploadStudies, getOrthancConfigurations } from '../../api';
 import {
   Button,
   ComboBox,
@@ -14,39 +14,62 @@ import { OrthancConfiguration } from '../../types';
 import { FileUploader } from '@carbon/react';
 import styles from './studies.scss'
 import { maxUploadImageDataSize } from '../constants';
+import { z } from 'zod';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FormGroup } from '@carbon/react';
 
-export interface UploadStudiesWorkspaceProps extends DefaultPatientWorkspaceProps {
-  patient: fhir.Patient;
-}
 
-export default function UploadStudiesWorkspace(props: UploadStudiesWorkspaceProps) {
+const UploadStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> =({
+  patientUuid,
+  closeWorkspace,
+}) => {
+    const { t } = useTranslation();
+    const isTablet = useLayoutType() === 'tablet';
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const orthancConfigurations  = getOrthancConfigurations();
+    const patientState = useMemo(() => ({ patientUuid }), [patientUuid]);
 
-  const { t } = useTranslation();
-  const isTablet = useLayoutType() === 'tablet';
-  const [selectedServer, setSelectedServer] = useState<OrthancConfiguration | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const orthancConfigurations  = useOrthancConfigurations();
-  const { closeWorkspace, patientUuid, } = props;
-  const patientState = useMemo(() => ({ patientUuid }), [patientUuid]);
+  const uploadStudiesFormSchema = useMemo(() => {
+    return z.object({
+       orthancConfiguration: z.object({
+          id: z.number(),
+          orthancBaseUrl: z.string(),
+          orthancProxyUrl: z.string().nullable().optional(),
+        })
+    })
+  },[t]);
 
-  const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    
-    if (!selectedServer) {
-      closeWorkspace({ignoreChanges: true});
-      showSnackbar({
-        title: "Upload stuies error",
-        subtitle: "Select only one server",
-        kind: 'error',
-        isLowContrast: false,
-      });
-      return;
-    }
+  type UploadStudiesFormData = z.infer<typeof uploadStudiesFormSchema>
+
+  const formProps = useForm<UploadStudiesFormData>({
+    mode: 'all',
+    resolver: zodResolver(uploadStudiesFormSchema),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: {errors, isDirty},
+  } = formProps
+
+  const onSubmit = useCallback(
+    (data: UploadStudiesFormData) => {
+      const {
+        orthancConfiguration,
+      } = data;
+      const abortController = new AbortController();
+
+      // copy the content because zod library makes everything optional
+      const serverConfig: OrthancConfiguration = {
+          id: orthancConfiguration.id,
+          orthancBaseUrl: orthancConfiguration.orthancBaseUrl,
+          orthancProxyUrl: orthancConfiguration.orthancProxyUrl,
+      };
 
     if (selectedFiles.length === 0) {
-      closeWorkspace({ignoreChanges: true})
       showSnackbar({
-        title: "Upload stuies error",
+        title: "Upload studies error",
         subtitle: "Select files to upload",
         kind: 'error',
         isLowContrast: false,
@@ -56,88 +79,87 @@ export default function UploadStudiesWorkspace(props: UploadStudiesWorkspaceProp
 
     const oversized = selectedFiles.some(file => file.size > maxUploadImageDataSize);
     if (oversized) {
-      closeWorkspace({ignoreChanges: true});
       showSnackbar({
         title: "Upload stuies error",
-        subtitle: 'One or more files exceed the size limit of 2MB.',
+        subtitle: `One or more files exceed the size limit of ${maxUploadImageDataSize / 1000000} MB.`,
         kind: 'error',
         isLowContrast: false,
       });
       return;
     }
 
-    const formData = new FormData();
-      formData.append('orthancBaseUrl', selectedServer.orthancBaseUrl);
-      selectedFiles.forEach(file => {
-        formData.append('files', file);
-      });
-
-    console.log('Uploading studies', formData);
-    const abortController = new AbortController();
-
-    uploadFiles(selectedFiles, selectedServer, abortController)
-      .then((response) => {
-        closeWorkspace({ignoreChanges: true});
-        if (response.status === 201 || response.status === 200) {
-            showSnackbar({
-              isLowContrast: true,
-              kind: 'success',
-              title: t('studyUploaded', 'StudyUploaded'),
-              subtitle: t(
-                'studyReadyToSynchronize', 'StudyReadyToSynchronize',
-              ),
-            });
-        }
+    uploadStudies(selectedFiles, serverConfig, abortController)
+      .then(() => {
+        closeWorkspace();
+        return () => abortController.abort();
       })
-      .catch(() => {
+      .catch((err) => {
         createErrorHandler();
         showSnackbar({
-          title: t('uploadStudiesError', 'UploadStudiesError'),
+          title: t('uploadStudiesError', 'Upload studies error'),
           kind: 'error',
           isLowContrast: false,
-          subtitle: t('checkForUpload', 'CheckForUpload'),
+          subtitle: t('checkForUpload', 'Check for upload')+": "+err?.message
         });
-      })
-    .finally(()=> abortController.abort);
-    closeWorkspace;
-  }, [selectedFiles, selectedServer, t, closeWorkspace ]);
+      }
+    );
+      }, [selectedFiles, t, closeWorkspace ]
+    );
 
   return (
+    <FormProvider {...formProps}>
     <Form
-      className={styles.formContainer}
+      className={styles.form}
       encType="multipart/form-data"
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
+      id = "uploadStudies"
     > 
       {isTablet ? (
         <Row className={styles.header}>
           <ExtensionSlot className={styles.content} name="patient-details-header-slot" state={patientState} />
         </Row>
       ) : null}
-      <div className={styles.form}>
-        <Stack gap={5} className={styles.formContent}>
-          <ComboBox
-            id="orthancConfigurationId"
-            items={(orthancConfigurations && orthancConfigurations.data) ?? []}
-            itemToString={(item: OrthancConfiguration) => item?.orthancBaseUrl || ''}
-            titleText={t('selectOrthancServer', 'SelectOrthancServer')}
-            onChange={({ selectedItem }) => setSelectedServer(selectedItem)}
-            placeholder={t('selectOrthancServer', 'SelectOrthancServer')}
-          />
-
-          <FileUploader
-            labelTitle={t(
-              'selectFilesToUpload',
-              `Select files to upload (dicom or zip). Max size: ${maxUploadImageDataSize / 2000000} MB`
-            )}
-            name="files"
-            buttonLabel={t('chooseFiles', 'Choose Files')}
-            multiple
-            accept={['.dcm', '.zip']}
-            onChange={(e: any) => {
-              const files = Array.from(e.target.files ?? []);
-              setSelectedFiles(selectedFiles);
-            }}
-          />
+        <Stack gap={1} className={styles.formContent}>
+        <section>
+            <ResponsiveWrapper>
+              <FormGroup legendText={t('orthancConfiguration', 'Orthanc configurations')}>
+              <Controller
+                name="orthancConfiguration"
+                control={control}
+                render={({field: {value, onChange}}) => (
+                  <ComboBox
+                    id="orthancConfiguration"
+                    itemToString={(item: OrthancConfiguration) => item?.orthancBaseUrl}
+                    items={orthancConfigurations.data || []}
+                    onChange={({ selectedItem }) => onChange(selectedItem)} 
+                    placeholder={t('selectOrthancServer', 'Select an Orthanc server')}
+                    selectedItem={value}
+                    invalid={!!errors.orthancConfiguration}
+                    invalidText={errors.orthancConfiguration?.message || t('selectValidServer', 'Please select a valid Orthanc server')}
+                  />
+                )}
+              />
+              </FormGroup>
+            </ResponsiveWrapper>
+          </section>
+          <section>
+            <div className={styles.container}>
+              <FileUploader
+                labelTitle={t(
+                  'selectFilesToUpload',
+                  `Select files to upload (dicom or zip). Max size: ${maxUploadImageDataSize / 1000000} MB`
+                )}
+                name="files"
+                buttonLabel={t('chooseFiles', 'Choose Files')}
+                multiple
+                accept={['.dcm', '.zip']}
+                onChange={(e: any) => {
+                  const files = Array.from<File>(e.target.files ?? []);
+                  setSelectedFiles(files);
+                }}
+              />
+            </div>
+          </section>
           <div className={styles['popup-box-btn']}>
             <Button type="submit" kind="primary">
               {t('upload', 'Upload')}
@@ -147,9 +169,10 @@ export default function UploadStudiesWorkspace(props: UploadStudiesWorkspaceProp
             </Button>
           </div>
         </Stack>
-      </div>
-    </Form>
+      </Form>
+    </FormProvider>
   );
 }
 
+export default UploadStudiesWorkspace;
 

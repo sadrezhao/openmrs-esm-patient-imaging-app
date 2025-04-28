@@ -1,9 +1,7 @@
-import React, { useCallback, useRef, useState} from 'react';
+import React, { useState} from 'react';
 import {
   DataTable,
-  Button,
   IconButton,
-  InlineLoading,
   Table,
   TableBody,
   TableCell,
@@ -13,52 +11,55 @@ import {
   TableRow,
 } from '@carbon/react';
 import {
-  CardHeader,
   compare,
   PatientChartPagination,
-  launchPatientWorkspace,
   EmptyState,
 } from '@openmrs/esm-patient-common-lib';
-
 import {
-    TrashCanIcon,
     useLayoutType,
     usePagination,
   } from '@openmrs/esm-framework';
 
 import { useTranslation } from 'react-i18next';
-import { DicomStudy } from '../../types';
+import { DicomStudy, OrthancConfiguration, StudiesWithScores } from '../../types';
+import { studiesCount } from '../constants';
 import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
-import orthancExplorer from '../../assets/orthanc.png';
 import SeriesDetailsTable  from './series-details-table.component';
-import { studiesCount } from '../constants';
 import styles from './details-table.scss';
 
 
-export interface StudyDetailsTableProps {
-  isValidating?: boolean;
-  studies?: Array<DicomStudy> | null;
-  showDeleteButton?: boolean;
+export interface AssignStudiesTableProps {
+  data?: StudiesWithScores | null;
   patientUuid: string;
+  assignStudyFunction: Function,
 }
 
-const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
-  isValidating,
-  studies,
-  showDeleteButton,
+const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
+  data,
   patientUuid,
+  assignStudyFunction: assignStudyFunction,
 }) => {
   const { t } = useTranslation();
   const displayText = t('studies', 'studies');
   const headerTitle = t('Studies', 'Studies');
-  const { results, goTo, currentPage } = usePagination(studies ?? [], studiesCount);
+  const { results, goTo, currentPage } = usePagination(data.studies ?? [], studiesCount);
   const [expandedRows, setExpandedRows] = useState({});
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
-  const shouldOnClickBeCalled = useRef(true);
+
+
+  const getStudyScore = ({ study, data}: {study: DicomStudy; data: StudiesWithScores}) => {
+    return data.scores[study.studyInstanceUID]
+  }
+
+  const studyAssignStatus = ({ study }: { study: DicomStudy }) => {
+    return study.mrsPatientUuid && study.mrsPatientUuid === patientUuid
+  }
 
   const tableHeaders = [
+    { key: 'assignCheckbox', header: '', isSortable:false },
+    { key: 'score', header: t('Score', 'Score')}, 
     { key: 'studyInstanceUID', header: t('studyInstanceUID', 'Study instance UID')},
     { key: 'patientName', header: t('patientName', 'Patient name'), isSortable: true},
     { key: 'studyDate', header: t('studyDate', 'Study date'), isSortable: true},
@@ -68,7 +69,24 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   ].filter(Boolean);
 
   const tableRows = results?.map((study, index) => ({
-    id: study.id,
+    id: study.id ?? `row-${index}`,
+    assignCheckbox: (
+        <input
+            type="checkbox"
+            value={study.id}
+            checked={studyAssignStatus({study})}
+            onChange={(e) =>{
+              if (e.target.checked) {
+                assignStudyFunction(study, 'true')
+                study.mrsPatientUuid = patientUuid
+              } else {
+                assignStudyFunction(study, 'false')
+                study.mrsPatientUuid = null
+              }
+            }}
+        />
+    ),
+    score: (<div>{getStudyScore({study, data})+"%"}</div>),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
     patientName: {
       sortKey: study.patientName,
@@ -78,32 +96,20 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
         </div>
       )
     },
-    studyDate: <div className={"studyDateColumn"}><span>{study.studyDate}</span></div>,
+    studyDate: (<div className={"studyDateColumn"}>
+          <span>{study.studyDate}</span>
+        </div>),
     studyDescription: study.studyDescription,
     orthancConfiguration: study.orthancConfiguration.orthancBaseUrl,
     action: {
       content:(
         <div className="flex gap-1">
-        {showDeleteButton && (
-            <IconButton
-              kind="ghost"
-              align="left"
-              size={isTablet ? 'lg' : 'sm'}
-              label={t('removeStudy', 'RemoveStudy')}
-              onClick={() => {
-                shouldOnClickBeCalled.current = false;
-                onRemoveClick();
-              }}
-            >
-              <TrashCanIcon className={styles.removeButton} />
-            </IconButton>
-          )}
           <IconButton
             kind="ghost"
             align="left"
             size={isTablet ? 'lg' : 'sm'}
             label={t('stoneviewer', 'Stone viewer of Orthanc')}
-            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/stone-webviewer/index.html?study=${study.studyInstanceUID}`} 
+            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/stoneview/${study.id}`} 
             >
               <img className='stone-img' src={stoneview} style={{width:23, height:14, marginTop: 4}}></img>
           </IconButton>
@@ -112,18 +118,9 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
             align="left"
             size={isTablet ? 'lg' : 'sm'}
             label={t('ohifviewer', 'Ohif viewer')}
-            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ohif/viewer?StudyInstanceUIDs=${study.studyInstanceUID}`}
+            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ohifview/${study.id}`} 
             >
-               <img className='ohif-img' src={ohifview} style={{width:26,height:26, marginTop:0}}></img>
-          </IconButton> 
-          <IconButton
-            kind="ghost"
-            align="left"
-            size={isTablet ? 'lg' : 'sm'}
-            label={t('orthancExplorer2', 'Show data in orthanc explorer')}
-            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ui/app/#/filtered-studies?StudyInstanceUID=${study.studyInstanceUID}&expand=series`} 
-            >
-                <img className='orthanc-img' src={orthancExplorer} style={{width:26,height:26, marginTop:0}}></img>
+               <img className='orthanc-img' src={ohifview} style={{width:26,height:26, marginTop:0}}></img>
           </IconButton> 
         </div>
       )
@@ -137,7 +134,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
       : compare(cellA.sortKey, cellB.sortKey);
   };
 
-  if (studies && studies?.length) {
+  if (data.studies && data.studies?.length) {
   return (
     <div className={styles.widgetCard}>
       <DataTable 
@@ -193,7 +190,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
                             <TableCell colSpan={headers.length}>
                               <div className={styles.seriesTableDiv}>
                                 <SeriesDetailsTable 
-                                  study = {row}
+                                  study = {row} 
                                   patientUuid={patientUuid}
                                   />
                               </div>
@@ -210,7 +207,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
       </DataTable>
       <PatientChartPagination
           pageNumber={currentPage}
-          totalItems={studies.length}
+          totalItems={data.studies.length}
           currentItems={results.length}
           pageSize={studiesCount}
           onPageNumberChange={({ page }) => goTo(page)}
@@ -220,10 +217,5 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   }
   return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
 }
-
-export default StudiesDetailTable;
-
-function onRemoveClick() {
-  throw new Error('Function not implemented.');
-}
+export default AssignStudiesTable;
 

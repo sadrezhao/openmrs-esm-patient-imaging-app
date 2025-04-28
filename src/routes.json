@@ -38,15 +38,21 @@
       "type": "form"
     },
     {
-      "name": "synchronize-studies-form-workspace",
-      "title": "synchronizeStudies",
-      "component": "synchronizeStudiesFormWorkspace",
+      "name": "link-studies-form-workspace",
+      "title": "linkStudies",
+      "component": "linkStudiesFormWorkspace",
+      "type": "form"
+    },
+    {
+      "name": "assign-studies-form-workspace",
+      "title": "assignStudies",
+      "component": "assignStudiesFormWorkspace",
       "type": "form",
       "canMaximize": true,
       "preferredWindowSize": "maximized"
     },
     {
-      "name": "add-requst-form-workspace",
+      "name": "add-request-form-workspace",
       "title": "addRequest",
       "component": "addNewRequestWorkspace",
       "type": "form",

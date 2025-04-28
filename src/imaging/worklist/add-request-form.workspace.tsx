@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useEffect,} from 'react';
 import { useTranslation } from 'react-i18next';
-import { ConfigObject, ResponsiveWrapper, showSnackbar, useConfig, useLayoutType, useSession} from '@openmrs/esm-framework';
+import { ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -17,7 +17,7 @@ import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
 import styles from './worklist.scss';
 import { OrthancConfiguration, RequestProcedure } from '../../types';
 import { Controller, useForm, FormProvider} from 'react-hook-form';
-import { saveRequstProcedure, useOrthancConfigurations } from '../../api';
+import { saveRequestProcedure, getOrthancConfigurations } from '../../api';
 
 function generateAccessionNumber(): string {
   const date: Date = new Date();
@@ -52,35 +52,27 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
 }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
-  const config = useConfig<ConfigObject>();
-  const orthancConfigurations = useOrthancConfigurations()
-
+  const orthancConfigurations = getOrthancConfigurations()
 
   const requestFormSchema = useMemo (() => {    
     return z.object({
-        id: z.number().optional(),
+        id: z.number(),
         status: z.string().nonempty({ message: t('statusError', 'Status is required') }),
-        orthancConfiguration: z
-        .object({
-          id: z.number().optional(),
+        orthancConfiguration: z.object({
+          id: z.number(),
           orthancBaseUrl: z.string(),
-          orthancProxyUrl: z.string(),
-          lastChangedIndex: z.number(),
-        })
-        .refine((val) => !!val.id, {
-          message: t('selectConfigureUrlErrorMessage', 'Configured server is required'),
+          orthancProxyUrl: z.string().nullable().optional(),
         }),
         patientUuid: z.string().nonempty({ message: 'Patient UID is required' }),
         accessionNumber: z.string().nonempty({ message: 'Accession number is required' }),
+        studyInstanceUID: z.string().nullable().optional(),
         requestingPhysician: z.string().refine((value) => !!value, {
           message: t('requestingPhysicianMsg', 'Enter the requesting physician name'),
         }),
         requestDescription: z.string().refine((value) => !!value, {
           message: t('requestDescriptionMsg', 'Enter the request description'),
         }),
-        priority: z.string()
-        .min(1, { message: t('selectPriorityErrorMsg', 'Priority is required') }),
-        studyInstanceUID: z.string().optional().or(z.literal('')),
+        priority: z.string().min(1, { message: 'Priority is required'}),
       });
     }, [t]);
 
@@ -89,22 +81,6 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   const formProps = useForm<NewRequestFormData>({
     mode: 'all',
     resolver: zodResolver(requestFormSchema),
-    defaultValues: {
-      id: undefined,
-      status: "Scheduled",
-      orthancConfiguration: {
-        id: 0,
-        orthancBaseUrl: '',
-        orthancProxyUrl: '',
-        lastChangedIndex: 0,
-      },
-      patientUuid: patientUuid,
-      accessionNumber: "",
-      studyInstanceUID: "",
-      requestingPhysician: "",
-      requestDescription: "",
-      priority: "Low",
-    },
   });
 
   const {
@@ -113,6 +89,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     formState: {errors, isDirty, isSubmitting},
   } = formProps
 
+  const priorityLevel = ['Low', 'Medium', 'High'];
   
   useEffect(() => {
     promptBeforeClosing(() => isDirty);
@@ -135,22 +112,21 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
 
       const newRequestProcedure: RequestProcedure = {
         id,
-        status,
+        status, 
         orthancConfiguration: {
           id: orthancConfiguration.id,
           orthancBaseUrl: orthancConfiguration.orthancBaseUrl,
           orthancProxyUrl: orthancConfiguration.orthancProxyUrl,
-          lastChangedIndex: orthancConfiguration.lastChangedIndex
         },
         patientUuid,
-        accessionNumber,
-        studyInstanceUID,
-        requestingPhysician,
-        requestDescription,
-        priority
+        accessionNumber: accessionNumber,
+        studyInstanceUID: studyInstanceUID,
+        requestingPhysician: requestingPhysician,
+        requestDescription: requestDescription,
+        priority: priority
       };
-
-      saveRequstProcedure(newRequestProcedure, patientUuid, abortController
+    
+      saveRequestProcedure(newRequestProcedure, patientUuid, abortController
       ).then(
        () => {
         closeWorkspaceWithSavedChanges();
@@ -183,27 +159,27 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
       <Form className={styles.form} onSubmit={handleSubmit(onSubmit)} id="newRequestForm">
         <Stack gap={1} className={styles.container}>
           <section>
-            <ResponsiveWrapper>
-              <FormGroup legendText={t('config', 'config')}>
-              <Controller
-                name="orthancConfiguration"
-                control={control}
-                render={({field: {value, onChange}}) => (
-                  <ComboBox
-                    id="orthancConfiguration"
-                    itemToString={(item: OrthancConfiguration) => item?.orthancBaseUrl}
-                    items={orthancConfigurations?.data || []} 
-                    onChange={({ selectedItem }) => onChange(selectedItem)} 
-                    placeholder={t('selectServer', 'Select the orthanc server')}
-                    selectedItem={value}
-                    invalid={!!errors?.orthancConfiguration}
-                    invalidText={errors?.orthancConfiguration?.message || t('selectValidServer', 'Please select a valid Orthanc server')}
-                  />
-                )}
-              />
-              </FormGroup>
-            </ResponsiveWrapper>
-          </section>
+              <ResponsiveWrapper>
+                <FormGroup legendText={t('orthancConfiguration', 'Orthanc configurations')}>
+                <Controller
+                  name="orthancConfiguration"
+                  control={control}
+                  render={({field: {value, onChange}}) => (
+                    <ComboBox
+                      id="orthancConfiguration"
+                      itemToString={(item: OrthancConfiguration) => item?.orthancBaseUrl}
+                      items={orthancConfigurations.data || []}
+                      onChange={({ selectedItem }) => onChange(selectedItem)} 
+                      placeholder={t('selectOrthancServer', 'Select an Orthanc server')}
+                      selectedItem={value}
+                      invalid={!!errors.orthancConfiguration}
+                      invalidText={errors.orthancConfiguration?.message || t('selectValidServer', 'Please select a valid Orthanc server')}
+                    />
+                  )}
+                />
+                </FormGroup>
+              </ResponsiveWrapper>
+            </section>
           <section>
             <ResponsiveWrapper>
               <Controller
@@ -217,8 +193,8 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                       labelText={t('accessionNumber', 'accessionNumber')}
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
-                      invalid={!!errors?.accessionNumber}
-                      invalidText={errors?.accessionNumber?.message || t('enterAccessionNumber', 'Please enter the accession number')}
+                      invalid={!!errors.accessionNumber}
+                      invalidText={errors.accessionNumber?.message || t('enterAccessionNumber', 'Please enter the accession number')}
                     />
                      <Button
                         type="button"
@@ -245,8 +221,8 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                       labelText={t('requestingPhysician', 'requestingPhysician')}
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
-                      invalid={!!errors?.requestingPhysician}
-                      invalidText={errors?.requestingPhysician?.message || t('enterRequestingPhysician', 'Please enter the physician')}
+                      invalid={!!errors.requestingPhysician}
+                      invalidText={errors.requestingPhysician?.message || t('enterRequestingPhysician', 'Please enter the physician')}
                     />
                   </div>
                 )}
@@ -263,7 +239,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                     <TextArea
                       type="text"
                       id="requestDescription"
-                      labelText={t('requestDescription', 'requestDescription')}
+                      labelText={t('requestDescription', 'Request description')}
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
                       invalid={!!errors?.requestDescription}
@@ -280,16 +256,17 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
               <Controller
                 name="priority"
                 control={control}
+                defaultValue="Low"
                 render={({field: {value, onChange}}) => (
                   <ComboBox
                     id="priority"
                     itemToString={(item: string) => item}
-                    items={['High', 'Middle', 'Low']}
+                    items={priorityLevel || []}
                     onChange = {({seletedItem}) => onChange(seletedItem)}
                     placeholder={t('selectPriority', 'Select the request priority')}
                     selectedItem={value}
-                    invalid={!!errors?.priority}
-                    invalidText={errors?.priority?.message || t('selectPriority', 'Please enter the priority')}
+                    invalid={!!errors.priority}
+                    invalidText={errors.priority?.message || t('selectPriority', 'Please enter the priority')}
                   />
                 )}
               />

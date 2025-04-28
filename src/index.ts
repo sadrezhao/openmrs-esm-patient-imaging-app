@@ -42,8 +42,13 @@ export const uploadStudiesFormWorkspace = getAsyncLifecycle(
  options,
 );
 
-export const synchronizeStudiesFormWorkspace = getAsyncLifecycle(
-  () => import('./imaging/studies/synchronize-studies.workspace'),
+export const linkStudiesFormWorkspace = getAsyncLifecycle(
+  () => import('./imaging/studies/link-studies.workspace'),
+  options,
+ );
+
+ export const assignStudiesFormWorkspace = getAsyncLifecycle(
+  () => import('./imaging/studies/assign-studies.workspace'),
   options,
  );
 

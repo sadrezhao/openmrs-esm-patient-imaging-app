@@ -18,7 +18,7 @@
   "upload": "Upload",
   "add": "Add",
   "action": "Action",
-  "synchronizeStudies": "Synchronize studies",
+  "fetchStudy": "Fetch study",
   "stoneviewer": "Show image in stone viewer",
   "ohifviewer": "Show image data in Orthanc explorer",
   "worklist": "Worklist",

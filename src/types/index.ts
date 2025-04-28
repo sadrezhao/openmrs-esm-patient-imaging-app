@@ -1,20 +1,17 @@
-import { Patient } from "@openmrs/esm-framework";
 
 export interface DicomStudy {
-  id?: number,
+  id: number,
   studyInstanceUID: string;
   orthancStudyUID: string;
   orthancConfiguration: OrthancConfiguration;
   patientName: string;
-  patientUuid: string;
+  mrsPatientUuid: string;
   studyDate: string;
-  studyTime: string;
   studyDescription: string;
-  gender: string;
+  gender?: string;
 }
 
 export interface Series {
-  id?: number;
   seriesInstanceUID: string;
   orthancSeriesUID: string;
   orthancConfiguration: OrthancConfiguration;
@@ -26,14 +23,12 @@ export interface Series {
 }
 
 export interface OrthancConfiguration {
-  id?: number;
+  id: number;
   orthancBaseUrl: string;
   orthancProxyUrl?: string;
-  lastChangedIndex: number;
 }
 
 export interface Instance {
-  id?: number,
   sopInstanceUID: string;
   orthancInstanceUID: string;
   instanceNumber: string;
@@ -43,7 +38,7 @@ export interface Instance {
 }
 
 export interface RequestProcedure {
-  id?: number,
+  id: number,
   status: string,
   orthancConfiguration: OrthancConfiguration,
   patientUuid: string,
@@ -55,8 +50,9 @@ export interface RequestProcedure {
 }
 
 export interface RequestProcedureStep {
-  id?: number,
-  requestProcedure: RequestProcedure,
+  id: number,
+  // requestProcedure: RequestProcedure,
+  requestId: number,
   modality: string,
   aetTitle: string,
   scheduledReferringPhysician: string,
@@ -101,3 +97,8 @@ export const modalityOptions = [
   "SR (Structured Report)",
   "RT (Radiotherapy)"
 ]
+
+export interface StudiesWithScores {
+  studies: Array<DicomStudy>;
+  scores: Map<string, number>;
+}

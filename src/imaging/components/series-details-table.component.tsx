@@ -18,12 +18,11 @@ import {
   } from '@openmrs/esm-patient-common-lib';
 
 import { useTranslation } from 'react-i18next';
-import { DicomStudy } from '../../types';
-import dayjs from 'dayjs';
+import { DicomStudy, Series } from '../../types';
 import stoneview from '../../assets/stoneViewer.png';
-import ohifview from '../../assets/ohifViewer.png';
-import { useLayoutType, usePagination, formatDate, TrashCanIcon} from '@openmrs/esm-framework';
-import { useStudySeries } from '../../api';
+import orthancExplorer from '../../assets/orthanc.png';
+import { useLayoutType, usePagination, TrashCanIcon} from '@openmrs/esm-framework';
+import { getStudySeries } from '../../api';
 import InstancesDetailsTable from './instances-details-table.component';
 import styles from './details-table.scss'
 import { seriesCount } from '../constants';
@@ -42,7 +41,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
         error: seriesError,
         isLoading: isLoadingSeries,
         isValidating: isValidatingSeries,
-      } = useStudySeries(study);
+      } = getStudySeries(study.id);
     
     const { t } = useTranslation();
     const displayText = t('series', 'Series');
@@ -54,25 +53,18 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
     const shouldOnClickBeCalled = useRef(true);
     
     const tableHeaders = [
-        { key: 'seriesInstanceUID', header: t('seriesUID', 'SeriesUID')},
+        { key: 'seriesInstanceUID', header: t('seriesUID', 'Series UID')},
         { key: 'modality', header: t('modality', 'Modality')},
-        { key: 'seriesDate', header: t('seriesDate', 'SeriesDate'), isSortable: true, isVisible: true},
+        { key: 'seriesDate', header: t('seriesDate', 'Series date'), isSortable: true, isVisible: true},
         { key: 'seriesDescription', header: t('description', 'description')},
         { key: 'action', header: t('action', 'Action')},
     ]
 
     const tableRows = results?.map((series, index) => ({
-        id: series.id ?? `row-${index}`,
+        id: series.seriesInstanceUID,
         seriesInstanceUID: <div className={styles.subTableWrapText}>{ series.seriesInstanceUID}</div>,
         modality: series.modality,
-        seriesDate: {
-            sortKey: dayjs(series.seriesDate).toDate(),
-            content: (
-            <div className={"seriesDateColumn"}>
-                <span>{formatDate(new Date(series.seriesDate))}</span>
-            </div>
-            )
-        },
+        seriesDate: <div className={"seriesDateColumn"}><span>{series.seriesDate}</span></div>,
         seriesDescription: series.seriesDescription,
         action: {
             content:(
@@ -81,7 +73,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   kind="ghost"
                   align="left"
                   size={isTablet ? 'lg' : 'sm'}
-                  label={t('removeSeries', 'RemoveSeries')}
+                  label={t('removeSeries', 'Remove series')}
                   onClick={() => {
                     shouldOnClickBeCalled.current = false;
                     onRemoveClick();
@@ -93,8 +85,8 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   kind="ghost"
                   align="left"
                   size={isTablet ? 'lg' : 'sm'}
-                  label={t('stoneviewer', 'Stoneviewer')}
-                  onClick={() => window.location.href = `${series.orthancConfiguration.orthancBaseUrl}/stoneview/${series.id}`} 
+                  label={t('stoneviewer', 'Stone viewer of Orthanc')}
+                  onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/stone-webviewer/index.html?study=${study.studyInstanceUID}&series=${series.seriesInstanceUID}`} 
                   >
                     <img className='stone-img' src={stoneview} style={{width:23, height:14, marginTop: 4}}></img>
                 </IconButton>
@@ -102,10 +94,10 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   kind="ghost"
                   align="left"
                   size={isTablet ? 'lg' : 'sm'}
-                  label={t('ohifviewer', 'Ohifviewer')}
-                  onClick={() => window.location.href = `${series.orthancConfiguration.orthancBaseUrl}/ohifview/${series.id}`} 
+                  label={t('orthancExplorer2', 'Show data in orthanc explorere')}
+                  onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ui/app/#/filtered-studies?StudyInstanceUID=${study.studyInstanceUID}&expand=series`} 
                   >
-                     <img className='orthanc-img' src={ohifview} style={{width:26,height:26, marginTop:0}}></img>
+                     <img className='orthanc-img' src={orthancExplorer} style={{width:26,height:26, marginTop:0}}></img>
                 </IconButton> 
               </div>
             )
@@ -178,9 +170,9 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                                         <TableCell colSpan={headers.length}
                                         >
                                             <div className={styles.instanceTableDiv}>
-                                                <InstancesDetailsTable 
-                                                    series={row}
-                                                    patientUuid={patientUuid}
+                                                <InstancesDetailsTable
+                                                    study={study}
+                                                    seriesInstanceUID={row.id}
                                                 /> 
                                             </div>
                                         </TableCell>

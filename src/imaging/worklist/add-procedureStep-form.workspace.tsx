@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { OpenmrsDatePicker, ResponsiveWrapper, showSnackbar, toDateObjectStrict, toOmrsIsoString, useConfig, useLayoutType, useSession} from '@openmrs/esm-framework';
+import { OpenmrsDatePicker, ResponsiveWrapper, showSnackbar, toDateObjectStrict, toOmrsIsoString, useLayoutType, useSession} from '@openmrs/esm-framework';
 import {
     Button,
     ButtonSet,
@@ -10,18 +10,19 @@ import {
     Stack,
     TextArea,
     TextInput,
+    TimePicker,
+    TimePickerSelect,
+    SelectItem
 } from '@carbon/react'
 import { DefaultPatientWorkspaceProps, type amPm, convertTime12to24} from '@openmrs/esm-patient-common-lib';
-import { saveRequestProcedureStep, useOrthancConfigurations } from '../../api';
+import { saveRequestProcedureStep, getOrthancConfigurations } from '../../api';
 import { FormProvider, useForm, Controller} from 'react-hook-form';
 import { modalityOptions, RequestProcedureStep } from '../../types';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './worklist.scss';
 import dayjs from 'dayjs';
-import { TimePickerSelect } from '@carbon/react';
-import { SelectItem } from '@carbon/react';
-import { TimePicker } from '@carbon/react';
+import { testRequestProcedure } from '../../api/api-test';
 
 export interface AddNewProcedureStepWorkspaceProps extends DefaultPatientWorkspaceProps{
   patient: fhir.Patient;
@@ -40,39 +41,43 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
 
     const procedureStepFormSchema = useMemo(() => {
       return z.object({
-        id: z.number().optional(),
-        requestProcedure: z.object({
-          id: z.number().optional(),
-          status: z.string(),
-          orthancConfiguration: z
-            .object({
-              id: z.number().optional(),
-              orthancBaseUrl: z.string(),
-              orthancProxyUrl: z.string(),
-              lastChangedIndex: z.number(),
-            })
-            .refine((val) => !!val.id, {
-              message: t('selectConfigureUrlErrorMessage', 'Configured server is required'),
-            }),
-          patientUuid: z.string(),
-          accessionNumber: z.string(),
-          studyInstanceUID: z.string().optional(),
-          requestingPhysician: z.string(),
-          requestDescription: z.string(),
-          priority: z.string(),
+        id: z.number(),
+        requestId: z.number(),
+        // requestProcedure: z.object({
+        //   id: z.number(),
+        //   status: z.string().nonempty({ message: t('statusError', 'Status is required') }),
+        //   orthancConfiguration: z.object({
+        //     id: z.number(),
+        //     orthancBaseUrl: z.string(),
+        //     orthancProxyUrl: z.string().nullable().optional(),
+        //     lastChangedIndex: z.number(),
+        //   }),
+        //   patientUuid: z.string().nonempty({ message: 'Patient UID is required' }),
+        //   accessionNumber: z.string().nonempty({ message: 'Accession number is required' }),
+        //   studyInstanceUID: z.string().nullable().optional(),
+        //   requestingPhysician: z.string().refine((value) => !!value, {
+        //     message: t('requestingPhysicianMsg', 'Enter the requesting physician name'),
+        //   }),
+        //   requestDescription: z.string().refine((value) => !!value, {
+        //     message: t('requestDescriptionMsg', 'Enter the request description'),
+        //   }),
+        //   priority: z.string().min(1, { message: 'Priority is required'}),   
+        // }).required(),
+        modality: z.string().min(1, { message: 'Modality is required' }),
+        aetTitle: z.string().min(1, { message: 'AET title is required' }),
+        scheduledReferringPhysician: z.string().refine((value) => !!value, {
+          message: t('scheduledReferringPhysician', 'Referring physician is required'),
         }),
-        modality: z.string().nonempty({ message: 'Modality is required' }),
-        aetTitle: z.string().nonempty({ message: 'AET title is required' }),
-        scheduledReferringPhysician: z.string().nonempty({ message: 'Referring physician is required' }),
-        requestedProcedureDescription: z.string().nonempty({ message: 'Procedure description is required' }),
+        requestedProcedureDescription: z.string().refine((value) => !!value, {
+          message: t('requestedProcedureDescription', 'Procedure description is required'),
+        }),
         stepStartDate: z.date().refine((value) => !!value, t('stepDateRequired', 'Step date required')),
         stepStartTime: z.string().refine((value) => !!value, t('stepTimeRequired', 'Step start time required')),
         timeFormat: z.enum(['PM', 'AM']),
-        performedProcedureStepStatus: z.string().nonempty({ message: 'Procedure step status is required' }),
-        stationName: z.string().optional(),
-        procedureStepLocation: z.string().optional(),
-
-      })
+        performedProcedureStepStatus: z.string().min(1, { message: 'Procedure step status is required' }),
+        stationName: z.string().nullable().optional(),
+        procedureStepLocation: z.string().nullable().optional(),
+      });
     }, [t]);
 
     type NewProcedureStepFormData = z.infer<typeof procedureStepFormSchema>;
@@ -80,22 +85,6 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
     const formProps = useForm<NewProcedureStepFormData>({
       mode: 'all',
       resolver: zodResolver(procedureStepFormSchema),
-      defaultValues:{
-        id: undefined,
-        requestProcedure: {
-
-        },
-        modality: 'CT (Computed Tomography)',
-        aetTitle: '',
-        scheduledReferringPhysician: '',
-        requestedProcedureDescription: '',
-        stepStartDate: new Date(),
-        stepStartTime: dayjs(new Date()).format('hh:mm'),
-        timeFormat: new Date().getHours() >= 12 ? 'PM' : 'AM',
-        performedProcedureStepStatus: 'In progress',
-        stationName: '',
-        procedureStepLocation: '',
-      },
     });
 
     const {
@@ -112,7 +101,8 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
       (data: NewProcedureStepFormData) => {
         const {
           id,
-          requestProcedure,
+          // requestProcedure,
+          requestId,
           modality,
           aetTitle,
           scheduledReferringPhysician,
@@ -128,28 +118,30 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
         const abortController = new AbortController();
         const [hours, minutes] = convertTime12to24(stepStartTime, timeFormat);
 
+        // copy the content because zod library makes everything optional
         const newRequestProcedureStep: RequestProcedureStep = {
           id,
-          requestProcedure: {
-            id: requestProcedure.id,
-            status: requestProcedure.status,
-            orthancConfiguration: {
-              id: requestProcedure.orthancConfiguration.id,
-              orthancBaseUrl: requestProcedure.orthancConfiguration.orthancBaseUrl,
-              orthancProxyUrl: requestProcedure.orthancConfiguration.orthancProxyUrl,
-              lastChangedIndex: requestProcedure.orthancConfiguration.lastChangedIndex
-            },
-            patientUuid: requestProcedure.patientUuid,
-            accessionNumber: requestProcedure.accessionNumber,
-            studyInstanceUID: requestProcedure.studyInstanceUID,
-            requestingPhysician: requestProcedure.requestingPhysician,
-            requestDescription: requestProcedure.requestDescription,
-            priority: requestProcedure.priority
-          },
-          modality,
-          aetTitle,
-          scheduledReferringPhysician,
-          requestedProcedureDescription,
+          requestId: requestId,
+          // requestProcedure: {
+          //   id: requestProcedure.id,
+          //   status: requestProcedure.status,
+          //   orthancConfiguration: {
+          //     id: requestProcedure.orthancConfiguration.id,
+          //     orthancBaseUrl: requestProcedure.orthancConfiguration.orthancBaseUrl,
+          //     orthancProxyUrl: requestProcedure.orthancConfiguration.orthancProxyUrl,
+          //     lastChangedIndex: requestProcedure.orthancConfiguration.lastChangedIndex
+          //   },
+          //   patientUuid: requestProcedure.patientUuid,
+          //   accessionNumber: requestProcedure.accessionNumber,
+          //   studyInstanceUID: requestProcedure.studyInstanceUID,
+          //   requestingPhysician: requestProcedure.requestingPhysician,
+          //   requestDescription: requestProcedure.requestDescription,
+          //   priority: requestProcedure.priority,
+          // },
+          modality: modality,
+          aetTitle: aetTitle,
+          scheduledReferringPhysician: scheduledReferringPhysician,
+          requestedProcedureDescription: requestedProcedureDescription,
           stepStartDate: toDateObjectStrict(
             toOmrsIsoString(
               new Date(
@@ -161,13 +153,13 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
               ),
             ),
           ),
-          stepStartTime,
-          performedProcedureStepStatus,
-          stationName,
-          procedureStepLocation
+          stepStartTime: stepStartTime,
+          performedProcedureStepStatus: performedProcedureStepStatus,
+          stationName: stationName,
+          procedureStepLocation: procedureStepLocation
         };
 
-        saveRequestProcedureStep(newRequestProcedureStep, patientUuid, abortController
+        saveRequestProcedureStep(newRequestProcedureStep, requestId, abortController
         ).then(
           () => {
             closeWorkspaceWithSavedChanges();
@@ -201,11 +193,12 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                   <Controller
                     name="modality"
                     control={control}
+                    defaultValue={modalityOptions[0]}
                     render={({ field: { value, onChange } }) => (
                         <div className={styles.row}>
                           <ComboBox
                             id="modality"
-                            itemToString={(item, index) => item || ''}
+                            itemToString={(item) => item || ''}
                             items={modalityOptions}
                             onChange={({ selectedItem }) => onChange(selectedItem)}
                             placeholder={t('selectModality', 'Select the modality')}
@@ -284,7 +277,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
               </ResponsiveWrapper>
             </section>
             <section>
-            <ResponsiveWrapper>
+              <ResponsiveWrapper>
                 <Controller
                   name="stepStartDate"
                   control={control}

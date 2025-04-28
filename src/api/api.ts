@@ -1,325 +1,284 @@
 import React, { useCallback } from 'react';
 import useSWR, {mutate} from 'swr';
 import { FetchResponse, } from '@openmrs/esm-framework';
-import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
-import type { DicomStudy, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from '../types';
+import { openmrsFetch } from '@openmrs/esm-framework';
+import type { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series, StudiesWithScores } from '../types';
 import { testSeries, testStudy, testRequestProcedureList, testInstances, testProcedureSteps, testConfigurations, testRequestProcedure } from '../api/api-test';
-
-export const careSettingUuid = 'b47d1b48-1d9f-4d3c-b44b-8f29a9b20c7d';
-
-// export interface PatientStudiesFetchResponse {
-//   results: Array<DicomStudy>
-// }
-
-export default interface PatientStudiesResponse {
-  results: Array<DicomStudy>;
-  id: string;
-  total: number;
-  type: string;
-}
-
-export interface RequestProcedureResponse {
-  results: Array<RequestProcedure>;
-  id: string;
-  total: number;
-  type: string;
-}
-
-export interface ProcedureStepResponse {
-  results: Array<RequestProcedureStep>;
-  id: string;
-  total: number;
-  type: string;
-}
-
-export interface SeriesResponse {
-  results: Array<Series>;
-  id: string;
-  total: number;
-  type: string;
-}
-
-export interface OrthancConfigurationResponse {
-  results: Array<OrthancConfiguration>
-  id: string;
-  total: number;
-  type: string;
-}
-
-export interface MappingStudyResponse {
-  // results: DicomStudy,
-  id: string;
-  total: number;
-  type: string
-}
-
-export interface SaveRequestResponse {
-    // results: DicomStudy,
-    id: string;
-    total: number;
-    type: string
-}
+import { imagingUrl, worklistUrl } from '../imaging/constants'
 
 
+export function getStudiesByPatient(patientUuid: string) {
+    const studiesUrl = `${imagingUrl}/studies?patient=${patientUuid}`;
 
-function sortRequestsByDate(requests: any[]) {
-  return requests?.sort(
-    (request1, request2) => new Date(request2.createdDate).getTime() - new Date(request2.createDate).getTime(),
-  );
-}
-
-
-export function useStudies(patientUuid: string) {
-    // const studiesUrl = `${restBaseUrl}/studies?patient=${patientId}`;
-    const studiesUrl = `http://localhost:8042/studies/49974143-ec23cb52-6b2a1c46-14d5daa0-0822ce1a`
-    
-    const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: PatientStudiesResponse}, Error>(
-        studiesUrl,
-        openmrsFetch,
+    const { data, error, isLoading, isValidating, mutate } = useSWR<{data: Array<DicomStudy>}, Error>(
+      studiesUrl,
+      openmrsFetch,
     );
 
     return {
-        data: testStudy ?  testStudy : null,
+        data: data?.data,
         error: error,
-        isLoading,
-        isValidating,
+        isLoading: isLoading,
+        isValidating: isValidating,
         mutate,
     };
 }
 
 
-export async function uploadFiles(
-  files: File[], 
-  config: OrthancConfiguration,
-  abortController: AbortController,
-) {
-  const uploadUrl = `${config.orthancBaseUrl}/instaces`; //"POST"
+export function getStudiesByConfig(configuration: OrthancConfiguration, patientUuid: string) {
+  const studiesByConfigUrl = `${imagingUrl}/studiesbyconfig?configurationId=${configuration.id}&patient=${patientUuid}`;
 
-  const formData = new FormData;
-  files.forEach(file => formData.append('file', file));
-
-  const uploadResponse = await openmrsFetch(`${uploadUrl}`, {
-    method: 'POST',
-    signal: abortController.signal,
-    body: formData,
-  });
-  return uploadResponse;
-}
-
-export async function useSynchronizeStudies (
-  fetchOption: String,
-  server: String,
-  abortController: AbortController,
-){
-  const synchronizeUrl = `` //get
-
-    // const mutateRequest = useCallback(
-  //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/worklist?patient=${patientUuid}`)),
-  //   [patientUuid],
-  // );
-
-  // const { data, error, isLoading, isValidating } = useSWR<FetchResponse<PatientStudiesResponse>, Error>(
-  //   synchronizeUrl,
-  //   openmrsFetch,
-  // );
-
-  return {
-    data: testStudy ? testStudy : null,
-    error: null,
-    isLoading: null,
-    isValidating: null,
-    // mutate: mutateRequest,
-    mutate: null,
-  };
-
-}
-
-export function useRequests(patientUuid: string) {
-  // const requestsUrl = `${restBaseUrl}/worklist?patient=${patientId}`
-  const requestsUrl = `http://localhost:8042/studies/49974143-ec23cb52-6b2a1c46-14d5daa0-0822ce1a`
-  
-  // const mutateRequest = useCallback(
-  //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/worklist?patient=${patientUuid}`)),
-  //   [patientUuid],
-  // );
-
-  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<RequestProcedureResponse>, Error>(
-    patientUuid ? requestsUrl : null,
-    openmrsFetch,
-  );
-
-  // const requests = useMemo(() => sortRequestsByDate(data?.data?.results) ?? null, [data]);
-
-  return {
-    data: testRequestProcedureList ? testRequestProcedureList : null,
-    error,
-    isLoading,
-    isValidating,
-    // mutate: mutateRequest,
-    mutate: null,
-  };
-
-}
-
-
-export function useProcedureStep(request: RequestProcedure) {
-  const procedureStepUrl = `http://localhost:8042/series/49974143-ec23cb52-6b2a1c46-14d5daa0-0822ce1a/instances`
-
-  const mutateInstances = useCallback(
-    () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/worklist`)),
-    [request],
-  );
-
-  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<ProcedureStepResponse>, Error>(
-    request? procedureStepUrl : null,
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<StudiesWithScores>, Error>(
+    studiesByConfigUrl,
     openmrsFetch,
   );
 
   return {
-    data: testProcedureSteps ? testProcedureSteps : null,
-    error,
-    isLoading,
-    isValidating,
-    mutate: mutateInstances,
-  };
-
-}
-
-export function useStudySeries(study: DicomStudy) {
-  const requestsUrl = `http://localhost:8042/study/49974143-ec23cb52-6b2a1c46-14d5daa0-0822ce1a/series`
-
-  const mutateSeries = useCallback(
-    () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/study=${study.studyInstanceUID}/series`)),
-    [study],
-  );
-
-  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<SeriesResponse>, Error>(
-    study? requestsUrl : null,
-    openmrsFetch,
-  );
-
-  return {
-    data: testSeries ? testSeries : null,
-    error,
-    isLoading,
-    isValidating,
-    mutate: mutateSeries,
+      data: data?.data,
+      error: error,
+      isLoading: isLoading,
+      isValidating: isValidating,
+      mutate,
   };
 }
 
+export function getOrthancConfigurations() {
+  const configurationUrl = `${imagingUrl}/configurations`
 
-export function useStudyInstances(series: Series) {
-  const instancesUrl = `http://localhost:8042/series/49974143-ec23cb52-6b2a1c46-14d5daa0-0822ce1a/instances`
-
-  // const mutateInstances = useCallback(
-  //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/series=${series.orthancSeriesUID}/instnace`)),
-  //   [series],
-  // );
-
-  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<SeriesResponse>, Error>(
-    series? instancesUrl : null,
-    openmrsFetch,
-  );
-
-  return {
-    data: testInstances ? testInstances : null,
-    error,
-    isLoading,
-    isValidating,
-    mutate: null,
-  };
-}
-
-export function useOrthancConfigurations() {
-  const configurationUrl = `${restBaseUrl}/configurations`
-
-  const mutateInstances = useCallback(
-    () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/configurations`)),
-    [],
-  );
-
-  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<OrthancConfigurationResponse>, Error>(
+  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<OrthancConfiguration>>, Error>(
     configurationUrl,
     openmrsFetch,
   );
 
+  if (error) {
+    console.error("SWR error fetching Orthanc configurations:", error);
+  }
+
   return {
-    // data: data ?? null,
-    data: testConfigurations ?? null,
-    error: null,
-    isLoading: null,
-    isValidating: null,
-    // mutate: mutateInstances,
-    mutate: null,
+    data: data?.data,
+    error,
+    isLoading,
+    isValidating,
+    mutate: mutate,
   };
 }
 
-export function useMappingStudy(study: DicomStudy, patientUuid: string, mapping: Boolean) {
+export async function uploadStudies (
+  files: File[], 
+  configuration: OrthancConfiguration,
+  abortController: AbortController,
+) {
 
-  const newStudy = study;
-  // newStudy.patientUuid = patientUuid;
+  const uploadUrl = imagingUrl+"/instances"
 
-  console.log("+++++++++++++ study: ", study)
+  for (const file of files) {
+    const formData = new FormData()
+    formData.append("configurationId", configuration.id.toString())
+    formData.append("file", file)
 
-  const mappingUrl = `${restBaseUrl}/mapping/`
+    const response = await openmrsFetch(uploadUrl, {
+      method: 'POST',
+      signal: abortController.signal,
+      body: formData,
+    });
 
-  // const mutateInstances = useCallback(
-  //   () => mutate((key) => typeof key === 'string' && key.startsWith(`${restBaseUrl}/mapping/?study=${study}`)),
-  //   [],
-  // );
+    if (!response.ok) {
+      throw new Error(await response.text() || "Upload failed")
+    }
+  }
+}
 
-  const { data, error, isLoading, isValidating } = useSWR<FetchResponse<MappingStudyResponse>, Error>(
-    mappingUrl,
+export async function getLinkStudies (
+  fetchOption: string,
+  configuration: OrthancConfiguration,
+  abortController: AbortController
+){
+  const linkUrl = `${imagingUrl}/linkstudies`
+
+  const formData = new FormData()
+  formData.append("configurationId", configuration.id.toString())
+  formData.append("fetchOption", fetchOption) 
+
+  const response = await openmrsFetch(linkUrl, {
+    method: 'POST',
+    signal: abortController.signal,
+    body: formData,
+  })
+
+  if (!response.ok) {
+    throw new Error(await response.text() || "Link studies failed")
+  }
+}
+
+export function getRequestsByPatient(patientUuid: string) {
+  const requestsUrl = `${worklistUrl}/patientrequests?patient=${patientUuid}`
+  
+  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<RequestProcedure>>, Error>(
+    patientUuid ? requestsUrl : null,
     openmrsFetch,
   );
 
   return {
-    // data: data ?? null,
-    data: testStudy ?? null,
-    error: null,
-    isLoading: null,
-    isValidating: null,
-    // mutate: mutateInstances,
-    mutate: null,
+    data: data?.data,
+    error: error,
+    isLoading: isLoading,
+    isValidating: isValidating,
+    mutate:mutate,
   };
 }
 
-export function saveRequstProcedure(
+
+export function getProcedureStep(request: RequestProcedure) {
+
+  const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${request.id}`
+
+  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<RequestProcedureStep>>, Error>(
+    procedureStepUrl,
+    openmrsFetch,
+  );
+
+  return {
+    data: data?.data,
+    error: error,
+    isLoading: isLoading,
+    isValidating: isValidating,
+    mutate: mutate,
+  };
+
+}
+
+export function getStudySeries(studyId: number) {
+
+  const seriesUrl = `${imagingUrl}/studyseries?studyId=${studyId}`
+
+  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<Series>>, Error>(
+    seriesUrl,
+    openmrsFetch,
+  );
+
+  return {
+    data: data?.data,
+    error,
+    isLoading,
+    isValidating,
+    mutate: mutate,
+  };
+}
+
+
+export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
+  const instancesUrl = `${imagingUrl}/studyinstances?studyId=${studyId}&seriesInstanceUID=${seriesInstanceUID}`
+
+  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<Instance>>, Error>(
+    instancesUrl,
+    openmrsFetch,
+  );
+
+  return {
+    data: data?.data,
+    error,
+    isLoading,
+    isValidating,
+    mutate: mutate,
+  };
+}
+
+export async function assignStudy(
+    studyId: number, 
+    patientUuid: string, 
+    isAssign: boolean,
+    abortController: AbortController
+  ) {
+    const mappingUrl = `${imagingUrl}/assingstudy`
+
+    const formData = new FormData()
+    formData.append("studyId", studyId.toString())
+    formData.append("patient", patientUuid)
+    formData.append("isAssign", isAssign.toString())
+
+    const response = await openmrsFetch(mappingUrl, {
+      method: 'POST',
+      signal: abortController.signal,
+      body: formData,
+    })
+
+    if (!response.ok) {
+      throw new Error(await response.text() || "Save patient request procedure failed")
+    }
+}
+
+export async function saveRequestProcedure(
     request: RequestProcedure, 
     patientUuid: string,
     abortController: AbortController
   ){
-    const saveRequstUrl = `${restBaseUrl}/worklist/request`;
-    
-    return openmrsFetch<unknown>(saveRequstUrl,{
+    const saveRequstUrl = `${worklistUrl}/saverequest`;
+
+    const formData = new FormData()
+    formData.append("patient", patientUuid)
+    formData.append("requestProcedure", JSON.stringify(request))
+
+
+    const response = await openmrsFetch(saveRequstUrl,{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       signal: abortController.signal,
-      body: {
-        patient: patientUuid,
-        request: request
-      },
+      body: formData
     });
+
+    if (!response.ok) {
+      throw new Error(await response.text() || "Save patient request procedure failed")
+    }
 }
 
 
-export function saveRequestProcedureStep (
+export async function saveRequestProcedureStep (
   step: RequestProcedureStep,
-  patientUuid: string,
+  requestId: number,
   abortController: AbortController
 ) {
-  const saveProcedureStepUrl = `${restBaseUrl}/worklist/procedureStep`;
-  return openmrsFetch<unknown>(saveProcedureStepUrl,{
+  const saveProcedureStepUrl = `${worklistUrl}/savestep`;
+
+  const formData = new FormData()
+  formData.append("requestId", requestId.toString())
+  formData.append("step", JSON.stringify(step))
+
+  const response = await openmrsFetch(saveProcedureStepUrl,{
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     signal: abortController.signal,
-    body: {
-      patient: patientUuid,
-      request: saveProcedureStepUrl
-    },
+    body: formData
   });
+
+  if (!response.ok) {
+    throw new Error(await response.text() || "Save patient request procedure step failed")
+  }
+}
+
+export function deleteStudy(studyId: string) {
+  return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}`,{
+    method: 'DELETE',
+  })
+}
+
+export function deleteSeries(seriesInstanceUID: string) {
+  return openmrsFetch(`${imagingUrl}/series?seriesInstanceUID=${seriesInstanceUID}`, {
+    method: 'DELETE',
+  })
+}
+
+export function deleteRequest(requestId: string) {
+  return openmrsFetch(`${worklistUrl}/request?requestId=${requestId}`, {
+    method: 'DELETE',
+  })
+}
+
+export function deleteProcedureStep(stepId: string) {
+  return openmrsFetch(`${worklistUrl}/procedureStep?stepId=${stepId}`, {
+    method: 'DELETE',
+  })
 }

@@ -90,3 +90,14 @@
     padding: layout.$spacing-02 0;
   }
 }
+
+.timePicker {
+  align-items: baseline;
+  flex: none;
+  margin-left: layout.$spacing-01;
+
+  :global(.cds--form-requirement) {
+    max-width: 6rem;
+    max-height: 0 !important;
+  }
+}

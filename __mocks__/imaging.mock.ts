@@ -1,51 +1,76 @@
-import { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from "../types";
+
+export interface DicomStudy {
+    id?: number,
+    studyInstanceUID: string;
+    orthancStudyUID: string;
+    orthancConfiguration: OrthancConfiguration;
+    patientName: string;
+    patientUuid: string;
+    studyDate: string;
+    studyTime: string;
+    studyDescription: string;
+    gender: string;
+}
+
+export interface Series {
+    id?: number;
+    seriesInstanceUID: string;
+    orthancSeriesUID: string;
+    orthancConfiguration: OrthancConfiguration;
+    seriesDescription: string;
+    seriesNumber: string;
+    seriesDate: string;
+    seriesTime: string;
+    modality: string;
+}
+
+export interface OrthancConfiguration {
+    id?: number;
+    orthancBaseUrl: string;
+    orthancProxyUrl?: string;
+}
+
+export interface Instance {
+    id?: number,
+    sopInstanceUID: string;
+    orthancInstanceUID: string;
+    instanceNumber: string;
+    imagePositionPatient: string;
+    numberOfFrames: string;
+    orthancConfiguration: OrthancConfiguration,
+}
+
+export interface RequestProcedure {
+    id?: number,
+    status: string,
+    orthancConfiguration: OrthancConfiguration,
+    patientUuid: string,
+    accessionNumber: string,
+    studyInstanceUID?: string,
+    requestingPhysician: string,
+    requestDescription: string,
+    priority: string
+}
+
+export interface RequestProcedureStep {
+    id?: number,
+    requestProcedure: RequestProcedure,
+    modality: string,
+    aetTitle: string,
+    scheduledReferringPhysician: string,
+    requestedProcedureDescription: string,
+    stepStartDate: Date,
+    stepStartTime: string,
+    performedProcedureStepStatus: string,
+    stationName?: string,
+    procedureStepLocation?: string
+}
 
 export const testStudy: Array<DicomStudy> = [{
     id: 0,
     studyInstanceUID: "2.16.840.1.113669.632.20.1211.10000098591",
     orthancStudyUID: "abc123def456",
-    mrsPatientUuid: "f2439e62-8f0d-4a4f-85a1-cad42b0dfb62",
-    // mrsPatient: {
-    //     uuid: 'f2439e62-8f0d-4a4f-85a1-cad42b0dfb62', // from OpenmrsResourceStrict
-    //     display: 'John Doe',                          // from OpenmrsResourceStrict
-    //     identifiers: [
-    //       {
-    //           identifier: '1001A',
-    //           identifierType: {
-    //               uuid: 'abc-def-123',
-    //               display: 'National ID',
-    //           },
-    //           preferred: true,
-    //           voided: false,
-    //           uuid: '1000HM2'
-    //       },
-    //     ],
-    //     person: {
-    //       uuid: '789e1234-e89b-42f1-b2a2-123456789abc',
-    //       display: 'John Doe',
-    //       gender: 'M',
-    //       birthdate: '1985-05-15',
-    //       birthdateEstimated: false,
-    //       dead: false,
-    //       age: 39,
-    //       names: [
-    //         {
-    //             givenName: 'John',
-    //             familyName: 'Doe',
-    //             uuid: ''
-    //         },
-    //       ],
-    //       addresses: [
-    //         {
-    //             address1: '123 Main St',
-    //             cityVillage: 'Springfield',
-    //             country: 'USA',
-    //             uuid: ''
-    //         },
-    //       ],
-    //     },
-    //     voided: false,
-    //   },
+    patientUuid: "f2439e62-8f0d-4a4f-85a1-cad42b0dfb62",
     orthancConfiguration: {
         id: 1,
         orthancProxyUrl: "",
@@ -53,15 +78,15 @@ export const testStudy: Array<DicomStudy> = [{
     },
     patientName: "John Doe",
     studyDate: "2025-04-07",
-    // studyTime: "14:30:00",
+    studyTime: "14:30:00",
     studyDescription: "CT Chest without contrast",
-    gender: "Male",
+    gender: "Male"
   }
 ];
 
 
 export const testSeries: Array<Series> = [{
-  // id: 1,
+  id: 1,
   seriesInstanceUID: "1.2.840.113704.1.111.5692.1127828999.2",
   orthancSeriesUID: "df8a96b2-bfa2e9b1-6e7b7f4c-35c4a7bd-0b1a9911",
   orthancConfiguration: {
@@ -76,7 +101,7 @@ export const testSeries: Array<Series> = [{
   modality: "CT"
 },
 {
-  // id: 2,
+  id: 2,
   seriesInstanceUID: "1.2.840.113704.1.111.5692.1127829280.6",
   orthancSeriesUID: "df8a96b2-bfa2e9b1-6e7b7f4c-35c4a7bd-0b1a9911",
   orthancConfiguration: {
@@ -111,7 +136,7 @@ export const testRequestProcedureList: Array<RequestProcedure> = [
     }
 ]
 
-export const testRequestProcedure: Array<RequestProcedure> = [{
+export const testRequestProcedure: RequestProcedure = {
       id: 1,
       status: "Scheduled",
       orthancConfiguration: {
@@ -125,7 +150,7 @@ export const testRequestProcedure: Array<RequestProcedure> = [{
       requestingPhysician: "Dr. John Smith",
       requestDescription: "MRI Brain with contrast",
       priority: "High"
-  }]
+  }
 
 export const testConfigurations: Array<OrthancConfiguration> = [
   {
@@ -142,7 +167,7 @@ export const testConfigurations: Array<OrthancConfiguration> = [
 
 export const testInstances: Array<Instance> = [
   {
-    // id: 1,
+    id: 1,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829431.11401",
     orthancInstanceUID: "f3a5c83e-b3f5-4a5d-8f0f-5a0a8f4f5b7c",
     instanceNumber: "1",
@@ -155,7 +180,7 @@ export const testInstances: Array<Instance> = [
     },
   },
   {
-    // id: 2,
+    id: 2,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829433.11402",
     orthancInstanceUID: "e2b3d39e-6bfc-4ef4-a96a-daa176d6d010",
     instanceNumber: "2",
@@ -168,7 +193,7 @@ export const testInstances: Array<Instance> = [
     },
   },
   {
-    // id: 3,
+    id: 3,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829433.11403",
     orthancInstanceUID: "d1c7e28a-2e42-432e-9c6a-b58700a1c9e2",
     instanceNumber: "3",
@@ -181,7 +206,7 @@ export const testInstances: Array<Instance> = [
     },
   },
   {
-    // id: 4,
+    id: 4,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829434.11404",
     orthancInstanceUID: "d1c7e28a-2e42-432e-9c6a-b58700a1c9e2",
     instanceNumber: "4",
@@ -194,7 +219,7 @@ export const testInstances: Array<Instance> = [
     },
   },
   {
-    // id: 5,
+    id: 5,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829434.11405",
     orthancInstanceUID: "d1c7e28a-2e42-432e-9c6a-b58700a1c9e2",
     instanceNumber: "5",
@@ -207,7 +232,7 @@ export const testInstances: Array<Instance> = [
     },
   },
   {
-    // id: 6,
+    id: 6,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829434.11406",
     orthancInstanceUID: "d1c7e28a-2e42-432e-9c6a-b58700a1c9e2",
     instanceNumber: "6",
@@ -220,7 +245,7 @@ export const testInstances: Array<Instance> = [
     },
   },
   {
-    // id: 7,
+    id: 7,
     sopInstanceUID: "1.2.840.113704.1.111.6168.1127829434.11407",
     orthancInstanceUID: "d1c7e28a-2e42-432e-9c6a-b58700a1c9e2",
     instanceNumber: "7",
@@ -237,8 +262,7 @@ export const testInstances: Array<Instance> = [
 export const testProcedureSteps: Array<RequestProcedureStep> = [
   {
     id: 1,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedure: testRequestProcedureList[0],
     modality: 'CT',
     aetTitle: 'AET_CT1',
     scheduledReferringPhysician: 'Dr. Alice Morgan',
@@ -251,8 +275,7 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 2,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedure: testRequestProcedureList[0],
     modality: 'MR',
     aetTitle: 'AET_MR2',
     scheduledReferringPhysician: 'Dr. Brian Lee',
@@ -265,8 +288,7 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 3,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedure: testRequestProcedureList[0],
     modality: 'US',
     aetTitle: 'AET_US3',
     scheduledReferringPhysician: 'Dr. Claire Zhang',
@@ -279,8 +301,7 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 4,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedure: testRequestProcedureList[0],
     modality: 'CR',
     aetTitle: 'AET_CR4',
     scheduledReferringPhysician: 'Dr. Daniel Kim',

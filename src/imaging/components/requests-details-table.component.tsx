@@ -92,7 +92,7 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                   kind="ghost"
                   align="left"
                   size={isTablet ? 'lg' : 'sm'}
-                  label={t('removeRequst', 'RemoveRequst')}
+                  label={t('removeRequst', 'Remove requst')}
                   onClick={() => {
                     shouldOnClickBeCalled.current = false;
                     onRemoveClick();
