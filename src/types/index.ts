@@ -37,6 +37,15 @@ export interface Instance {
   orthancConfiguration: OrthancConfiguration,
 }
 
+export interface CreateRequestProcedure {
+  orthancConfiguration: OrthancConfiguration,
+  patientUuid: string,
+  accessionNumber: string,
+  requestingPhysician: string,
+  requestDescription: string,
+  priority: string
+}
+
 export interface RequestProcedure {
   id: number,
   status: string,
@@ -49,25 +58,30 @@ export interface RequestProcedure {
   priority: string
 }
 
-export interface RequestProcedureStep {
-  id: number,
-  // requestProcedure: RequestProcedure,
+export interface CreateRequestProcedureStep {
   requestId: number,
   modality: string,
   aetTitle: string,
   scheduledReferringPhysician: string,
   requestedProcedureDescription: string,
-  stepStartDate: Date,
+  stepStartDate: string,
   stepStartTime: string,
-  performedProcedureStepStatus: string,
   stationName?: string,
   procedureStepLocation?: string
 }
 
-export enum RequestProcedureStatus {
-  SCHEDULED = 'scheduled',
-  PROGRESS = 'progress',
-  COMPLETED = 'completed',
+export interface RequestProcedureStep {
+  id: number,
+  requestProcedureId: number,
+  modality: string,
+  aetTitle: string,
+  scheduledReferringPhysician: string,
+  requestedProcedureDescription: string,
+  stepStartDate: string,
+  stepStartTime: string,
+  performedProcedureStepStatus: string,
+  stationName?: string,
+  procedureStepLocation?: string
 }
 
 export enum StudyStatus {
@@ -80,25 +94,27 @@ export enum StudyStatus {
 }
 
 export const modalityOptions = [
-  "CR (Computed Radiography)",
-  "CT (Computed Tomography)",
-  "MR (Magnetic Resonance Imaging)",
-  "US (Ultrasound)",
-  "XA (X-ray Angiography)",
-  "DX (Digital Radiography)",
-  "MG (Mammography)",
-  "NM (Nuclear Medicine)",
-  "PT (Positron Emission Tomography)",
-  "RF (Radio Fluoroscopy)",
-  "SC (Secondary Capture)",
-  "XC (External-camera Photography)",
-  "OP (Ophthalmic Photography)",
-  "PR (Presentation State)",
-  "SR (Structured Report)",
-  "RT (Radiotherapy)"
+  {code:"CR", label: "CR (Computed Radiography)"},
+  {code:"CT", label: "CT (Computed Tomography)"},
+  {code:"MR", label: "MR (Magnetic Resonance Imaging)"},
+  {code:"US", label:"US (Ultrasound)"},
+  {code:"XA", label: "XA (X-ray Angiography)"},
+  {code:"DX", lable: "DX (Digital Radiography)"},
+  {code:"MG", label: "MG (Mammography)"},
+  {code:"PT", label: "NM (Nuclear Medicine)"},
+  {code:"PT", label: "PT (Positron Emission Tomography)"},
+  {code:"RF", label: "RF (Radio Fluoroscopy)"},
+  {code:"SC", label: "SC (Secondary Capture)"},
+  {code:"XC", label: "XC (External-camera Photography)"},
+  {code:"OP", lable: "OP (Ophthalmic Photography)"},
+  {code:"PR", label: "PR (Presentation State)"},
+  {code:"SR", label: "SR (Structured Report)"},
+  {code:"RT", label: "RT (Radiotherapy)"}
 ]
 
 export interface StudiesWithScores {
   studies: Array<DicomStudy>;
   scores: Map<string, number>;
 }
+
+export const priorityLevels = ['low', 'medium', 'high'];

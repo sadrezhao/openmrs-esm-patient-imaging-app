@@ -1,9 +1,7 @@
-import React, { useCallback, useRef, useState} from 'react';
+import React, { useRef, useState} from 'react';
 import {
   DataTable,
-  Button,
   IconButton,
-  InlineLoading,
   Table,
   TableBody,
   TableCell,
@@ -21,6 +19,7 @@ import {
 } from '@openmrs/esm-patient-common-lib';
 
 import {
+  showModal,
     TrashCanIcon,
     useLayoutType,
     usePagination,
@@ -32,7 +31,7 @@ import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
 import orthancExplorer from '../../assets/orthanc.png';
 import SeriesDetailsTable  from './series-details-table.component';
-import { studiesCount } from '../constants';
+import { studiesCount, studyDeleteConfirmationDialog } from '../constants';
 import styles from './details-table.scss';
 
 
@@ -57,6 +56,14 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
   const shouldOnClickBeCalled = useRef(true);
+
+  const launchDeleteStudyDialog = (studyId: number) => {
+    const dispose = showModal(studyDeleteConfirmationDialog, {
+      closeDeleteModal: () => dispose(),
+      studyId,
+      patientUuid,
+    });
+  }
 
   const tableHeaders = [
     { key: 'studyInstanceUID', header: t('studyInstanceUID', 'Study instance UID')},
@@ -92,8 +99,9 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
               label={t('removeStudy', 'RemoveStudy')}
               onClick={() => {
                 shouldOnClickBeCalled.current = false;
-                onRemoveClick();
+                launchDeleteStudyDialog(study.id)
               }}
+              isDelete
             >
               <TrashCanIcon className={styles.removeButton} />
             </IconButton>
@@ -222,8 +230,4 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
 }
 
 export default StudiesDetailTable;
-
-function onRemoveClick() {
-  throw new Error('Function not implemented.');
-}
 

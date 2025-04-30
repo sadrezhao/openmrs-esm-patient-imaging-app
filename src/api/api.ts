@@ -1,10 +1,9 @@
-import React, { useCallback } from 'react';
-import useSWR, {mutate} from 'swr';
+import useSWR from 'swr';
 import { FetchResponse, } from '@openmrs/esm-framework';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import type { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series, StudiesWithScores } from '../types';
-import { testSeries, testStudy, testRequestProcedureList, testInstances, testProcedureSteps, testConfigurations, testRequestProcedure } from '../api/api-test';
+import type { CreateRequestProcedure, CreateRequestProcedureStep, DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series, StudiesWithScores } from '../types';
 import { imagingUrl, worklistUrl } from '../imaging/constants'
+import { toDICOMDateTime } from '../imaging/utils/help';
 
 
 export function getStudiesByPatient(patientUuid: string) {
@@ -128,9 +127,9 @@ export function getRequestsByPatient(patientUuid: string) {
 }
 
 
-export function getProcedureStep(request: RequestProcedure) {
+export function getProcedureStep(requestId: number) {
 
-  const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${request.id}`
+  const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${requestId}`
 
   const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<RequestProcedureStep>>, Error>(
     procedureStepUrl,
@@ -208,16 +207,20 @@ export async function assignStudy(
 }
 
 export async function saveRequestProcedure(
-    request: RequestProcedure, 
+    request: CreateRequestProcedure, 
     patientUuid: string,
     abortController: AbortController
   ){
     const saveRequstUrl = `${worklistUrl}/saverequest`;
 
-    const formData = new FormData()
-    formData.append("patient", patientUuid)
-    formData.append("requestProcedure", JSON.stringify(request))
-
+    const requestPostData = {
+      configurationId: request.orthancConfiguration.id,
+      patientUuid: patientUuid,
+      accessionNumber: request.accessionNumber,
+      requestingPhysician: request.requestingPhysician,
+      requestDescription: request.requestDescription,
+      priority: request.priority
+    };
 
     const response = await openmrsFetch(saveRequstUrl,{
       method: 'POST',
@@ -225,7 +228,7 @@ export async function saveRequestProcedure(
         'Content-Type': 'application/json',
       },
       signal: abortController.signal,
-      body: formData
+      body: JSON.stringify(requestPostData)
     });
 
     if (!response.ok) {
@@ -235,15 +238,23 @@ export async function saveRequestProcedure(
 
 
 export async function saveRequestProcedureStep (
-  step: RequestProcedureStep,
+  step: CreateRequestProcedureStep,
   requestId: number,
   abortController: AbortController
 ) {
   const saveProcedureStepUrl = `${worklistUrl}/savestep`;
 
-  const formData = new FormData()
-  formData.append("requestId", requestId.toString())
-  formData.append("step", JSON.stringify(step))
+  const stepPostData = {
+    requestId: requestId,
+    modality: step.modality,
+    aetTitle: step.aetTitle,
+    scheduledReferringPhysician: step.scheduledReferringPhysician,
+    requestedProcedureDescription: step.requestedProcedureDescription,
+    stepStartDate: step.stepStartDate,
+    stepStartTime: step.stepStartTime,
+    stationName: step.stationName,
+    procedureStepLocation: step.procedureStepLocation
+  }
 
   const response = await openmrsFetch(saveProcedureStepUrl,{
     method: 'POST',
@@ -251,7 +262,7 @@ export async function saveRequestProcedureStep (
       'Content-Type': 'application/json',
     },
     signal: abortController.signal,
-    body: formData
+    body: JSON.stringify(stepPostData)
   });
 
   if (!response.ok) {
@@ -259,26 +270,31 @@ export async function saveRequestProcedureStep (
   }
 }
 
-export function deleteStudy(studyId: string) {
-  return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}`,{
+export function deleteStudy(studyId: number, deleteOption: string, abortController: AbortController) {
+  return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}&deleteOption=${deleteOption}`,{
     method: 'DELETE',
+    signal: abortController.signal
   })
 }
 
-export function deleteSeries(seriesInstanceUID: string) {
-  return openmrsFetch(`${imagingUrl}/series?seriesInstanceUID=${seriesInstanceUID}`, {
+export function deleteSeries(orthancSeriesUID: string, studyId: number, abortController: AbortController) {
+  return openmrsFetch(`${imagingUrl}/series?orthancSeriesUID=${orthancSeriesUID}&studyId=${studyId}`, {
     method: 'DELETE',
+    signal: abortController.signal
   })
 }
 
-export function deleteRequest(requestId: string) {
+export function deleteRequest(requestId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/request?requestId=${requestId}`, {
     method: 'DELETE',
+    signal: abortController.signal
   })
 }
 
-export function deleteProcedureStep(stepId: string) {
-  return openmrsFetch(`${worklistUrl}/procedureStep?stepId=${stepId}`, {
+export function deleteProcedureStep(stepId: number, abortController: AbortController) {
+  return openmrsFetch(`${worklistUrl}/requeststep?stepId=${stepId}`, {
     method: 'DELETE',
+    signal: abortController.signal
   })
 }
+

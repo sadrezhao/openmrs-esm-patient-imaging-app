@@ -27,13 +27,16 @@ import {
     useLayoutType,
     usePagination,
     TrashCanIcon,
+    showModal,
+    launchWorkspace,
 } from '@openmrs/esm-framework';
 
 import { useTranslation } from 'react-i18next';
-import { RequestProcedure, RequestProcedureStep } from '../../types';
-import { addNewProcedureStepWorkspace, procedureStepCount } from '../constants';
-import styles from './details-table.scss';
+import { RequestProcedure } from '../../types';
+import { addNewProcedureStepWorkspace, procedureStepCount, procedureSteptDeleteConfirmationDialog } from '../constants';
 import { getProcedureStep } from '../../api';
+import styles from './details-table.scss';
+
 
 export interface ProcedureStepTableProps {
     requestProcedure: RequestProcedure;
@@ -50,7 +53,7 @@ export interface ProcedureStepTableProps {
         error: stepError,
         isLoading: isLoadingStep,
         isValidating: isValidatingStep,
-    } = getProcedureStep(requestProcedure)
+    } = getProcedureStep(requestProcedure.id)
 
     const { t } = useTranslation();
     const displayText = t('procedureStep', 'Procedure step');
@@ -59,7 +62,14 @@ export interface ProcedureStepTableProps {
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
     const shouldOnClickBeCalled = useRef(true);
-    const launchAddNewProcedureStepForm = useCallback(() => launchPatientWorkspace(addNewProcedureStepWorkspace), []);
+
+      const launchDeleteProcedureStepDialog = (requestId: number, stepId: number) => {
+        const dispose = showModal(procedureSteptDeleteConfirmationDialog, {
+          closeDeleteModal: () => dispose(),
+          requestId,
+          stepId
+        });
+      }
 
     const tableHeaders = [
         { key: 'id', header: t('stepID', 'StepID')},
@@ -88,12 +98,7 @@ export interface ProcedureStepTableProps {
             content: (<div><span>{step.scheduledReferringPhysician}</span></div>)
         },
         requestedProcedureDescription: step.requestedProcedureDescription,
-        stepStartDate: {
-            sortKey: dayjs(step.stepStartDate).toDate(),
-            content: (
-            <div><span>{formatDate(new Date(step.stepStartDate))}</span></div>
-            )
-        },
+        stepStartDate: step.stepStartDate,
         stepStartTime: step.stepStartTime,
         stationName: step.stationName,
         procedureStepLocation: step.procedureStepLocation,
@@ -107,7 +112,7 @@ export interface ProcedureStepTableProps {
                         label={t('removeStep', 'Remove step')}
                         onClick={() => {
                             shouldOnClickBeCalled.current = false;
-                            onRemoveClick();
+                            launchDeleteProcedureStepDialog(requestProcedure.id, step.id);
                         }}
                         >
                         <TrashCanIcon className={styles.removeButton} />
@@ -131,22 +136,10 @@ export interface ProcedureStepTableProps {
         return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
     }
     
-    if (stepList?.length) {
-        return (
-            <div className={styles.widgetCard}>
-            <CardHeader title={headerTitle}>
-                <span>{isValidatingStep ? <InlineLoading/>: null}</span>
-                <div className={styles.buttons}>
-                    <Button
-                        kind="ghost"
-                        renderIcon={(props) => <AddIcon size={16} {...props} />}
-                        iconDescription={t('add', 'Add')}
-                        onClick={launchAddNewProcedureStepForm}
-                    >
-                    {t('Add', 'Add')}
-                    </Button>
-                </div>
-                </CardHeader>
+    return (
+        <div className={styles.widgetCard}>
+        {stepList?.length ? (
+            <>
                 <DataTable
                     rows={tableRows} 
                     headers={tableHeaders}
@@ -156,57 +149,55 @@ export interface ProcedureStepTableProps {
                     data-floating-menu-container
                     size={isTablet ? 'lg' : 'sm'}
                 >
-                {({ rows, headers, getHeaderProps, getTableProps, getRowProps }) => (
-                      <TableContainer>
-                         <Table aria-label="Procedure step summary" className={styles.table} {...getTableProps()} />
-                         <TableHead>
-                            <TableRow>
-                                {headers.map((header, index) => (
-                                    <TableHeader
-                                        {...getHeaderProps({
-                                        header,
-                                        isSortable: header.isSortable,
-                                        })}
-                                    >
-                                        {header.header}
-                                    </TableHeader>
-                                    ))}
-                                    <TableHeader />
-                            </TableRow>
-                         </TableHead>
-                         <TableBody>
-                            {rows.map((row, rowIndex) => {
-                                return (
-                                    <React.Fragment key={rowIndex}>
-                                        <TableRow>
-                                            {row.cells.map((cell, cellIndex) => (
-                                                <TableCell className={styles.tableCell} key={cellIndex}>
-                                                    {cell.value?.content ?? cell.value}
-                                                </TableCell>
-                                                ))}
-                                        </TableRow>
-                                    </React.Fragment>
-                                )
-                            })}
-                         </TableBody>
-                      </TableContainer>
-                )}
-                </DataTable>
-                <PatientChartPagination
-                    pageNumber={currentPage}
-                    totalItems={stepList.length}
-                    currentItems={results.length}
-                    pageSize={procedureStepCount}
-                    onPageNumberChange={({ page }) => goTo(page)}
-                />
-            </div>
-        )
-    }
-}
-
-function onRemoveClick() {
-    throw new Error('Function not implemented.');
-}
+                    {({ rows, headers, getHeaderProps, getTableProps, getRowProps }) => (
+                        <TableContainer>
+                            <Table aria-label="Procedure step summary" className={styles.table} {...getTableProps()} />
+                            <TableHead>
+                                <TableRow>
+                                    {headers.map((header, index) => (
+                                        <TableHeader
+                                            {...getHeaderProps({
+                                            header,
+                                            isSortable: header.isSortable,
+                                            })}
+                                        >
+                                            {header.header}
+                                        </TableHeader>
+                                        ))}
+                                        <TableHeader />
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {rows.map((row, rowIndex) => {
+                                    return (
+                                        <React.Fragment key={rowIndex}>
+                                            <TableRow>
+                                                {row.cells.map((cell, cellIndex) => (
+                                                    <TableCell className={styles.tableCell} key={cellIndex}>
+                                                        {cell.value?.content ?? cell.value}
+                                                    </TableCell>
+                                                    ))}
+                                            </TableRow>
+                                        </React.Fragment>
+                                    )
+                                })}
+                            </TableBody>
+                        </TableContainer>
+                    )}
+                    </DataTable>
+                    <PatientChartPagination
+                        pageNumber={currentPage}
+                        totalItems={stepList.length}
+                        currentItems={results.length}
+                        pageSize={procedureStepCount}
+                        onPageNumberChange={({ page }) => goTo(page)}
+                    />
+                </>
+        ) : (
+            <EmptyState displayText={displayText} headerTitle={headerTitle}/>
+        )}
+    </div>
+)}
 
 export default ProcedureStepTable
 

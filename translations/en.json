@@ -55,8 +55,6 @@
   "checkForConnection": "Connection problem between OpenMRS and Orthanc",
   "enterRequestedProcedureDescription": "Please enter the desired procedure description.",
   "orthancConfiguration": "Orthanc configurations",
-  
-
 
 
   "casualGreeting": "hey",

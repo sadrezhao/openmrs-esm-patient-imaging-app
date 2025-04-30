@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect,} from 'react';
+import React, { useCallback, useMemo, useEffect, useState,} from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import { z } from 'zod';
@@ -11,38 +11,15 @@ import {
     TextArea,
     TextInput,
     Stack,
-    FormGroup
+    FormGroup,
+    InlineLoading
 } from '@carbon/react';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
 import styles from './worklist.scss';
-import { OrthancConfiguration, RequestProcedure } from '../../types';
+import { CreateRequestProcedure, OrthancConfiguration, priorityLevels} from '../../types';
 import { Controller, useForm, FormProvider} from 'react-hook-form';
 import { saveRequestProcedure, getOrthancConfigurations } from '../../api';
-
-function generateAccessionNumber(): string {
-  const date: Date = new Date();
-
-  const formattedDate: string =
-      date.getFullYear().toString() +
-      String(date.getMonth() + 1).padStart(2, '0') +
-      String(date.getDate()).padStart(2, '0') +
-      String(date.getHours()).padStart(2, '0') +
-      String(date.getMinutes()).padStart(2, '0') +
-      String(date.getSeconds()).padStart(2, '0');
-
-  const randomPart: string = Math.floor(10000 + Math.random() * 90000).toString();
-
-  const accessionNumber: string = formattedDate + randomPart;
-
-  const inputElement = document.getElementById("accessionNumber") as HTMLInputElement | null;
-
-  if (inputElement) {
-      inputElement.value = accessionNumber;
-  } else {
-      console.warn('Element with ID "accessionNumber" not found.');
-  }
-  return accessionNumber;
-}
+import { generateAccessionNumber } from '../utils/help';
 
 const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   patientUuid,
@@ -56,16 +33,13 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
 
   const requestFormSchema = useMemo (() => {    
     return z.object({
-        id: z.number(),
-        status: z.string().nonempty({ message: t('statusError', 'Status is required') }),
+        id: z.number().nullable().optional(),
         orthancConfiguration: z.object({
           id: z.number(),
           orthancBaseUrl: z.string(),
           orthancProxyUrl: z.string().nullable().optional(),
         }),
-        patientUuid: z.string().nonempty({ message: 'Patient UID is required' }),
         accessionNumber: z.string().nonempty({ message: 'Accession number is required' }),
-        studyInstanceUID: z.string().nullable().optional(),
         requestingPhysician: z.string().refine((value) => !!value, {
           message: t('requestingPhysicianMsg', 'Enter the requesting physician name'),
         }),
@@ -88,64 +62,43 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     handleSubmit,
     formState: {errors, isDirty, isSubmitting},
   } = formProps
-
-  const priorityLevel = ['Low', 'Medium', 'High'];
   
   useEffect(() => {
     promptBeforeClosing(() => isDirty);
   }, [isDirty, promptBeforeClosing]);
 
   const onSubmit = useCallback(
-    (data: NewRequestFormData) => {
-      const {
-        id,
-        status,
-        orthancConfiguration,
-        patientUuid,
-        accessionNumber,
-        studyInstanceUID,
-        requestingPhysician,
-        requestDescription,
-        priority, 
-      } = data;
+     async (data: NewRequestFormData) => {
       const abortController = new AbortController();
 
-      const newRequestProcedure: RequestProcedure = {
-        id,
-        status, 
+      const payload: CreateRequestProcedure = {
         orthancConfiguration: {
-          id: orthancConfiguration.id,
-          orthancBaseUrl: orthancConfiguration.orthancBaseUrl,
-          orthancProxyUrl: orthancConfiguration.orthancProxyUrl,
+          id: data.orthancConfiguration.id,
+          orthancBaseUrl: data.orthancConfiguration.orthancBaseUrl,
+          orthancProxyUrl: data.orthancConfiguration.orthancProxyUrl,
         },
-        patientUuid,
-        accessionNumber: accessionNumber,
-        studyInstanceUID: studyInstanceUID,
-        requestingPhysician: requestingPhysician,
-        requestDescription: requestDescription,
-        priority: priority
+        patientUuid: patientUuid,
+        accessionNumber: data.accessionNumber,
+        requestingPhysician: data.requestingPhysician,
+        requestDescription: data.requestDescription,
+        priority: data.priority,
       };
-    
-      saveRequestProcedure(newRequestProcedure, patientUuid, abortController
-      ).then(
-       () => {
+
+      try{  
+        await saveRequestProcedure(payload, patientUuid, abortController)
         closeWorkspaceWithSavedChanges();
         showSnackbar({
           kind: 'success',
-          title: t('requestSaved', 'request saved successfully'),
-          isLowContrast: true,
+          title: t('requestSaved', 'Request saved successfully'),
         });
-       },
-       (err) => {
+      } catch (err: any) {
         showSnackbar({
           title: t('errorSaving', 'Error saving request'),
           kind: 'error',
-          isLowContrast: false,
           subtitle: err?.message,
+          isLowContrast: false,
         });
-       }
-      );
-      return () => abortController.abort();
+      }
     },
     [
       patientUuid,
@@ -156,8 +109,9 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
 
   return (
     <FormProvider {...formProps}>
-      <Form className={styles.form} onSubmit={handleSubmit(onSubmit)} id="newRequestForm">
-        <Stack gap={1} className={styles.container}>
+      <Form className={styles.form} id="newRequestForm" onSubmit={handleSubmit(onSubmit)}>
+        <Stack gap={1} className={styles.container}
+        >
           <section>
               <ResponsiveWrapper>
                 <FormGroup legendText={t('orthancConfiguration', 'Orthanc configurations')}>
@@ -256,13 +210,13 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
               <Controller
                 name="priority"
                 control={control}
-                defaultValue="Low"
+                defaultValue="low"
                 render={({field: {value, onChange}}) => (
                   <ComboBox
                     id="priority"
                     itemToString={(item: string) => item}
-                    items={priorityLevel || []}
-                    onChange = {({seletedItem}) => onChange(seletedItem)}
+                    items={priorityLevels}
+                    onChange={({ selectedItem }) => onChange(selectedItem)}
                     placeholder={t('selectPriority', 'Select the request priority')}
                     selectedItem={value}
                     invalid={!!errors.priority}
@@ -274,12 +228,16 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
             </ResponsiveWrapper>
           </section>
         </Stack>
-        <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
-          <Button className={styles.button} kind="secondary" onClick={closeWorkspace}>
-            {t('cancel', 'Cancel')}
-          </Button>
-          <Button className={styles.button} kind="primary" disabled={isSubmitting} type="submit">
-            {t('save', 'Save')}
+        <ButtonSet className={isTablet ? styles.tabletButtons : styles.desktopButtons}>
+          <Button className={styles.button} onClick={closeWorkspace} kind="secondary">
+            {t('discard', 'Discard')}
+          </Button>       
+          <Button className={styles.button} kind="primary" 
+            disabled={isSubmitting} type="submit"
+          >      
+            {isSubmitting ? (
+                <InlineLoading description={t('saving', 'Saving') + '...'}/>
+                ) : t('saveAndClose', 'Save and Close')}
           </Button>
         </ButtonSet>
       </Form>

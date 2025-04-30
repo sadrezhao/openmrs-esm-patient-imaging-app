@@ -1,3 +1,4 @@
+import { toDICOMDateTime } from "../imaging/utils/help";
 import { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from "../types";
 
 export const testStudy: Array<DicomStudy> = [{
@@ -113,7 +114,7 @@ export const testRequestProcedureList: Array<RequestProcedure> = [
 
 export const testRequestProcedure: Array<RequestProcedure> = [{
       id: 1,
-      status: "Scheduled",
+      status: "scheduled",
       orthancConfiguration: {
           id: 1,
           orthancProxyUrl: "",
@@ -237,27 +238,25 @@ export const testInstances: Array<Instance> = [
 export const testProcedureSteps: Array<RequestProcedureStep> = [
   {
     id: 1,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedureId: 0,
     modality: 'CT',
     aetTitle: 'AET_CT1',
     scheduledReferringPhysician: 'Dr. Alice Morgan',
     requestedProcedureDescription: 'CT scan of the chest to evaluate nodules.',
-    stepStartDate: new Date(),
+    stepStartDate: toDICOMDateTime(new Date()),
     stepStartTime: '08:30',
-    performedProcedureStepStatus: 'SCHEDULED',
+    performedProcedureStepStatus: 'scheduled',
     stationName: 'CT_STATION_01',
     procedureStepLocation: 'Radiology Room 1'
   },
   {
     id: 2,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedureId: 0,
     modality: 'MR',
     aetTitle: 'AET_MR2',
     scheduledReferringPhysician: 'Dr. Brian Lee',
     requestedProcedureDescription: 'MRI of the brain for headache evaluation.',
-    stepStartDate: new Date(),
+    stepStartDate: toDICOMDateTime(new Date()),
     stepStartTime: '09:15',
     performedProcedureStepStatus: 'IN_PROGRESS',
     stationName: 'MRI_STATION_01',
@@ -265,13 +264,12 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 3,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedureId: 0,
     modality: 'US',
     aetTitle: 'AET_US3',
     scheduledReferringPhysician: 'Dr. Claire Zhang',
     requestedProcedureDescription: 'Abdominal ultrasound to check liver status.',
-    stepStartDate: new Date(),
+    stepStartDate: toDICOMDateTime(new Date()),
     stepStartTime: '10:00',
     performedProcedureStepStatus: 'COMPLETED',
     stationName: 'US_STATION_01',
@@ -279,13 +277,12 @@ export const testProcedureSteps: Array<RequestProcedureStep> = [
   },
   {
     id: 4,
-    // requestProcedure: testRequestProcedureList[0],
-    requestId: 0,
+    requestProcedureId: 0,
     modality: 'CR',
     aetTitle: 'AET_CR4',
     scheduledReferringPhysician: 'Dr. Daniel Kim',
     requestedProcedureDescription: 'X-ray of left knee due to injury.',
-    stepStartDate: new Date(),
+    stepStartDate: toDICOMDateTime(new Date()),
     stepStartTime: '10:45',
     performedProcedureStepStatus: 'COMPLETED',
     stationName: 'XRY_STATION_01',

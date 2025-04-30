@@ -27,6 +27,22 @@
         "path": "Imaging",
         "fullWidth": false
       }
+    },
+    {
+      "name": "study-delete-confirmation-dialog",
+      "component": "studyDeleteConfirmationDialog"
+    },
+    {
+      "name": "series-delete-confirmation-dialog",
+      "component": "seriesDeleteConfirmationDialog"
+    },
+    {
+      "name": "request-delete-confirmation-dialog",
+      "component": "requestDeleteConfirmationDialog"
+    },
+    {
+      "name": "procedureStep-delete-confirmation-dialog",
+      "component": "procedureSteptDeleteConfirmationDialog"
     }
   ],
   
@@ -56,16 +72,14 @@
       "title": "addRequest",
       "component": "addNewRequestWorkspace",
       "type": "form",
-      "canMaximize": true,
-      "preferredWindowSize": "maximized"
+      "canMaximize": true
     },
     {
       "name": "add-procedureStep-form-workspace",
       "title": "addProcedureStep",
       "component": "addNewProcedureStepWorkspace",
       "type": "form",
-      "canMaximize": true,
-      "preferredWindowSize": "maximized"
+      "canMaximize": true
     }
   ]
 }

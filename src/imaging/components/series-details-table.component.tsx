@@ -21,11 +21,11 @@ import { useTranslation } from 'react-i18next';
 import { DicomStudy, Series } from '../../types';
 import stoneview from '../../assets/stoneViewer.png';
 import orthancExplorer from '../../assets/orthanc.png';
-import { useLayoutType, usePagination, TrashCanIcon} from '@openmrs/esm-framework';
+import { useLayoutType, usePagination, TrashCanIcon, showModal} from '@openmrs/esm-framework';
 import { getStudySeries } from '../../api';
 import InstancesDetailsTable from './instances-details-table.component';
+import { seriesCount, seriesDeleteConfirmationDialog } from '../constants';
 import styles from './details-table.scss'
-import { seriesCount } from '../constants';
 
 export interface SeriesDetailsTableProps {
     study: DicomStudy;
@@ -51,6 +51,15 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
     const shouldOnClickBeCalled = useRef(true);
+
+    const launchDeleteSeriesDialog = (orthancSeriesUID: string, studyId: number) => {
+    const dispose = showModal(seriesDeleteConfirmationDialog, {
+        closeDeleteModal: () => dispose(),
+        orthancSeriesUID,
+        studyId,
+        patientUuid,
+    });
+    }
     
     const tableHeaders = [
         { key: 'seriesInstanceUID', header: t('seriesUID', 'Series UID')},
@@ -76,7 +85,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   label={t('removeSeries', 'Remove series')}
                   onClick={() => {
                     shouldOnClickBeCalled.current = false;
-                    onRemoveClick();
+                    launchDeleteSeriesDialog(series.orthancSeriesUID, study.id)
                   }}
                 >
                   <TrashCanIcon className={styles.removeButton} />

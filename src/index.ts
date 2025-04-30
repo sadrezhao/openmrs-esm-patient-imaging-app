@@ -62,6 +62,26 @@ export const addNewProcedureStepWorkspace = getAsyncLifecycle(
   options,
  );
 
+export const studyDeleteConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/delete-study.modal'),
+  options,
+);
+
+export const seriesDeleteConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/delete-series.modal'),
+  options,
+);
+
+export const requestDeleteConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/delete-request.modal'),
+  options,
+);
+
+export const procedureSteptDeleteConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/delete-procedureStep.modal'),
+  options,
+);
+
 export const imagingDetailedSummary = getSyncLifecycle(ImagingDetailedSummaryComponent, options);
 
 export function createErrorHandler() {

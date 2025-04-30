@@ -54,6 +54,12 @@
   }
 }
 
+.addButton {
+  svg {
+    fill: currentColor !important;
+  }
+}
+
 .wrapText {
   word-break: break-all;  /* Break long words */
   white-space: normal;  /* Allow wrapping */
@@ -77,8 +83,6 @@
 .seriesTableDiv, .procedureStepTableDiv {
   border: 2px solid blue;
   margin-bottom: 5px;
-  margin-left: 20px;
-  margin-right: 20px;
 }
 
 .instanceTableDiv {

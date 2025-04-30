@@ -12,57 +12,34 @@ import {
     TextInput,
     TimePicker,
     TimePickerSelect,
-    SelectItem
+    SelectItem,
+    InlineLoading
 } from '@carbon/react'
 import { DefaultPatientWorkspaceProps, type amPm, convertTime12to24} from '@openmrs/esm-patient-common-lib';
-import { saveRequestProcedureStep, getOrthancConfigurations } from '../../api';
+import { saveRequestProcedureStep} from '../../api';
 import { FormProvider, useForm, Controller} from 'react-hook-form';
-import { modalityOptions, RequestProcedureStep } from '../../types';
+import { CreateRequestProcedureStep, modalityOptions, RequestProcedure } from '../../types';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './worklist.scss';
-import dayjs from 'dayjs';
-import { testRequestProcedure } from '../../api/api-test';
+import { toDICOMDateTime, toDicomTimeString } from '../utils/help';
 
 export interface AddNewProcedureStepWorkspaceProps extends DefaultPatientWorkspaceProps{
-  patient: fhir.Patient;
-  patientUuid: string;
+  request: RequestProcedure;
 }
 
 const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> = ({
   patientUuid,
+  request,
   closeWorkspace,
   closeWorkspaceWithSavedChanges,
   promptBeforeClosing,
 }) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
-    const currentUser = useSession();
 
     const procedureStepFormSchema = useMemo(() => {
       return z.object({
-        id: z.number(),
-        requestId: z.number(),
-        // requestProcedure: z.object({
-        //   id: z.number(),
-        //   status: z.string().nonempty({ message: t('statusError', 'Status is required') }),
-        //   orthancConfiguration: z.object({
-        //     id: z.number(),
-        //     orthancBaseUrl: z.string(),
-        //     orthancProxyUrl: z.string().nullable().optional(),
-        //     lastChangedIndex: z.number(),
-        //   }),
-        //   patientUuid: z.string().nonempty({ message: 'Patient UID is required' }),
-        //   accessionNumber: z.string().nonempty({ message: 'Accession number is required' }),
-        //   studyInstanceUID: z.string().nullable().optional(),
-        //   requestingPhysician: z.string().refine((value) => !!value, {
-        //     message: t('requestingPhysicianMsg', 'Enter the requesting physician name'),
-        //   }),
-        //   requestDescription: z.string().refine((value) => !!value, {
-        //     message: t('requestDescriptionMsg', 'Enter the request description'),
-        //   }),
-        //   priority: z.string().min(1, { message: 'Priority is required'}),   
-        // }).required(),
         modality: z.string().min(1, { message: 'Modality is required' }),
         aetTitle: z.string().min(1, { message: 'AET title is required' }),
         scheduledReferringPhysician: z.string().refine((value) => !!value, {
@@ -73,8 +50,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
         }),
         stepStartDate: z.date().refine((value) => !!value, t('stepDateRequired', 'Step date required')),
         stepStartTime: z.string().refine((value) => !!value, t('stepTimeRequired', 'Step start time required')),
-        timeFormat: z.enum(['PM', 'AM']),
-        performedProcedureStepStatus: z.string().min(1, { message: 'Procedure step status is required' }),
+        timeFormat: z.string().refine((value) => !!value,  t('seletTimeFormat', 'Time format is required')),
         stationName: z.string().nullable().optional(),
         procedureStepLocation: z.string().nullable().optional(),
       });
@@ -90,6 +66,8 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
     const {
       control,
       handleSubmit,
+      getValues,
+      setValue,
       formState: {errors, isDirty, isSubmitting},
     } = formProps
 
@@ -97,90 +75,60 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
       promptBeforeClosing(() => isDirty);
     }, [isDirty, promptBeforeClosing]);
 
-    const onSubmit = useCallback(
-      (data: NewProcedureStepFormData) => {
-        const {
-          id,
-          // requestProcedure,
-          requestId,
-          modality,
-          aetTitle,
-          scheduledReferringPhysician,
-          requestedProcedureDescription,
-          stepStartDate,
-          stepStartTime,
-          timeFormat,
-          performedProcedureStepStatus,
-          stationName,
-          procedureStepLocation,
-        } = data;
+    useEffect(() => {
+      setValue('timeFormat', 'AM');
+    }, [setValue]);
 
+    useEffect(() => {
+      setValue('modality', modalityOptions[0].code);
+    }, [setValue]);
+
+
+    const onSubmit = useCallback(
+      async (data: NewProcedureStepFormData) => {
         const abortController = new AbortController();
-        const [hours, minutes] = convertTime12to24(stepStartTime, timeFormat);
+
+        const time = getValues('stepStartTime');
+        const format = getValues('timeFormat');
+        const fullTime = toDicomTimeString(time, format as 'AM' | 'PM');
 
         // copy the content because zod library makes everything optional
-        const newRequestProcedureStep: RequestProcedureStep = {
-          id,
+        const requestId: number = request.id;
+      
+        const payload: CreateRequestProcedureStep = {
           requestId: requestId,
-          // requestProcedure: {
-          //   id: requestProcedure.id,
-          //   status: requestProcedure.status,
-          //   orthancConfiguration: {
-          //     id: requestProcedure.orthancConfiguration.id,
-          //     orthancBaseUrl: requestProcedure.orthancConfiguration.orthancBaseUrl,
-          //     orthancProxyUrl: requestProcedure.orthancConfiguration.orthancProxyUrl,
-          //     lastChangedIndex: requestProcedure.orthancConfiguration.lastChangedIndex
-          //   },
-          //   patientUuid: requestProcedure.patientUuid,
-          //   accessionNumber: requestProcedure.accessionNumber,
-          //   studyInstanceUID: requestProcedure.studyInstanceUID,
-          //   requestingPhysician: requestProcedure.requestingPhysician,
-          //   requestDescription: requestProcedure.requestDescription,
-          //   priority: requestProcedure.priority,
-          // },
-          modality: modality,
-          aetTitle: aetTitle,
-          scheduledReferringPhysician: scheduledReferringPhysician,
-          requestedProcedureDescription: requestedProcedureDescription,
-          stepStartDate: toDateObjectStrict(
-            toOmrsIsoString(
-              new Date(
-                dayjs(stepStartDate).year(),
-                dayjs(stepStartDate).month(),
-                dayjs(stepStartDate).date(),
-                hours,
-                minutes,
-              ),
-            ),
-          ),
-          stepStartTime: stepStartTime,
-          performedProcedureStepStatus: performedProcedureStepStatus,
-          stationName: stationName,
-          procedureStepLocation: procedureStepLocation
-        };
+          modality: data.modality,
+          aetTitle: data.aetTitle,
+          scheduledReferringPhysician: data.scheduledReferringPhysician,
+          requestedProcedureDescription: data.requestedProcedureDescription,
+          stepStartDate: toDICOMDateTime(data.stepStartDate),
+          stepStartTime: fullTime,
+          stationName: data.stationName ? data.stationName: null,
+          procedureStepLocation: data.procedureStepLocation ? data.procedureStepLocation : null
+        }
 
-        saveRequestProcedureStep(newRequestProcedureStep, requestId, abortController
-        ).then(
-          () => {
-            closeWorkspaceWithSavedChanges();
-            showSnackbar({
-              kind: 'success',
-              title: t('requestSaved', 'request saved successfully'),
-              isLowContrast: true,
-            });
-          },
-           (err) => {
-            showSnackbar({
+        try{
+          await saveRequestProcedureStep(payload, requestId, abortController)
+          closeWorkspaceWithSavedChanges();
+          showSnackbar({
+            kind: 'success',
+            title: t('requestSaved', 'Request saved successfully'),
+          });
+        }catch (err: any) {
+           showSnackbar({
               title: t('errorSaving', 'Error saving request'),
               kind: 'error',
-              isLowContrast: false,
               subtitle: err?.message,
+              isLowContrast: false,
             });
-            }
-          );
-          return () => abortController.abort();
-
-        },[currentUser, patientUuid, closeWorkspaceWithSavedChanges, t]
+          }
+        },
+        [
+          patientUuid,
+          request,
+          closeWorkspaceWithSavedChanges,
+          t
+        ],
     );
 
     return(
@@ -193,18 +141,18 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                   <Controller
                     name="modality"
                     control={control}
-                    defaultValue={modalityOptions[0]}
                     render={({ field: { value, onChange } }) => (
                         <div className={styles.row}>
                           <ComboBox
                             id="modality"
-                            itemToString={(item) => item || ''}
+                            itemToString={(item) => item?.label || ""}
                             items={modalityOptions}
-                            onChange={({ selectedItem }) => onChange(selectedItem)}
+                            onChange={({ selectedItem }) => onChange(selectedItem?.code)}
                             placeholder={t('selectModality', 'Select the modality')}
-                            selectedItem={value}
+                            aria-label={t('modality', 'Modality')}
+                            selectedItem={modalityOptions.find(opt => opt.code === value)}
                             invalid={!!errors?.modality}
-                            invalidText={errors?.modality?.message || t('selectModality', 'Please select a modality')}
+                            invalidText={errors?.modality?.message || t('selectModality', 'Modality is required')}
                           />
                         </div>
                       )
@@ -227,7 +175,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                         value={value}
                         onChange={(evt) => onChange(evt.target.value)}
                         invalid={!!errors?.aetTitle}
-                        invalidText={errors?.aetTitle?.message || t('enterAetTitle', 'Please enter the aetTitle')}
+                        invalidText={errors?.aetTitle?.message || t('enterAetTitle', 'AetTitle is required')}
                       />
                     </div>
                   )}
@@ -248,7 +196,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                         value={value}
                         onChange={(evt) => onChange(evt.target.value)}
                         invalid={!!errors?.scheduledReferringPhysician}
-                        invalidText={errors?.scheduledReferringPhysician?.message || t('enterScheduledReferringPhysician', 'Please enter the scheduled referring physician')}
+                        invalidText={errors?.scheduledReferringPhysician?.message || t('enterScheduledReferringPhysician', 'Scheduled referring physician is required')}
                       />
                     </div>
                   )}
@@ -269,7 +217,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                         value={value}
                         onChange={(evt) => onChange(evt.target.value)}
                         invalid={!!errors?.requestedProcedureDescription}
-                        invalidText={errors?.requestedProcedureDescription?.message || t('enterRequestedProcedureDescription', 'EnterRequestedProcedureDescription')}
+                        invalidText={errors?.requestedProcedureDescription?.message || t('enterDescription', 'Description is required')}
                       />
                     </div>
                   )}
@@ -297,7 +245,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
               </ResponsiveWrapper>
             </section>
             <section>
-            <ResponsiveWrapper>
+              <ResponsiveWrapper>
                 <Controller
                   name="stepStartTime"
                   control={control}
@@ -310,6 +258,8 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                       style={{ marginLeft: '0.125rem', flex: 'none' }}
                       value={value}
                       onBlur={onBlur}
+                      invalid={!!errors?.stepStartTime}
+                      invalidText={errors?.stepStartTime?.message || t('selectStepStartTime', 'Start time is required')}
                     >
                       <Controller
                         name="timeFormat"
@@ -320,6 +270,8 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                             onChange={(event) => onChange(event.target.value as amPm)}
                             value={value}
                             aria-label={t('timeFormat ', 'Time Format')}
+                            invalid={!!errors?.timeFormat}
+                            invalidText={errors?.timeFormat?.message || t('seletTimeFormat', 'Time format is required')}
                           >
                             <SelectItem value="AM" text={t('AM', 'AM')} />
                             <SelectItem value="PM" text={t('PM', 'PM')} />
@@ -344,8 +296,6 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                         labelText={t('stationName', 'stationName')}
                         value={value}
                         onChange={(evt) => onChange(evt.target.value)}
-                        invalid={!!errors?.stationName}
-                        invalidText={errors?.stationName?.message || t('enterStationName', 'Please enter the station name')}
                       />
                     </div>
                   )}
@@ -365,8 +315,6 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                         labelText={t('procedureStepLocation', 'procedureStepLocation')}
                         value={value}
                         onChange={(evt) => onChange(evt.target.value)}
-                        invalid={!!errors?.procedureStepLocation}
-                        invalidText={errors?.procedureStepLocation?.message || t('enterProcedureStepLocation', 'Please enter the procedure step location')}
                       />
                     </div>
                   )}
@@ -374,12 +322,15 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
               </ResponsiveWrapper>
             </section>
           </Stack>
-            <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
+            <ButtonSet className={isTablet ? styles.tabletButtons : styles.desktopButtons}>
               <Button className={styles.button} kind="secondary" onClick={closeWorkspace}>
-                {t('cancel', 'Cancel')}
+                {t('discard', 'Discard')}
               </Button>
               <Button className={styles.button} kind="primary" disabled={isSubmitting} type="submit">
-                {t('save', 'Save')}
+                {isSubmitting ? (
+                  <InlineLoading description={t('saving', 'Saving') + '...'}/>
+                  ) : t('saveAndClose', 'Save and Close')
+                }
               </Button>
             </ButtonSet>
         </Form>

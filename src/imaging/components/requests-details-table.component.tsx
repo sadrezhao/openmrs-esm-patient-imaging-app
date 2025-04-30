@@ -22,16 +22,17 @@ import {
 
   import {
     AddIcon,
-    formatDate,
     useLayoutType,
     usePagination,
     TrashCanIcon,
+    showModal,
+    launchWorkspace,
   } from '@openmrs/esm-framework';
 
-  import { useTranslation } from 'react-i18next';
-  import { RequestProcedure } from '../../types';
-  import { addNewRequestWorkspace, requestCount } from '../constants';
-  import styles from './details-table.scss';
+import { useTranslation } from 'react-i18next';
+import { RequestProcedure } from '../../types';
+import { addNewProcedureStepWorkspace, addNewRequestWorkspace, requestCount, requestDeleteConfirmationDialog } from '../constants';
+import styles from './details-table.scss';
 import ProcedureStepTable from './procedureStep-details-table.component';
 
   export interface RequestProcedureTableProps {
@@ -44,7 +45,6 @@ import ProcedureStepTable from './procedureStep-details-table.component';
   const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({
     isValidating,
     requests,
-    showDeleteButton,
     patientUuid
   }) => {
     const { t } = useTranslation();
@@ -55,7 +55,15 @@ import ProcedureStepTable from './procedureStep-details-table.component';
     const shouldOnClickBeCalled = useRef(true);
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
-    const launchAddNewRequestForm = useCallback(() => launchPatientWorkspace(addNewRequestWorkspace), []);
+    const launchAddNewRequestWorkspace = useCallback(() => launchPatientWorkspace(addNewRequestWorkspace), []);
+
+    const launchDeleteRequestDialog = (requestId: number) => {
+    const dispose = showModal(requestDeleteConfirmationDialog, {
+        closeDeleteModal: () => dispose(),
+        requestId,
+        patientUuid,
+    });
+    }
 
     const tableHeaders = [
         { key: 'id', header: t('requestID', 'RequestID')},
@@ -87,7 +95,7 @@ import ProcedureStepTable from './procedureStep-details-table.component';
         orthancConfiguration: request.orthancConfiguration.orthancBaseUrl,
         action: {
             content:(
-              <div className="flex gap-1">
+              <div className="requestBtn" style={{display: 'flex'}}>
                 <IconButton
                   kind="ghost"
                   align="left"
@@ -95,10 +103,22 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                   label={t('removeRequst', 'Remove requst')}
                   onClick={() => {
                     shouldOnClickBeCalled.current = false;
-                    onRemoveClick();
+                    launchDeleteRequestDialog(request.id)
                   }}
                 >
                   <TrashCanIcon className={styles.removeButton} />
+                </IconButton>
+                <IconButton
+                  kind="ghost"
+                  align="left"
+                  size={isTablet ? 'lg' : 'sm'}
+                  label={t('addProcedureStep', 'Add procedure step')}
+                  onClick={() => {
+                    shouldOnClickBeCalled.current = false;
+                    launchWorkspace(addNewProcedureStepWorkspace, {request: request})
+                  }}
+                >
+                  <AddIcon className={styles.addButton} />
                 </IconButton>
               </div>
             )
@@ -120,7 +140,7 @@ import ProcedureStepTable from './procedureStep-details-table.component';
                     kind="ghost"
                     renderIcon={(props) => <AddIcon size={16} {...props} />}
                     iconDescription={t('add', 'Add')}
-                    onClick={launchAddNewRequestForm}
+                    onClick={launchAddNewRequestWorkspace}
                     >
                     {t('Add', 'Add')}
                     </Button>
@@ -206,10 +226,6 @@ import ProcedureStepTable from './procedureStep-details-table.component';
         );
     }
     return <EmptyState displayText={displayText} headerTitle={headerTitle}/>;
-  }
-
-function onRemoveClick() {
-    throw new Error('Function not implemented.');
   }
 
 export default RequestProcedureTable;
