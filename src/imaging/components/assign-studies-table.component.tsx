@@ -21,7 +21,7 @@ import {
   } from '@openmrs/esm-framework';
 
 import { useTranslation } from 'react-i18next';
-import { DicomStudy, OrthancConfiguration, StudiesWithScores } from '../../types';
+import { DicomStudy, StudiesWithScores } from '../../types';
 import { studiesCount } from '../constants';
 import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
@@ -45,6 +45,7 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
   const headerTitle = t('Studies', 'Studies');
   const { results, goTo, currentPage } = usePagination(data.studies ?? [], studiesCount);
   const [expandedRows, setExpandedRows] = useState({});
+  const [assignedStudies, setAssignedStudies] = useState({});
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
 
@@ -56,6 +57,14 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
   const studyAssignStatus = ({ study }: { study: DicomStudy }) => {
     return study.mrsPatientUuid && study.mrsPatientUuid === patientUuid
   }
+
+  const handleAssignChange = (study, checked) => {
+    assignStudyFunction(study, checked.toString());
+    setAssignedStudies(prev => ({
+      ...prev,
+      [study.id]: checked
+    }));
+  };
 
   const tableHeaders = [
     { key: 'assignCheckbox', header: '', isSortable:false },
@@ -71,20 +80,16 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
   const tableRows = results?.map((study, index) => ({
     id: study.id ?? `row-${index}`,
     assignCheckbox: (
-        <input
-            type="checkbox"
-            value={study.id}
-            checked={studyAssignStatus({study})}
-            onChange={(e) =>{
-              if (e.target.checked) {
-                assignStudyFunction(study, 'true')
-                study.mrsPatientUuid = patientUuid
-              } else {
-                assignStudyFunction(study, 'false')
-                study.mrsPatientUuid = null
-              }
-            }}
-        />
+      <input
+          type="checkbox"
+          value={study.id}
+          checked={studyAssignStatus({study})}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            handleAssignChange(study, checked);
+            study.mrsPatientUuid = checked ? patientUuid : null;
+          }}
+      />
     ),
     score: (<div>{getStudyScore({study, data})+"%"}</div>),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
@@ -190,8 +195,10 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
                             <TableCell colSpan={headers.length}>
                               <div className={styles.seriesTableDiv}>
                                 <SeriesDetailsTable 
-                                  study = {row} 
+                                  studyId={row.id}
+                                  studyInstanceUID = {row.studyInstanceUID} 
                                   patientUuid={patientUuid}
+                                  orthancBaseUrl={row.orthancConfiguration}
                                   />
                               </div>
                             </TableCell>

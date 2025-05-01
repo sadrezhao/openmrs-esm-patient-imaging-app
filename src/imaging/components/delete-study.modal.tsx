@@ -30,7 +30,6 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({
         console.log('Selected option:', value);
       };
     
-
     const handleDelete = useCallback(async () => {
         setIsDeleting(true);
 

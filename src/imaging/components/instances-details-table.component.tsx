@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import {
     DataTable,
     IconButton,
@@ -18,37 +18,50 @@ import {
   } from '@openmrs/esm-patient-common-lib';
 
 import { useTranslation } from 'react-i18next';
-import { DicomStudy, Series } from '../../types';
-import { useLayoutType, usePagination} from '@openmrs/esm-framework';
+import { showModal, useLayoutType, usePagination} from '@openmrs/esm-framework';
 import { getStudyInstances } from '../../api';
 import preview from '../../assets/preview.png';
 import orthancExplorer from '../../assets/orthanc.png';
 import styles from './details-table.scss'
-import { instancesCount } from '../constants';
+import { instancePreviewDialog, instancesCount } from '../constants';
 
 export interface InstancesDetailsTableProps {
-    study: DicomStudy,
+    studyId: number
+    studyInstanceUID: string
     seriesInstanceUID: string
+    orthancBaseUrl: string
 }
 
 const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
-    study,
-    seriesInstanceUID
+    studyId,
+    studyInstanceUID,
+    seriesInstanceUID,
+    orthancBaseUrl
 }) => {
     const {
         data: instances,
         error: seriesError,
         isLoading: isLoadingSeries,
         isValidating: isValidatingSeries,
-    } = getStudyInstances(study.id, seriesInstanceUID);
+    } = getStudyInstances(studyId, seriesInstanceUID);
+
+    const launchInstancePreviewDialog = (orthancInstanceUID: string, studyId: number, instancePosition: string) => {
+        const dispose = showModal(instancePreviewDialog, {
+            closeInstancePreviewModal: () => dispose(),
+            orthancInstanceUID,
+            studyId,
+            instancePosition
+        });
+    }
 
     const { t } = useTranslation();
     const displayText = t('instances', 'Instances');
     const headerTitle = t('instances', 'Instances');
     const { results, goTo, currentPage } = usePagination(instances, instancesCount);
     const layout = useLayoutType();
+    const shouldOnClickBeCalled = useRef(true);
     const isTablet = layout === 'tablet';
-
+    
     const tableHeaders = [
         { key: 'sopInstanceUID', header: t('sopInstanceUID', 'SOP Instance UID')},
         { key: 'instanceNumber', header: t('instanceNumber', 'Instance number')},
@@ -57,7 +70,7 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
         { key: 'action', header: t('action', 'Action')},
     ]
 
-    const tableRows = results?.map((instance, index) => ({
+    const tableRows = results?.map((instance) => ({
         id: instance.sopInstanceUID,
         sopInstanceUID: <div className={styles.subTableWrapText}>{ instance.sopInstanceUID}</div>,
         instanceNumber: instance.instanceNumber,
@@ -65,13 +78,16 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
         numberOfFrames: instance.numberOfFrames,
         action: {
             content:(
-                <div className="flex gap-1">
+                <div className="instanceActionsDiv" style={{display: 'flex'}}>
                     <IconButton
                         kind="ghost"
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
                         label={t('instanceViewLocal', 'InstanceViewLocal')}
-                        onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/??/${seriesInstanceUID}`} 
+                        onClick={() => {
+                            shouldOnClickBeCalled.current = false;
+                            launchInstancePreviewDialog(instance.orthancInstanceUID, studyId, instance.imagePositionPatient)
+                        }} 
                     >
                         <img className='stone-img' src={preview} style={{width:23, height:23}}></img>
                     </IconButton>
@@ -80,7 +96,7 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
                         label={t('instanceViewInOrthanc', 'Instance view in Orthanc')}
-                        onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/instances/${instance.orthancInstanceUID}/preview`} 
+                        onClick={() => window.location.href = `${orthancBaseUrl}instances/${instance.orthancInstanceUID}/preview`}
                     >
                         <img className='orthanc-img' src={preview} style={{width:23,height:23}}></img>
                     </IconButton> 
@@ -89,7 +105,7 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                         align="left"
                         size={isTablet ? 'lg' : 'sm'}
                         label={t('orthancExplorer2', 'Show data in orthanc explorere')}
-                        onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ui/app/#/filtered-studies?StudyInstanceUID=${study.studyInstanceUID}&expand=series`} 
+                        onClick={() => window.location.href = `${orthancBaseUrl}/ui/app/#/filtered-studies?StudyInstanceUID=${studyInstanceUID}&expand=series`}
                         >
                         <img className='orthanc-img' src={orthancExplorer} style={{width:26,height:26, marginTop:0}}></img>
                     </IconButton> 
@@ -142,9 +158,9 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row, rowIndex) => {
+                        {rows.map((row) => {
                             return(
-                                <React.Fragment key={rowIndex}>
+                                <React.Fragment key={row.id}>
                                     <TableRow className={styles.row}>
                                         {row.cells.map((cell) => (
                                             <TableCell className={styles.tableCell} key={cell.id}

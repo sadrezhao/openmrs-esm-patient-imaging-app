@@ -3,9 +3,12 @@ import { FetchResponse, } from '@openmrs/esm-framework';
 import { openmrsFetch } from '@openmrs/esm-framework';
 import type { CreateRequestProcedure, CreateRequestProcedureStep, DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series, StudiesWithScores } from '../types';
 import { imagingUrl, worklistUrl } from '../imaging/constants'
-import { toDICOMDateTime } from '../imaging/utils/help';
 
-
+/**
+ * 
+ * @param patientUuid 
+ * @returns 
+ */
 export function getStudiesByPatient(patientUuid: string) {
     const studiesUrl = `${imagingUrl}/studies?patient=${patientUuid}`;
 
@@ -23,7 +26,12 @@ export function getStudiesByPatient(patientUuid: string) {
     };
 }
 
-
+/**
+ * 
+ * @param configuration 
+ * @param patientUuid 
+ * @returns 
+ */
 export function getStudiesByConfig(configuration: OrthancConfiguration, patientUuid: string) {
   const studiesByConfigUrl = `${imagingUrl}/studiesbyconfig?configurationId=${configuration.id}&patient=${patientUuid}`;
 
@@ -41,6 +49,10 @@ export function getStudiesByConfig(configuration: OrthancConfiguration, patientU
   };
 }
 
+/**
+ * 
+ * @returns 
+ */
 export function getOrthancConfigurations() {
   const configurationUrl = `${imagingUrl}/configurations`
 
@@ -62,6 +74,12 @@ export function getOrthancConfigurations() {
   };
 }
 
+/**
+ * 
+ * @param files 
+ * @param configuration 
+ * @param abortController 
+ */
 export async function uploadStudies (
   files: File[], 
   configuration: OrthancConfiguration,
@@ -87,6 +105,12 @@ export async function uploadStudies (
   }
 }
 
+/**
+ * 
+ * @param fetchOption 
+ * @param configuration 
+ * @param abortController 
+ */
 export async function getLinkStudies (
   fetchOption: string,
   configuration: OrthancConfiguration,
@@ -109,6 +133,11 @@ export async function getLinkStudies (
   }
 }
 
+/**
+ * 
+ * @param patientUuid 
+ * @returns 
+ */
 export function getRequestsByPatient(patientUuid: string) {
   const requestsUrl = `${worklistUrl}/patientrequests?patient=${patientUuid}`
   
@@ -126,7 +155,11 @@ export function getRequestsByPatient(patientUuid: string) {
   };
 }
 
-
+/**
+ * 
+ * @param requestId 
+ * @returns 
+ */
 export function getProcedureStep(requestId: number) {
 
   const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${requestId}`
@@ -146,6 +179,11 @@ export function getProcedureStep(requestId: number) {
 
 }
 
+/**
+ * 
+ * @param studyId 
+ * @returns 
+ */
 export function getStudySeries(studyId: number) {
 
   const seriesUrl = `${imagingUrl}/studyseries?studyId=${studyId}`
@@ -164,7 +202,12 @@ export function getStudySeries(studyId: number) {
   };
 }
 
-
+/**
+ * 
+ * @param studyId 
+ * @param seriesInstanceUID 
+ * @returns 
+ */
 export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
   const instancesUrl = `${imagingUrl}/studyinstances?studyId=${studyId}&seriesInstanceUID=${seriesInstanceUID}`
 
@@ -182,6 +225,13 @@ export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
   };
 }
 
+/**
+ * 
+ * @param studyId 
+ * @param patientUuid 
+ * @param isAssign 
+ * @param abortController 
+ */
 export async function assignStudy(
     studyId: number, 
     patientUuid: string, 
@@ -206,6 +256,12 @@ export async function assignStudy(
     }
 }
 
+/**
+ * 
+ * @param request 
+ * @param patientUuid 
+ * @param abortController 
+ */
 export async function saveRequestProcedure(
     request: CreateRequestProcedure, 
     patientUuid: string,
@@ -236,7 +292,12 @@ export async function saveRequestProcedure(
     }
 }
 
-
+/**
+ * 
+ * @param step 
+ * @param requestId 
+ * @param abortController 
+ */
 export async function saveRequestProcedureStep (
   step: CreateRequestProcedureStep,
   requestId: number,
@@ -270,6 +331,13 @@ export async function saveRequestProcedureStep (
   }
 }
 
+/**
+ * 
+ * @param studyId 
+ * @param deleteOption 
+ * @param abortController 
+ * @returns 
+ */
 export function deleteStudy(studyId: number, deleteOption: string, abortController: AbortController) {
   return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}&deleteOption=${deleteOption}`,{
     method: 'DELETE',
@@ -277,6 +345,13 @@ export function deleteStudy(studyId: number, deleteOption: string, abortControll
   })
 }
 
+/**
+ * 
+ * @param orthancSeriesUID 
+ * @param studyId 
+ * @param abortController 
+ * @returns 
+ */
 export function deleteSeries(orthancSeriesUID: string, studyId: number, abortController: AbortController) {
   return openmrsFetch(`${imagingUrl}/series?orthancSeriesUID=${orthancSeriesUID}&studyId=${studyId}`, {
     method: 'DELETE',
@@ -284,6 +359,12 @@ export function deleteSeries(orthancSeriesUID: string, studyId: number, abortCon
   })
 }
 
+/**
+ * 
+ * @param requestId 
+ * @param abortController 
+ * @returns 
+ */
 export function deleteRequest(requestId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/request?requestId=${requestId}`, {
     method: 'DELETE',
@@ -291,6 +372,12 @@ export function deleteRequest(requestId: number, abortController: AbortControlle
   })
 }
 
+/**
+ * 
+ * @param stepId 
+ * @param abortController 
+ * @returns 
+ */
 export function deleteProcedureStep(stepId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/requeststep?stepId=${stepId}`, {
     method: 'DELETE',
@@ -298,3 +385,17 @@ export function deleteProcedureStep(stepId: number, abortController: AbortContro
   })
 }
 
+/**
+ * 
+ * @param orthancInstanceUID 
+ * @param studyId 
+ * @param abortController 
+ * @returns 
+ */
+export function previewInstance(orthancInstanceUID: string, studyId: number, abortController: AbortController) {
+   const previewUrl = `${imagingUrl}/previewinstance?orthancInstanceUID=${orthancInstanceUID}&studyId=${studyId}`
+   return openmrsFetch(previewUrl, {
+    method: 'GET',
+    signal: abortController.signal
+   })
+}

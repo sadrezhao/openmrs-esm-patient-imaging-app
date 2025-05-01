@@ -9,6 +9,7 @@ export const studyDeleteConfirmationDialog = 'study-delete-confirmation-dialog'
 export const seriesDeleteConfirmationDialog = 'series-delete-confirmation-dialog'
 export const requestDeleteConfirmationDialog = 'request-delete-confirmation-dialog'
 export const procedureSteptDeleteConfirmationDialog = 'procedureStep-delete-confirmation-dialog'
+export const instancePreviewDialog = 'instance-preview-dialog'
 export const studiesCount = 5;
 export const seriesCount = 5
 export const instancesCount = 10

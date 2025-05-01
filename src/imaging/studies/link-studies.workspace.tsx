@@ -12,7 +12,7 @@ import {
     Stack,
 } from '@carbon/react';
 import { OrthancConfiguration } from '../../types';
-import { getLinkStudies, getOrthancConfigurations } from '../../api';
+import { getLinkStudies, getOrthancConfigurations, getStudiesByPatient } from '../../api';
 import { Row } from '@carbon/react';
 import { FormGroup } from '@carbon/react';
 import { RadioButton } from '@carbon/react';

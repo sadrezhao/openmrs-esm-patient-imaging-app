@@ -43,6 +43,10 @@
     {
       "name": "procedureStep-delete-confirmation-dialog",
       "component": "procedureSteptDeleteConfirmationDialog"
+    },
+    {
+      "name": "instance-preview-dialog",
+      "component": "instancePreviewDialog"
     }
   ],
   

@@ -11,10 +11,8 @@ import {
   TableRow,
 } from '@carbon/react';
 import {
-  CardHeader,
   compare,
   PatientChartPagination,
-  launchPatientWorkspace,
   EmptyState,
 } from '@openmrs/esm-patient-common-lib';
 
@@ -33,6 +31,7 @@ import orthancExplorer from '../../assets/orthanc.png';
 import SeriesDetailsTable  from './series-details-table.component';
 import { studiesCount, studyDeleteConfirmationDialog } from '../constants';
 import styles from './details-table.scss';
+import { buildURL } from '../utils/help';
 
 
 export interface StudyDetailsTableProps {
@@ -56,6 +55,11 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
   const shouldOnClickBeCalled = useRef(true);
+  const studyMap = useRef<Map<string, DicomStudy>>(new Map());
+
+  results?.forEach((study) => {
+    studyMap.current.set(String(study.id), study);
+  })
 
   const launchDeleteStudyDialog = (studyId: number) => {
     const dispose = showModal(studyDeleteConfirmationDialog, {
@@ -74,8 +78,8 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
     { key: 'action', header: t('action', 'Action')},
   ].filter(Boolean);
 
-  const tableRows = results?.map((study, index) => ({
-    id: study.id,
+  const tableRows = results?.map((study) => ({
+    id: study.id.toString(),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
     patientName: {
       sortKey: study.patientName,
@@ -90,7 +94,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
     orthancConfiguration: study.orthancConfiguration.orthancBaseUrl,
     action: {
       content:(
-        <div className="flex gap-1">
+        <div className="studiesActionDiv" style={{display: 'flex'}}>
         {showDeleteButton && (
             <IconButton
               kind="ghost"
@@ -111,7 +115,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
             align="left"
             size={isTablet ? 'lg' : 'sm'}
             label={t('stoneviewer', 'Stone viewer of Orthanc')}
-            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/stone-webviewer/index.html?study=${study.studyInstanceUID}`} 
+            onClick={() => window.location.href = buildURL(study.orthancConfiguration.orthancBaseUrl, '/stone-webviewer/index.html', [{code: 'study', value: study.studyInstanceUID}])} 
             >
               <img className='stone-img' src={stoneview} style={{width:23, height:14, marginTop: 4}}></img>
           </IconButton>
@@ -120,7 +124,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
             align="left"
             size={isTablet ? 'lg' : 'sm'}
             label={t('ohifviewer', 'Ohif viewer')}
-            onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ohif/viewer?StudyInstanceUIDs=${study.studyInstanceUID}`}
+            onClick={() => window.location.href = buildURL(study.orthancConfiguration.orthancBaseUrl, '/ohif/viewer', [{code: 'StudyInstanceUIDs', value: study.studyInstanceUID}])}
             >
                <img className='ohif-img' src={ohifview} style={{width:26,height:26, marginTop:0}}></img>
           </IconButton> 
@@ -135,8 +139,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
           </IconButton> 
         </div>
       )
-    }
-
+    },
   }));
 
   const sortRow = (cellA, cellB, { sortDirection, sortStates }) => {
@@ -144,6 +147,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
       ? compare(cellB.sortKey, cellA.sortKey)
       : compare(cellA.sortKey, cellB.sortKey);
   };
+
 
   if (studies && studies?.length) {
   return (
@@ -176,17 +180,18 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                  {rows.map((row, rowIndex) => {
-                    const isExpanded = expandedRows[rowIndex];
+                  {rows.map((row) => {
+                    const isExpanded = expandedRows[row.id];
+                    const studyData = studyMap.current.get(row.id);
                     return (
-                      <React.Fragment key={rowIndex}>
+                      <React.Fragment key={row.id}>
                         <TableRow
                           className={styles.row}
                           {...getRowProps({ row })}
                           onDoubleClick={() =>
                             setExpandedRows((prev) => ({
                               ...prev,
-                              [rowIndex]: !prev[rowIndex],
+                              [row.id]: !prev[row.id],
                             }))
                           }
                         >
@@ -196,13 +201,15 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
                             </TableCell>
                           ))}
                         </TableRow>
-                        {isExpanded && (
+                        {isExpanded && studyData && (
                           <TableRow className={styles.expandedRow}>
                             <TableCell colSpan={headers.length}>
                               <div className={styles.seriesTableDiv}>
                                 <SeriesDetailsTable 
-                                  study = {row}
+                                  studyId={studyData.id}
+                                  studyInstanceUID = {studyData.studyInstanceUID}
                                   patientUuid={patientUuid}
+                                  orthancBaseUrl={studyData.orthancConfiguration.orthancBaseUrl}
                                   />
                               </div>
                             </TableCell>

@@ -26,8 +26,6 @@ export function startupApp() {
   defineConfigSchema(moduleName, configSchema);
 }
 
-// export const root = getAsyncLifecycle(() => import('./root.component'), options);
-
 export const imagingDashboardLink = getSyncLifecycle(
   createDashboardLink({
     ...dashboardMeta,
@@ -79,6 +77,11 @@ export const requestDeleteConfirmationDialog = getAsyncLifecycle(
 
 export const procedureSteptDeleteConfirmationDialog = getAsyncLifecycle(
   () => import('./imaging/components/delete-procedureStep.modal'),
+  options,
+);
+
+export const instancePreviewDialog = getAsyncLifecycle(
+  () => import('./imaging/components/instance-preview.modal'),
   options,
 );
 

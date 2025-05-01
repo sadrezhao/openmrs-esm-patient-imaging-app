@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getRequestsByPatient, getStudiesByPatient } from '../../api'
 import { DataTableSkeleton } from '@carbon/react';

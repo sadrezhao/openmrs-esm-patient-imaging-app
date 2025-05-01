@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
-import { ErrorState, ExtensionSlot, ResponsiveWrapper, useLayoutType } from '@openmrs/esm-framework';
+import { ErrorState, ExtensionSlot, ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, type DefaultPatientWorkspaceProps,} from '@openmrs/esm-patient-common-lib';
 
 import {
@@ -11,12 +11,12 @@ import {
     Stack,
 } from '@carbon/react';
 import { DicomStudy, OrthancConfiguration } from '../../types';
-import { assignStudy as assignStudy, getStudiesByConfig } from '../../api';
+import { assignStudy as assignStudy, getStudiesByConfig, getStudiesByPatient } from '../../api';
 import AssignStudiesTable from '../components/assign-studies-table.component';
 import { Row } from '@carbon/react';
 import { ButtonSet } from '@carbon/react';
-import styles from './studies.scss'
 import { DataTableSkeleton } from '@carbon/react';
+import styles from './studies.scss'
 
 interface AssignStudiesWorkspaceProps extends DefaultPatientWorkspaceProps {
     configuration: OrthancConfiguration;
@@ -33,6 +33,7 @@ const AssignStudiesWorkspace: React.FC<AssignStudiesWorkspaceProps> = ({
     const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
     const [isLoading, setIsLoading] = useState(false);
     const patientState = useMemo(() => ({ patientUuid }), [patientUuid]);
+    const { mutate } = getStudiesByPatient(patientUuid);
 
     const { 
         data: studiesData, 
@@ -42,9 +43,23 @@ const AssignStudiesWorkspace: React.FC<AssignStudiesWorkspaceProps> = ({
     } = getStudiesByConfig(configuration, patientUuid)
 
         
-    function assignStudyFunction(study: DicomStudy, isAssign: boolean) {
+    async function assignStudyFunction(study: DicomStudy, isAssign: boolean) {
         const abortController = new AbortController();
-        assignStudy(study.id, patientUuid, isAssign, abortController);
+        try{
+          await assignStudy(study.id, patientUuid, isAssign, abortController);
+          mutate();
+          showSnackbar({
+            kind: 'success',
+            title: isAssign ? t('studyAssigned', 'Study is assigned successfully') :  t('removeAssign', 'Assignment of the study is removed'),
+          });
+        } catch (err: any) {
+            showSnackbar({
+              title: isAssign? t('errorAssign', 'Error assigning study'): t('errorRemoveAssign', 'Error: Failed to remove the study assignment.'),
+              kind: 'error',
+              subtitle: err?.message,
+              isLowContrast: false,
+            });
+         }
     }
 
     return (

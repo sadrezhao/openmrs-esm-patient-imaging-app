@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect, useState,} from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import { z } from 'zod';
@@ -15,11 +15,11 @@ import {
     InlineLoading
 } from '@carbon/react';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
-import styles from './worklist.scss';
 import { CreateRequestProcedure, OrthancConfiguration, priorityLevels} from '../../types';
 import { Controller, useForm, FormProvider} from 'react-hook-form';
-import { saveRequestProcedure, getOrthancConfigurations } from '../../api';
+import { saveRequestProcedure, getOrthancConfigurations, getStudiesByPatient, getRequestsByPatient } from '../../api';
 import { generateAccessionNumber } from '../utils/help';
+import styles from './worklist.scss';
 
 const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   patientUuid,
@@ -30,6 +30,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const orthancConfigurations = getOrthancConfigurations()
+  const { mutate } = getRequestsByPatient(patientUuid)
 
   const requestFormSchema = useMemo (() => {    
     return z.object({
@@ -86,6 +87,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
 
       try{  
         await saveRequestProcedure(payload, patientUuid, abortController)
+        mutate();
         closeWorkspaceWithSavedChanges();
         showSnackbar({
           kind: 'success',

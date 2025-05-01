@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     DataTable,
     IconButton,
@@ -18,7 +18,7 @@ import {
   } from '@openmrs/esm-patient-common-lib';
 
 import { useTranslation } from 'react-i18next';
-import { DicomStudy, Series } from '../../types';
+import { Series } from '../../types';
 import stoneview from '../../assets/stoneViewer.png';
 import orthancExplorer from '../../assets/orthanc.png';
 import { useLayoutType, usePagination, TrashCanIcon, showModal} from '@openmrs/esm-framework';
@@ -26,22 +26,27 @@ import { getStudySeries } from '../../api';
 import InstancesDetailsTable from './instances-details-table.component';
 import { seriesCount, seriesDeleteConfirmationDialog } from '../constants';
 import styles from './details-table.scss'
+import { buildURL } from '../utils/help';
 
 export interface SeriesDetailsTableProps {
-    study: DicomStudy;
+    studyId: number;
+    studyInstanceUID: string;
     patientUuid: string;
+    orthancBaseUrl: string;
 }
 
 const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
-    study,
-    patientUuid
+    studyId,
+    studyInstanceUID,
+    patientUuid,
+    orthancBaseUrl
 }) => {
     const {
         data: seriesList,
         error: seriesError,
         isLoading: isLoadingSeries,
         isValidating: isValidatingSeries,
-      } = getStudySeries(study.id);
+      } = getStudySeries(studyId);
     
     const { t } = useTranslation();
     const displayText = t('series', 'Series');
@@ -51,14 +56,19 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
     const shouldOnClickBeCalled = useRef(true);
+    const seriesMap = useRef<Map<string, Series>>(new Map());
+
+    results?.forEach((series) => {
+        seriesMap.current.set(String(series.seriesInstanceUID), series);
+    })
 
     const launchDeleteSeriesDialog = (orthancSeriesUID: string, studyId: number) => {
-    const dispose = showModal(seriesDeleteConfirmationDialog, {
-        closeDeleteModal: () => dispose(),
-        orthancSeriesUID,
-        studyId,
-        patientUuid,
-    });
+        const dispose = showModal(seriesDeleteConfirmationDialog, {
+            closeDeleteModal: () => dispose(),
+            orthancSeriesUID,
+            studyId,
+            patientUuid,
+        });
     }
     
     const tableHeaders = [
@@ -69,7 +79,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
         { key: 'action', header: t('action', 'Action')},
     ]
 
-    const tableRows = results?.map((series, index) => ({
+    const tableRows = results?.map((series) => ({
         id: series.seriesInstanceUID,
         seriesInstanceUID: <div className={styles.subTableWrapText}>{ series.seriesInstanceUID}</div>,
         modality: series.modality,
@@ -77,7 +87,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
         seriesDescription: series.seriesDescription,
         action: {
             content:(
-              <div className="flex gap-1">
+              <div className="seriesActionDiv" style={{display: 'flex'}}>
                 <IconButton
                   kind="ghost"
                   align="left"
@@ -85,7 +95,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   label={t('removeSeries', 'Remove series')}
                   onClick={() => {
                     shouldOnClickBeCalled.current = false;
-                    launchDeleteSeriesDialog(series.orthancSeriesUID, study.id)
+                    launchDeleteSeriesDialog(series.orthancSeriesUID, studyId)
                   }}
                 >
                   <TrashCanIcon className={styles.removeButton} />
@@ -95,7 +105,8 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   align="left"
                   size={isTablet ? 'lg' : 'sm'}
                   label={t('stoneviewer', 'Stone viewer of Orthanc')}
-                  onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/stone-webviewer/index.html?study=${study.studyInstanceUID}&series=${series.seriesInstanceUID}`} 
+                    onClick={() => window.location.href = buildURL(orthancBaseUrl, "stone-webviewer/index.html", 
+                        [{code: 'study', value: studyInstanceUID}, {code: 'series', value: series.seriesInstanceUID}])} 
                   >
                     <img className='stone-img' src={stoneview} style={{width:23, height:14, marginTop: 4}}></img>
                 </IconButton>
@@ -104,7 +115,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                   align="left"
                   size={isTablet ? 'lg' : 'sm'}
                   label={t('orthancExplorer2', 'Show data in orthanc explorere')}
-                  onClick={() => window.location.href = `${study.orthancConfiguration.orthancBaseUrl}/ui/app/#/filtered-studies?StudyInstanceUID=${study.studyInstanceUID}&expand=series`} 
+                  onClick={() => window.location.href = `${orthancBaseUrl}ui/app/#/filtered-studies?StudyInstanceUID=${studyInstanceUID}&expand=series`}
                   >
                      <img className='orthanc-img' src={orthancExplorer} style={{width:26,height:26, marginTop:0}}></img>
                 </IconButton> 
@@ -152,44 +163,47 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row, rowIndex) => {
-                        const isExpanded = expandedRows[rowIndex];
-                        return (
-                            <React.Fragment key={rowIndex}>
-                                <TableRow
-                                    className={styles.row}
-                                    {...getRowProps({ row })}
-                                    onDoubleClick={() =>
-                                        setExpandedRows((prev) => ({
-                                            ...prev,
-                                            [rowIndex]: !prev[rowIndex],
-                                        }))
-                                    }
-                                >
-                                    {row.cells.map((cell, cellIndex) => (
-                                        <TableCell className={styles.tableCell} key={cellIndex}
-                                            style={cellIndex===4?{ width: '15%'}:{width: '22%'}}
-                                        >
-                                            {cell.value?.content ?? cell.value}
-                                        </TableCell>
-                                        ))}
-                                </TableRow>
-                                {isExpanded && (
-                                    <TableRow className={styles.expandedRow}>
-                                        <TableCell colSpan={headers.length}
-                                        >
-                                            <div className={styles.instanceTableDiv}>
-                                                <InstancesDetailsTable
-                                                    study={study}
-                                                    seriesInstanceUID={row.id}
-                                                /> 
-                                            </div>
-                                        </TableCell>
+                        {rows.map((row) => {
+                            const seriesData = seriesMap.current.get(row.id);
+                            const isExpanded = expandedRows[row.id];
+                            return (
+                                <React.Fragment key={row.id}>
+                                    <TableRow
+                                        className={styles.row}
+                                        {...getRowProps({ row })}
+                                        onDoubleClick={() =>
+                                            setExpandedRows((prev) => ({
+                                                ...prev,
+                                                [row.id]: !prev[row.id],
+                                            }))
+                                        }
+                                    >
+                                        {row.cells.map((cell) => (
+                                            <TableCell className={styles.tableCell} key={cell.id}
+                                                style={cell.id===4?{ width: '15%'}:{width: '22%'}}
+                                            >
+                                                {cell.value?.content ?? cell.value}
+                                            </TableCell>
+                                            ))}
                                     </TableRow>
-                                )}
-                            </React.Fragment>
-                        );
-                      })}
+                                    {isExpanded && seriesData && (
+                                        <TableRow className={styles.expandedRow}>
+                                            <TableCell colSpan={headers.length}
+                                            >
+                                                <div className={styles.instanceTableDiv}>
+                                                    <InstancesDetailsTable
+                                                        studyId={studyId}
+                                                        studyInstanceUID={studyInstanceUID}
+                                                        seriesInstanceUID={seriesData.seriesInstanceUID}
+                                                        orthancBaseUrl={orthancBaseUrl}
+                                                    /> 
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
                     </TableBody>
                 </TableContainer>
               )}

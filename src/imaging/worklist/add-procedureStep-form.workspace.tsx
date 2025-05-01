@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { OpenmrsDatePicker, ResponsiveWrapper, showSnackbar, toDateObjectStrict, toOmrsIsoString, useLayoutType, useSession} from '@openmrs/esm-framework';
+import { OpenmrsDatePicker, ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
 import {
     Button,
     ButtonSet,
@@ -15,8 +15,8 @@ import {
     SelectItem,
     InlineLoading
 } from '@carbon/react'
-import { DefaultPatientWorkspaceProps, type amPm, convertTime12to24} from '@openmrs/esm-patient-common-lib';
-import { saveRequestProcedureStep} from '../../api';
+import { DefaultPatientWorkspaceProps, type amPm } from '@openmrs/esm-patient-common-lib';
+import { getProcedureStep, saveRequestProcedureStep} from '../../api';
 import { FormProvider, useForm, Controller} from 'react-hook-form';
 import { CreateRequestProcedureStep, modalityOptions, RequestProcedure } from '../../types';
 import { z } from 'zod';
@@ -37,6 +37,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
 }) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
+    const { mutate } = getProcedureStep(request.id);
 
     const procedureStepFormSchema = useMemo(() => {
       return z.object({
@@ -48,8 +49,8 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
         requestedProcedureDescription: z.string().refine((value) => !!value, {
           message: t('requestedProcedureDescription', 'Procedure description is required'),
         }),
-        stepStartDate: z.date().refine((value) => !!value, t('stepDateRequired', 'Step date required')),
-        stepStartTime: z.string().refine((value) => !!value, t('stepTimeRequired', 'Step start time required')),
+        stepStartDate: z.date().refine((value) => !!value, t('stepDateRequired', 'Step date is required')),
+        stepStartTime: z.string().refine((value) => !!value, t('stepTimeRequired', 'Step start time is required')),
         timeFormat: z.string().refine((value) => !!value,  t('seletTimeFormat', 'Time format is required')),
         stationName: z.string().nullable().optional(),
         procedureStepLocation: z.string().nullable().optional(),
@@ -87,7 +88,6 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
     const onSubmit = useCallback(
       async (data: NewProcedureStepFormData) => {
         const abortController = new AbortController();
-
         const time = getValues('stepStartTime');
         const format = getValues('timeFormat');
         const fullTime = toDicomTimeString(time, format as 'AM' | 'PM');
@@ -109,6 +109,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
 
         try{
           await saveRequestProcedureStep(payload, requestId, abortController)
+          mutate();
           closeWorkspaceWithSavedChanges();
           showSnackbar({
             kind: 'success',

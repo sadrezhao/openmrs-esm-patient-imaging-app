@@ -1,10 +1,7 @@
-import React, { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import dayjs from 'dayjs';
+import React, { useRef } from 'react';
 import {
     DataTable,
-    Button,
     IconButton,
-    InlineLoading,
     Table,
     TableBody,
     TableCell,
@@ -14,26 +11,21 @@ import {
     TableRow,
 } from '@carbon/react';
 import {
-    CardHeader,
     compare,
     PatientChartPagination,
-    launchPatientWorkspace,
     EmptyState
 } from '@openmrs/esm-patient-common-lib';
 
 import {
-    AddIcon,
-    formatDate,
     useLayoutType,
     usePagination,
     TrashCanIcon,
     showModal,
-    launchWorkspace,
 } from '@openmrs/esm-framework';
 
 import { useTranslation } from 'react-i18next';
 import { RequestProcedure } from '../../types';
-import { addNewProcedureStepWorkspace, procedureStepCount, procedureSteptDeleteConfirmationDialog } from '../constants';
+import { procedureStepCount, procedureSteptDeleteConfirmationDialog } from '../constants';
 import { getProcedureStep } from '../../api';
 import styles from './details-table.scss';
 
@@ -154,7 +146,7 @@ export interface ProcedureStepTableProps {
                             <Table aria-label="Procedure step summary" className={styles.table} {...getTableProps()} />
                             <TableHead>
                                 <TableRow>
-                                    {headers.map((header, index) => (
+                                    {headers.map((header) => (
                                         <TableHeader
                                             {...getHeaderProps({
                                             header,

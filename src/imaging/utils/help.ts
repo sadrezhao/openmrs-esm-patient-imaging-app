@@ -25,6 +25,10 @@ export function toDICOMDateTime(date: Date): string {
     return `${year}${month}${day}${hour}${minute}${second}${fractionalSeconds}${timezone}`;
   }
   
+  /**
+   * 
+   * @returns 
+   */
   export function generateAccessionNumber(): string {
     const date: Date = new Date();
   
@@ -67,4 +71,20 @@ export function toDICOMDateTime(date: Date): string {
   
     return `${hourStr24}${minuteStrPadded}00`; // HHMMSS format
 }
-  
+
+
+/**
+ * 
+ * @param configurationUrl 
+ * @param specialUrl 
+ * @param params 
+ * @returns 
+ */
+export function buildURL(configurationUrl: string, specialUrl: string, params: Array<{ code: string; value: string }>) : string {
+    const basicUrl = new URL(specialUrl, configurationUrl);
+  for (const { code, value } of params) {
+    basicUrl.searchParams.set(code, value);
+  }
+    return basicUrl.toString();
+}
+

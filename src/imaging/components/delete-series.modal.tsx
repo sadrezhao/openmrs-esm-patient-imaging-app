@@ -68,7 +68,6 @@ const DeleteSeriesModal: React.FC<DeleteSeriesModalProps> = ({
                     )}
                 </Button>
             </ModalFooter>
-
         </div>
     )
 }

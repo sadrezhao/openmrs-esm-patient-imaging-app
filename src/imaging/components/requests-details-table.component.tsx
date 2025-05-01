@@ -1,4 +1,4 @@
-import React, { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
     DataTable,
     Button,
@@ -32,8 +32,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { RequestProcedure } from '../../types';
 import { addNewProcedureStepWorkspace, addNewRequestWorkspace, requestCount, requestDeleteConfirmationDialog } from '../constants';
-import styles from './details-table.scss';
 import ProcedureStepTable from './procedureStep-details-table.component';
+import styles from './details-table.scss';
 
   export interface RequestProcedureTableProps {
     isValidating?: boolean;
@@ -56,7 +56,8 @@ import ProcedureStepTable from './procedureStep-details-table.component';
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
     const launchAddNewRequestWorkspace = useCallback(() => launchPatientWorkspace(addNewRequestWorkspace), []);
-
+    
+  
     const launchDeleteRequestDialog = (requestId: number) => {
     const dispose = showModal(requestDeleteConfirmationDialog, {
         closeDeleteModal: () => dispose(),
