@@ -13,16 +13,13 @@ export function toDICOMDateTime(date: Date): string {
     const hour = pad(date.getHours());
     const minute = pad(date.getMinutes());
     const second = pad(date.getSeconds());
-    const milliseconds = date.getMilliseconds();
-    const fractionalSeconds = milliseconds > 0 ? `.${pad(milliseconds, 3)}` : '';
   
     const timezoneOffset = -date.getTimezoneOffset(); // in minutes
-    const tzSign = timezoneOffset >= 0 ? '+' : '-';
-    const tzHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
-    const tzMinutes = pad(Math.abs(timezoneOffset) % 60);
-    const timezone = `${tzSign}${tzHours}${tzMinutes}`;
+    // const tzSign = timezoneOffset >= 0 ? '+' : '-';
+    // const tzHours = pad(Math.floor(Math.abs(timezoneOffset) / 60));
+    // const tzMinutes = pad(Math.abs(timezoneOffset) % 60);
   
-    return `${year}${month}${day}${hour}${minute}${second}${fractionalSeconds}${timezone}`;
+    return `${year}${month}${day}${hour}${minute}${second}`;
   }
   
   /**

@@ -65,13 +65,13 @@ export interface ProcedureStepTableProps {
 
     const tableHeaders = [
         { key: 'id', header: t('stepID', 'StepID')},
+        { key: 'performedProcedureStepStatus', header: t('status', 'Status')},
         { key: 'modality', header: t('modality', 'Modality'), isSortable: true, isVisible: true},
         { key: 'aetTitle', header: t('aetTitle', 'Aet Title')},
         { key: 'scheduledReferringPhysician', header: t('scheduledReferringPhysician', 'Scheduled referring physician'), isSortable: true, isVisible: true},
         { key: 'requestedProcedureDescription', header: t('description', 'Description')},
         { key: 'stepStartDate', header: t('stepStartDate', 'Start date of the step'), isSortable: true, isVisible: true},
         { key: 'stepStartTime', header: t('time', 'Time')},
-        { key: 'performedProcedureStepStatus', header: t('status', 'Status')},
         { key: 'stationName', header: t('stationName', 'Sation name')},
         { key: 'procedureStepLocation', header: t('procedureStepLocation', 'Procedure step location')},
         { key: 'action', header: t('action', 'Action')},
@@ -79,12 +79,12 @@ export interface ProcedureStepTableProps {
 
     const tableRows = results?.map((step, id) => ({
         id: step.id,
+        performedProcedureStepStatus: step.performedProcedureStepStatus,
         modality: {
             sortKey: step.modality,
             content: (<div><span>{step.modality}</span></div>)
         },
         aetTitle: step.aetTitle,
-        performedProcedureStepStatus: step.performedProcedureStepStatus,
         scheduledReferringPhysician: {
             sortKey: step.scheduledReferringPhysician,
             content: (<div><span>{step.scheduledReferringPhysician}</span></div>)
