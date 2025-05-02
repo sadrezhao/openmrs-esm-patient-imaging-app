@@ -1,7 +1,7 @@
 /**
  * 
  * @param date 
- * @returns 
+ * @returns The data time based on the dicom format for datetime
  */
 export function toDICOMDateTime(date: Date): string {
     // Dicom DT format: YYYYMMDDHHMMSS.FFFFFF&ZZXX
@@ -24,7 +24,7 @@ export function toDICOMDateTime(date: Date): string {
   
   /**
    * 
-   * @returns 
+   * @returns The generated access number
    */
   export function generateAccessionNumber(): string {
     const date: Date = new Date();
@@ -51,6 +51,12 @@ export function toDICOMDateTime(date: Date): string {
     return accessionNumber;
   }
 
+  /**
+   * 
+   * @param time 
+   * @param period 
+   * @returns 
+   */
   export function toDicomTimeString(time: string, period: 'AM' | 'PM'): string {
     const [hourStr, minuteStr] = time.split(':');
 
@@ -72,10 +78,10 @@ export function toDICOMDateTime(date: Date): string {
 
 /**
  * 
- * @param configurationUrl 
- * @param specialUrl 
+ * @param configurationUrl The configuration url for the orthanc server
+ * @param specialUrl Part of the url for dicom view or ohif view
  * @param params 
- * @returns 
+ * @returns
  */
 export function buildURL(configurationUrl: string, specialUrl: string, params: Array<{ code: string; value: string }>) : string {
     const basicUrl = new URL(specialUrl, configurationUrl);

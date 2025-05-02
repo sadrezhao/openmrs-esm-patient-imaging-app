@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { createErrorHandler, ExtensionSlot, launchWorkspace, ResponsiveWrapper, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
@@ -12,7 +12,7 @@ import {
     Stack,
 } from '@carbon/react';
 import { OrthancConfiguration } from '../../types';
-import { getLinkStudies, getOrthancConfigurations, getStudiesByPatient } from '../../api';
+import { getLinkStudies, getOrthancConfigurations } from '../../api';
 import { Row } from '@carbon/react';
 import { FormGroup } from '@carbon/react';
 import { RadioButton } from '@carbon/react';
@@ -56,6 +56,7 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     const {
         control,
         handleSubmit,
+        setValue,
         formState: {errors},
     } = formProps
 
@@ -64,7 +65,10 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         { id: 'newest', display: 'Newest' },
       ];
     
-
+    useEffect(() => {
+        setValue('fetchOption', fetchOptions[0].id )
+    }, [setValue])
+    
     const onSubmit = useCallback(
         (data: LinkStudiesFormData) => {
             const {
@@ -122,7 +126,6 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                             <Controller
                                 name="fetchOption"
                                 control={control}
-                                defaultValue={fetchOptions[0].id}
                                 render={({ field: { value, onChange } }) => (
                                 <RadioButtonGroup
                                     name="linkFetchOption"

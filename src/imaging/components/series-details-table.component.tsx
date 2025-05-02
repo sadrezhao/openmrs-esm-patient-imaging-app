@@ -196,6 +196,7 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
                                                         studyInstanceUID={studyInstanceUID}
                                                         seriesInstanceUID={seriesData.seriesInstanceUID}
                                                         orthancBaseUrl={orthancBaseUrl}
+                                                        seriesModality={seriesData.modality}
                                                     /> 
                                                 </div>
                                             </TableCell>

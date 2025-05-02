@@ -1,5 +1,6 @@
-import { toDICOMDateTime } from "../imaging/utils/help";
-import { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from "../types";
+import { toDICOMDateTime } from "../src/imaging/utils/help";
+
+import { DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series } from "../src/types";
 
 export const testStudy: Array<DicomStudy> = [{
     id: 0,

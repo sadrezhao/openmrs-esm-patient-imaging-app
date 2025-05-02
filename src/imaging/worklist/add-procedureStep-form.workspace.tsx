@@ -16,7 +16,7 @@ import {
     InlineLoading
 } from '@carbon/react'
 import { DefaultPatientWorkspaceProps, type amPm } from '@openmrs/esm-patient-common-lib';
-import { getProcedureStep, saveRequestProcedureStep} from '../../api';
+import { getProcedureStep, getRequestsByPatient, saveRequestProcedureStep} from '../../api';
 import { FormProvider, useForm, Controller} from 'react-hook-form';
 import { CreateRequestProcedureStep, modalityOptions, RequestProcedure } from '../../types';
 import { z } from 'zod';
@@ -38,6 +38,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
     const { mutate } = getProcedureStep(request.id);
+    const { mutate: requestMutate} = getRequestsByPatient(patientUuid);
 
     const procedureStepFormSchema = useMemo(() => {
       return z.object({
@@ -115,6 +116,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
             kind: 'success',
             title: t('requestSaved', 'Request saved successfully'),
           });
+          requestMutate();
         }catch (err: any) {
            showSnackbar({
               title: t('errorSaving', 'Error saving request'),
@@ -128,7 +130,9 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
           patientUuid,
           request,
           closeWorkspaceWithSavedChanges,
-          t
+          t,
+          mutate,
+          requestMutate
         ],
     );
 

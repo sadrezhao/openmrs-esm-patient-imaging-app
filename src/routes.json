@@ -53,19 +53,19 @@
   "workspaces": [
     {
       "name": "upload-studies-form-workspace",
-      "title": "uploadStudy",
+      "title": "Upload study",
       "component": "uploadStudiesFormWorkspace",
       "type": "form"
     },
     {
       "name": "link-studies-form-workspace",
-      "title": "linkStudies",
+      "title": "Link studies",
       "component": "linkStudiesFormWorkspace",
       "type": "form"
     },
     {
       "name": "assign-studies-form-workspace",
-      "title": "assignStudies",
+      "title": "Assign studies",
       "component": "assignStudiesFormWorkspace",
       "type": "form",
       "canMaximize": true,
@@ -73,14 +73,14 @@
     },
     {
       "name": "add-request-form-workspace",
-      "title": "addRequest",
+      "title": "Add request",
       "component": "addNewRequestWorkspace",
       "type": "form",
       "canMaximize": true
     },
     {
       "name": "add-procedureStep-form-workspace",
-      "title": "addProcedureStep",
+      "title": "Add procedure step",
       "component": "addNewProcedureStepWorkspace",
       "type": "form",
       "canMaximize": true

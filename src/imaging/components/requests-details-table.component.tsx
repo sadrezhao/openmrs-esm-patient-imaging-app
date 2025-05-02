@@ -91,7 +91,7 @@ import styles from './details-table.scss';
             sortKey: request.priority,
             content: (<div><span>{request.requestingPhysician}</span></div>)
         },
-        studyInstanceUID: <div className={styles.subTableWrapText}>{request.studyInstanceUID}</div>,
+        studyInstanceUID: <div className={styles.wrapText}>{request.studyInstanceUID}</div>,
         requestDescription: request.requestDescription,
         orthancConfiguration: request.orthancConfiguration.orthancBaseUrl,
         action: {
@@ -202,7 +202,6 @@ import styles from './details-table.scss';
                                             <div className={styles.procedureStepTableDiv}>
                                                 <ProcedureStepTable 
                                                     requestProcedure={row}
-                                                    patientUuid={patientUuid} 
                                                 />                                           
                                             </div>
                                         </TableCell>

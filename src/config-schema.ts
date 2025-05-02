@@ -18,6 +18,6 @@ export const configSchema = {
 };
 
 export type Config = {
-  casualGreeting: boolean;
-  whoToGreet: Array<string>;
+  // casualGreeting: boolean;
+  // whoToGreet: Array<string>;
 };

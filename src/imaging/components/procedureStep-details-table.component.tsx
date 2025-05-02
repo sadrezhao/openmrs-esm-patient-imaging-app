@@ -32,12 +32,10 @@ import styles from './details-table.scss';
 
 export interface ProcedureStepTableProps {
     requestProcedure: RequestProcedure;
-    patientUuid: string;
 }
 
   const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({
     requestProcedure,
-    patientUuid
   }) => {
 
     const {

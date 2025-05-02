@@ -45,7 +45,7 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
   const headerTitle = t('Studies', 'Studies');
   const { results, goTo, currentPage } = usePagination(data.studies ?? [], studiesCount);
   const [expandedRows, setExpandedRows] = useState({});
-  const [assignedStudies, setAssignedStudies] = useState({});
+  const [assignedStudy, setAssignedStudy] = useState({});
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
 
@@ -60,7 +60,7 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
 
   const handleAssignChange = (study, checked) => {
     assignStudyFunction(study, checked.toString());
-    setAssignedStudies(prev => ({
+    setAssignedStudy(prev => ({
       ...prev,
       [study.id]: checked
     }));

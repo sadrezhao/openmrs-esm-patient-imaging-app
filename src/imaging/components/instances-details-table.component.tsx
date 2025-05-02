@@ -29,14 +29,16 @@ export interface InstancesDetailsTableProps {
     studyId: number
     studyInstanceUID: string
     seriesInstanceUID: string
-    orthancBaseUrl: string
+    orthancBaseUrl: string,
+    seriesModality: string
 }
 
 const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
     studyId,
     studyInstanceUID,
     seriesInstanceUID,
-    orthancBaseUrl
+    orthancBaseUrl,
+    seriesModality
 }) => {
     const {
         data: instances,
@@ -72,13 +74,15 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
 
     const tableRows = results?.map((instance) => ({
         id: instance.sopInstanceUID,
-        sopInstanceUID: <div className={styles.subTableWrapText}>{ instance.sopInstanceUID}</div>,
+        sopInstanceUID: <div className={styles.wrapText}>{ instance.sopInstanceUID}</div>,
         instanceNumber: instance.instanceNumber,
         imagePositionPatient: instance.imagePositionPatient,
         numberOfFrames: instance.numberOfFrames,
         action: {
             content:(
-                <div className="instanceActionsDiv" style={{display: 'flex'}}>
+                <div className="instanceActionsDiv" style={{display: 'flex'}}> 
+                  { seriesModality !== "RTSTRUCT" && seriesModality !== "RTDOSE" && (
+                    <>                 
                     <IconButton
                         kind="ghost"
                         align="left"
@@ -99,7 +103,9 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                         onClick={() => window.location.href = `${orthancBaseUrl}instances/${instance.orthancInstanceUID}/preview`}
                     >
                         <img className='orthanc-img' src={preview} style={{width:23,height:23}}></img>
-                    </IconButton> 
+                    </IconButton>
+                    </>
+                  )}
                     <IconButton
                         kind="ghost"
                         align="left"
@@ -144,12 +150,13 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
                     <Table aria-label="Instances summary" className={styles.table} {...getTableProps()} />
                     <TableHead>
                         <TableRow>
-                            {headers.map((header) => (
+                            {headers.map((header, index) => (
                             <TableHeader
                                 {...getHeaderProps({
                                 header,
                                 isSortable: header.isSortable,
                                 })}
+                                style={index === 4 ? { width: '180px' } : {}}
                             >
                                 {header.header}
                             </TableHeader>

@@ -4,6 +4,7 @@ import { Button, InlineLoading, ModalBody, ModalFooter, ModalHeader } from '@car
 import { showSnackbar } from '@openmrs/esm-framework';
 import { deleteSeries, getStudySeries } from '../../api';
 
+
 interface DeleteSeriesModalProps {
     closeDeleteModal: () => void;
     studyId: number;

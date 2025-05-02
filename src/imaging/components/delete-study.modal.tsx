@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, InlineLoading, ModalBody, ModalFooter, ModalHeader } from '@carbon/react';
 import { showSnackbar } from '@openmrs/esm-framework';
@@ -23,15 +23,17 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({
     const { t } = useTranslation();
     const { mutate } = getStudiesByPatient(patientUuid);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('')
+    const [selectedOption, setSelectedOption] = useState('openmrs')
 
-    const handleOptionChange = (value) => {
-        setSelectedOption(value);
-        console.log('Selected option:', value);
-      };
-    
+    const handleOptionChange = (valueOrEvent) => {
+        setSelectedOption(valueOrEvent?.target?.value || valueOrEvent);
+        console.log('======= Selected option:', valueOrEvent?.target?.value || valueOrEvent);
+    };
+
     const handleDelete = useCallback(async () => {
         setIsDeleting(true);
+
+        console.log(selectedOption)
 
         deleteStudy(studyId, selectedOption, new AbortController())
             .then((response) => {
@@ -55,7 +57,7 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({
                     subtitle: error?.message,
                 })
             })
-    },[closeDeleteModal, studyId, mutate, t, patientUuid])
+    },[closeDeleteModal, studyId, mutate, t, selectedOption])
 
     return (
         <div>
@@ -64,11 +66,11 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({
                 <p>{t('deleteModalConfirmationText', 'Are you sure you want to delete this study?')}</p>
                 <RadioButtonGroup
                     className={styles.radioButtonGroup}
-                    onChange={(value) => handleOptionChange}
-                    defaultSelected="openmrs"
+                    onChange={(value) => handleOptionChange(value)}
+                    valueSelected={selectedOption}
                     >
-                    <RadioButton value="openmrs" id="openmrs" labelText="From OpenMrs" />
-                    <RadioButton value="both" id="both" labelText="From Orthanc & OpenMrS" />
+                    <RadioButton value="openmrs" id="openmrs" labelText="From OpenMRS" />
+                    <RadioButton value="both" id="both" labelText="From Orthanc & OpenMRS" />
                 </RadioButtonGroup>
             </ModalBody>
             <ModalFooter>
