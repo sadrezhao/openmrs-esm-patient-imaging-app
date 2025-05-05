@@ -1,46 +1,91 @@
-![Node.js CI](https://github.com/openmrs/openmrs-esm-template-app/workflows/Node.js%20CI/badge.svg)
 
-# OpenMRS ESM Imaging App
+# Overview
 
-This repository provides a starting point for creating your own
-[OpenMRS Microfrontend](https://wiki.openmrs.org/display/projects/OpenMRS+3.0%3A+A+Frontend+Framework+that+enables+collaboration+and+better+User+Experience).
+The openmrs-esm-patient-imaging-app project contains a new frontend module for OpenMRS 3. Together with our 'imaging' backend module (see below), it provides an interface for visualizing and managing medical image data and worklists for patient imaging procedures.
 
-For more information, please see the
-[OpenMRS Frontend Developer Documentation](https://o3-docs.openmrs.org/#/).
+The frontend provides a tabular overview of the medical image data available for a patient and of the list of issued imaging requests. Various management functions allow to users to manage medical images (upload, assign, and delete) and the imaging procedure requests (create and and delete).
 
-In particular, the [Setup](https://o3-docs.openmrs.org/docs/frontend-modules/setup) section can help you get started developing microfrontends in general. The [Creating a microfrontend](https://o3-docs.openmrs.org/docs/recipes/create-a-frontend-module) section provides information about how to use this repository to create your own microfrontend.
+The backend module provides connectivity to one or multiple Orthanc servers (https://www.orthanc-server.com/). The Orthanc servers store the DICOM imaging data uploaded by users or modalities.
 
-## Running this code
+The Orthanc servers also act as DICOM worklist servers. Imaging procedure requests created in the frontend can be queried by modalities or the radiology department from the Orthanc servers. When a DICOM study matching the `PerformedProcedureStepID` tag of a worklist procedure step is uploaded to an Orthanc server, the Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
-```sh
-yarn  # to install dependencies
-yarn start  # to run the dev server
+***** diagram ****
+
+# Preparing your OpenMRS and Orthanc servers
+
+The following is needed:
+- An OpenMRS 3 frontend server
+- An OpenMRS backend server
+- One or multiple Orthanc servers
+
+## Deploying the backend module
+
+Download our imaging backend OMOD module from https://github.com/sadrezhao/openmrs-module-imaging/releases, copy it to the module directory of your OpenMRS backend server, and start the server. If deployed successfully, it should appear in the list of loaded modules in your server:
+
+![The backend imaging module](./src/assets/imagingModule.png)
+
+## Configure the connection to the Orthanc servers
+
+You must provide connection settings (IP address, username, etc.) in order to allow OpenMRS to reach the Orthanc server(s). If the imaging backend module has been correctly deployed, you can access the connection settings on the administration page of your OpenMRS server:
+
+![Orthanc server configuration](./src/assets/orthancConfiguration.png)
+
+## Configure your Orthanc servers
+
+The imaging backend module provides an REST API service that the Orthanc servers need to contact to query and update the worklist. Add the following lines to the configuration file of the Orthanc servers (typically the file `/etc/orthanc/orthanc.json`):
+
+```bash
+    "ImagingWorklistURL": "http://OPENMRSHOST:OPENMRSPORT/openmrs/ws/rest/v1/worklist/requests",   
+    "ImagingUpdateRequestStatus": "http://OPENMRSHOST:OPENMRSPORT/openmrs/ws/rest/v1/worklist/updaterequeststatus",`
+    "ImagingWorklistUsername" : "OPENMRSHOSTUSER",`  
+    "ImagingWorklistPassword" : "OPENMRSHOSTPASSWORD"`
 ```
 
-Once it is running, a browser window
-should open with the OpenMRS 3 application. Log in and then navigate to `/openmrs/spa/root`.
+Replace OPENMRSHOST and OPENMRSPORT by the address and port of your OpenMRS backend server, and OPENMRSHOSTUSER and OPENMRSHOSTPASSWORD by the name and password of an user account on the OpenMRS server that you have created for the Orthanc servers.
 
-## Adapting the code
+## Install the worklist plugin on the Orthanc servers:
 
-1. Start by finding and replacing all instances of "imaging" with the name
-  of your microfrontend.
-2. Update `index.ts` as appropriate, at least changing the feature name and the page name and route.
-3. Rename the `root.*` family of files to have the name of your first page.
-4. Delete the contents of the objects in `config-schema`. Start filling them back in once you have a clear idea what will need to be configured.
-5. Delete the `greeter` and `patient-getter` directories, and the contents of `root.component.tsx`.
-6. Delete the contents of `translations/en.json`.
-7. Open up `.github/workflows` and adapt it to your needs. If you're writing
- a microfrontend that will be managed by the community, you might be able to
-  just replace all instances of `template` with your microfrontend's name.
-  However, if you're writing a microfrontend for a specific organization or
-  implementation, you will probably need to configure GitHub Actions differently.
-8. Delete the contents of this README and write a short explanation of what
-  you intend to build. Links to planning or design documents can be very helpful.
+The Orthanc servers act as worklist servers for the modalities. Our python plugin for Orthanc implements the needed functionality. Download the python script from https://github.com/sadrezhao/openmrs-module-imaging/blob/main/python/orthancWorklist.py and place it in a directory that is accessible by the Orthanc servers, for example in `/etc/orthanc`. Then add the following line to the python plugin configuration file of Orthanc (typically the file `python.json` in `/etc/orthanc`):
 
-At this point, you should be able to write your first page as a React application.
+   `"PythonScript": "/etc/orthanc/orthancWorklist.py",`
 
-Check out the [Medication dispensing app](https://github.com/openmrs/openmrs-esm-dispensing-app) for an example of a non-trivial app built using the Template.
+Then restart the Orthanc server:
 
-## Integrating it into your application
+   `sudo systemctl restart orthanc`
 
-Please see [Creating a Frontend Module](https://o3-docs.openmrs.org/docs/recipes/create-a-frontend-module).
+# Running the frontend module
+
+To locally run the OpenMRS frontend and backend servers, enter the openmrs-esm-patient-imaging-app project directory and execute:
+
+```sh
+yarn  # to install frontend dependencies
+
+mvn openmrs-sdk:run -DserverId=YOUR_OPENMRS_SERVER` # to start the backend server with id YOUR_OPENMRS_SERVER
+
+npm start -- --backend http://OPENMRSHOST:OPENMRSPORT/` # to start the front end server with OPENMRSHOST:OPENMRSPORT as backend
+```
+
+Replace YOUR_OPENMRS_SERVER, OPENMRSHOST and OPENMRSPORT by the corresponding information of your backend server.
+
+
+# Testing the worklist
+
+First, create some new imaging requests in the front end. The DCMTK findscu tool from https://support.dcmtk.org/docs/findscu.html allows to query the resulting DICOM worklists from the Orthanc server (replace 127.0.0.1 by the IP address of the Orthanc server):
+
+```bash
+findscu -v -W -k "ScheduledProcedureStepSequence[0].Modality=CT" 127.0.0.1 4242     # Query by modality 
+
+findscu -v -W -k "PatientID=PatientUuid" 127.0.0.1 4242  # Query by patient data
+
+findscu -v -W -k "ScheduledProcedureStepSequence[0].RequestedProcedureDescription=xxx" 127.0.0.1 4242 # Query by requested procedure description
+```
+
+If you want to generate a `.wl` file, uncomment the following lines from the python plugin:
+
+``` bash
+# This code only for test:`
+  # Save the DICOM buffer to a file`
+  # with open("/tmp/worklist_test.wl", 'wb') as f:
+  # f.write(responseDicom)`
+
+```

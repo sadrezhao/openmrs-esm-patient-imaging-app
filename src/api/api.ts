@@ -6,8 +6,7 @@ import { imagingUrl, worklistUrl } from '../imaging/constants'
 
 /**
  * 
- * @param patientUuid 
- * @returns 
+ * @param patientUuid The UUID of the patient whose studies should be fetched.
  */
 export function getStudiesByPatient(patientUuid: string) {
     const studiesUrl = `${imagingUrl}/studies?patient=${patientUuid}`;
@@ -28,9 +27,8 @@ export function getStudiesByPatient(patientUuid: string) {
 
 /**
  * 
- * @param configuration 
- * @param patientUuid 
- * @returns 
+ * @param configuration The configured orthanc server.
+ * @param patientUuid The UUID of the patient whose studies should be fetched.
  */
 export function getStudiesByConfig(configuration: OrthancConfiguration, patientUuid: string) {
   const studiesByConfigUrl = `${imagingUrl}/studiesbyconfig?configurationId=${configuration.id}&patient=${patientUuid}`;
@@ -50,8 +48,7 @@ export function getStudiesByConfig(configuration: OrthancConfiguration, patientU
 }
 
 /**
- * 
- * @returns 
+ * @returns Get all the orthnac configurations
  */
 export function getOrthancConfigurations() {
   const configurationUrl = `${imagingUrl}/configurations`
@@ -76,9 +73,8 @@ export function getOrthancConfigurations() {
 
 /**
  * 
- * @param files 
- * @param configuration 
- * @param abortController 
+ * @param files The DICOM files that should be uploaded to the Orthanc server.
+ * @param configuration The Orthanc server to which the DICOM files should be uploaded
  */
 export async function uploadStudies (
   files: File[], 
@@ -107,9 +103,8 @@ export async function uploadStudies (
 
 /**
  * 
- * @param fetchOption 
- * @param configuration 
- * @param abortController 
+ * @param fetchOption The fetch option should retrieve either all studies or only the most recently updated studies from the Orthanc server
+ * @param configuration The orthanc server where the medical studies are stored.
  */
 export async function getLinkStudies (
   fetchOption: string,
@@ -135,8 +130,7 @@ export async function getLinkStudies (
 
 /**
  * 
- * @param patientUuid 
- * @returns 
+ * @param patientUuid The UUID of the patient whose requests should be fetched
  */
 export function getRequestsByPatient(patientUuid: string) {
   const requestsUrl = `${worklistUrl}/patientrequests?patient=${patientUuid}`
@@ -157,8 +151,7 @@ export function getRequestsByPatient(patientUuid: string) {
 
 /**
  * 
- * @param requestId 
- * @returns 
+ * @param requestId The UID of the request procedure whose step should be fetched
  */
 export function getProcedureStep(requestId: number) {
 
@@ -181,8 +174,7 @@ export function getProcedureStep(requestId: number) {
 
 /**
  * 
- * @param studyId 
- * @returns 
+ * @param studyId The medical study series that should be retrieved.
  */
 export function getStudySeries(studyId: number) {
 
@@ -204,9 +196,8 @@ export function getStudySeries(studyId: number) {
 
 /**
  * 
- * @param studyId 
- * @param seriesInstanceUID 
- * @returns 
+ * @param studyId The medical study instances that should be retrieved.
+ * @param seriesInstanceUID The UID of the series of the medical studies
  */
 export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
   const instancesUrl = `${imagingUrl}/studyinstances?studyId=${studyId}&seriesInstanceUID=${seriesInstanceUID}`
@@ -227,10 +218,9 @@ export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
 
 /**
  * 
- * @param studyId 
- * @param patientUuid 
- * @param isAssign 
- * @param abortController 
+ * @param studyId The medical study that should be assigned to the patient.
+ * @param patientUuid The UUID of the patient to whom the study belongs.
+ * @param isAssign Is the study assigned to the patient?
  */
 export async function assignStudy(
     studyId: number, 
@@ -258,9 +248,8 @@ export async function assignStudy(
 
 /**
  * 
- * @param request 
- * @param patientUuid 
- * @param abortController 
+ * @param request The new request procedure should be stored.
+ * @param patientUuid The UUID of the patient to whom the request belongs
  */
 export async function saveRequestProcedure(
     request: CreateRequestProcedure, 
@@ -294,9 +283,8 @@ export async function saveRequestProcedure(
 
 /**
  * 
- * @param step 
- * @param requestId 
- * @param abortController 
+ * @param step The new procedure step should be add to the request procedure
+ * @param requestId The UID of the request procedure should be updated to include the new step.
  */
 export async function saveRequestProcedureStep (
   step: CreateRequestProcedureStep,
@@ -333,10 +321,9 @@ export async function saveRequestProcedureStep (
 
 /**
  * 
- * @param studyId 
- * @param deleteOption 
- * @param abortController 
- * @returns 
+ * @param studyId The medical study should be deleted
+ * @param deleteOption The delete option should allow the user to choose whether to delete data only from OpenMRS 
+ *                     or from both OpenMRS and the Orthanc server.
  */
 export function deleteStudy(studyId: number, deleteOption: string, abortController: AbortController) {
   return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}&deleteOption=${deleteOption}`,{
@@ -361,9 +348,7 @@ export function deleteSeries(orthancSeriesUID: string, studyId: number, abortCon
 
 /**
  * 
- * @param requestId 
- * @param abortController 
- * @returns 
+ * @param requestId The request procedure should be deleted
  */
 export function deleteRequest(requestId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/request?requestId=${requestId}`, {
@@ -374,9 +359,7 @@ export function deleteRequest(requestId: number, abortController: AbortControlle
 
 /**
  * 
- * @param stepId 
- * @param abortController 
- * @returns 
+ * @param stepId The procedure step should be deleted
  */
 export function deleteProcedureStep(stepId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/requeststep?stepId=${stepId}`, {
@@ -387,10 +370,8 @@ export function deleteProcedureStep(stepId: number, abortController: AbortContro
 
 /**
  * 
- * @param orthancInstanceUID 
- * @param studyId 
- * @param abortController 
- * @returns 
+ * @param orthancInstanceUID The orthanc server where the study is stored
+ * @param studyId The UID of the medical study for which instances should be previewed.
  */
 export function previewInstance(orthancInstanceUID: string, studyId: number, abortController: AbortController) {
    const previewUrl = `${imagingUrl}/previewinstance?orthancInstanceUID=${orthancInstanceUID}&studyId=${studyId}`

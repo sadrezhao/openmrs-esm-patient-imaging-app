@@ -27,7 +27,7 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({
 
     const handleOptionChange = (valueOrEvent) => {
         setSelectedOption(valueOrEvent?.target?.value || valueOrEvent);
-        console.log('======= Selected option:', valueOrEvent?.target?.value || valueOrEvent);
+        console.log('Selected option:', valueOrEvent?.target?.value || valueOrEvent);
     };
 
     const handleDelete = useCallback(async () => {
