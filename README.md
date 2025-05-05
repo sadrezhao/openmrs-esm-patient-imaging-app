@@ -9,7 +9,13 @@ The backend module provides connectivity to one or multiple Orthanc servers (htt
 
 The Orthanc servers also act as DICOM worklist servers. Imaging procedure requests created in the frontend can be queried by modalities or the radiology department from the Orthanc servers. When a DICOM study matching the `PerformedProcedureStepID` tag of a worklist procedure step is uploaded to an Orthanc server, the Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
-***** diagram ****
+Watch the video demonstration of the module here: [![Watch the video]()](https://youtu.be/no3WNaq4Q_M)
+
+![The worlist workflow](./src/assets/worklist_workflow.png) 
+
+This diagram illustrates the workflow of the worklist. A radiologist wants to view the worklist generated in OpenMRS via C-FIND Rest API
+URL. The Orthanc server forwards the request to OpenMRS. OpenMRS processes the request and returns the worklist in JSON format. The Orthanc plugin function ``Onworklsit`` reads the data and generates the worklist in DICOM format. The results can be viewed with the command like ``findscu -v -W -k "ScheduledProcedureStepSequence[0].Modality=CT" 127.0.0.1 4242``. 
+When the radiologist performs the procedure, a new DICOM study is created and uploaded to the Orthanc server. The Orthanc plugin observes the new study using the OnChange function, notifies OpenMRS to update the worklist status and marks the associated procedure step as completed.
 
 # Preparing your OpenMRS and Orthanc servers
 
@@ -20,7 +26,7 @@ The following is needed:
 
 ## Deploying the backend module
 
-Download our imaging backend OMOD module from https://github.com/sadrezhao/openmrs-module-imaging/releases, copy it to the module directory of your OpenMRS backend server, and start the server. If deployed successfully, it should appear in the list of loaded modules in your server:
+Download our imaging backend OMOD module from https://github.com/sadrezhao/openmrs-module-imaging/releases, copy it to the module directory of your OpenMRS backend server, and start the server. If deployed successfully, it should appear in the list of loaded modules on your server:
 
 ![The backend imaging module](./src/assets/imagingModule.png)
 
