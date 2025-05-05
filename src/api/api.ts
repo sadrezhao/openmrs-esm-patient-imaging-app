@@ -115,7 +115,7 @@ export async function uploadStudies(
  * @param fetchOption The fetch option should retrieve either all studies or only the most recently updated studies from the Orthanc server
  * @param configuration The orthanc server where the medical studies are stored.
  */
-export async function useLinkStudies(
+export async function getLinkStudies(
   fetchOption: string,
   configuration: OrthancConfiguration,
   abortController: AbortController,

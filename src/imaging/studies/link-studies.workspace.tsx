@@ -13,7 +13,7 @@ import { type DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-l
 
 import { Button, ComboBox, Form, InlineLoading, Stack } from '@carbon/react';
 import { type OrthancConfiguration } from '../../types';
-import { useLinkStudies, useOrthancConfigurations } from '../../api';
+import { getLinkStudies, useOrthancConfigurations } from '../../api';
 import { Row } from '@carbon/react';
 import { FormGroup } from '@carbon/react';
 import { RadioButton } from '@carbon/react';
@@ -83,7 +83,7 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({ patientU
       };
 
       try {
-        await useLinkStudies(fetchOption, serverConfig, abortController);
+        await getLinkStudies(fetchOption, serverConfig, abortController);
         closeWorkspace();
         launchWorkspace(assignStudiesFormWorkspace, { configuration: serverConfig });
       } catch (err) {
