@@ -3579,7 +3579,7 @@ __metadata:
     jest: "npm:^29.7.0"
     jest-cli: "npm:^29.7.0"
     jest-environment-jsdom: "npm:^29.7.0"
-    lint-staged: "npm:^15.2.9"
+    lint-staged: "npm:^15.2.2"
     lodash-es: "npm:^4.17.21"
     openmrs: "npm:next"
     prettier: "npm:^3.3.3"
@@ -14015,7 +14015,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-staged@npm:^15.2.9":
+"lint-staged@npm:^15.2.2":
   version: 15.5.1
   resolution: "lint-staged@npm:15.5.1"
   dependencies:

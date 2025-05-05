@@ -1,36 +1,46 @@
 import useSWR from 'swr';
-import { FetchResponse, } from '@openmrs/esm-framework';
+import { type FetchResponse } from '@openmrs/esm-framework';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import type { CreateRequestProcedure, CreateRequestProcedureStep, DicomStudy, Instance, OrthancConfiguration, RequestProcedure, RequestProcedureStep, Series, StudiesWithScores } from '../types';
-import { imagingUrl, worklistUrl } from '../imaging/constants'
+import type {
+  CreateRequestProcedure,
+  CreateRequestProcedureStep,
+  DicomStudy,
+  Instance,
+  OrthancConfiguration,
+  RequestProcedure,
+  RequestProcedureStep,
+  Series,
+  StudiesWithScores,
+} from '../types';
+import { imagingUrl, worklistUrl } from '../imaging/constants';
 
 /**
- * 
+ *
  * @param patientUuid The UUID of the patient whose studies should be fetched.
  */
-export function getStudiesByPatient(patientUuid: string) {
-    const studiesUrl = `${imagingUrl}/studies?patient=${patientUuid}`;
+export function useStudiesByPatient(patientUuid: string) {
+  const studiesUrl = `${imagingUrl}/studies?patient=${patientUuid}`;
 
-    const { data, error, isLoading, isValidating, mutate } = useSWR<{data: Array<DicomStudy>}, Error>(
-      studiesUrl,
-      openmrsFetch,
-    );
+  const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: Array<DicomStudy> }, Error>(
+    studiesUrl,
+    openmrsFetch,
+  );
 
-    return {
-        data: data?.data,
-        error: error,
-        isLoading: isLoading,
-        isValidating: isValidating,
-        mutate,
-    };
+  return {
+    data: data?.data,
+    error: error,
+    isLoading: isLoading,
+    isValidating: isValidating,
+    mutate,
+  };
 }
 
 /**
- * 
+ *
  * @param configuration The configured orthanc server.
  * @param patientUuid The UUID of the patient whose studies should be fetched.
  */
-export function getStudiesByConfig(configuration: OrthancConfiguration, patientUuid: string) {
+export function useStudiesByConfig(configuration: OrthancConfiguration, patientUuid: string) {
   const studiesByConfigUrl = `${imagingUrl}/studiesbyconfig?configurationId=${configuration.id}&patient=${patientUuid}`;
 
   const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<StudiesWithScores>, Error>(
@@ -39,27 +49,27 @@ export function getStudiesByConfig(configuration: OrthancConfiguration, patientU
   );
 
   return {
-      data: data?.data,
-      error: error,
-      isLoading: isLoading,
-      isValidating: isValidating,
-      mutate,
+    data: data?.data,
+    error: error,
+    isLoading: isLoading,
+    isValidating: isValidating,
+    mutate,
   };
 }
 
 /**
  * @returns Get all the orthnac configurations
  */
-export function getOrthancConfigurations() {
-  const configurationUrl = `${imagingUrl}/configurations`
+export function useOrthancConfigurations() {
+  const configurationUrl = `${imagingUrl}/configurations`;
 
-  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<OrthancConfiguration>>, Error>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<OrthancConfiguration>>, Error>(
     configurationUrl,
     openmrsFetch,
   );
 
   if (error) {
-    console.error("SWR error fetching Orthanc configurations:", error);
+    console.error('SWR error fetching Orthanc configurations:', error);
   }
 
   return {
@@ -72,22 +82,21 @@ export function getOrthancConfigurations() {
 }
 
 /**
- * 
+ *
  * @param files The DICOM files that should be uploaded to the Orthanc server.
  * @param configuration The Orthanc server to which the DICOM files should be uploaded
  */
-export async function uploadStudies (
-  files: File[], 
+export async function uploadStudies(
+  files: File[],
   configuration: OrthancConfiguration,
   abortController: AbortController,
 ) {
-
-  const uploadUrl = imagingUrl+"/instances"
+  const uploadUrl = imagingUrl + '/instances';
 
   for (const file of files) {
-    const formData = new FormData()
-    formData.append("configurationId", configuration.id.toString())
-    formData.append("file", file)
+    const formData = new FormData();
+    formData.append('configurationId', configuration.id.toString());
+    formData.append('file', file);
 
     const response = await openmrsFetch(uploadUrl, {
       method: 'POST',
@@ -96,46 +105,46 @@ export async function uploadStudies (
     });
 
     if (!response.ok) {
-      throw new Error(await response.text() || "Upload failed")
+      throw new Error((await response.text()) || 'Upload failed');
     }
   }
 }
 
 /**
- * 
+ *
  * @param fetchOption The fetch option should retrieve either all studies or only the most recently updated studies from the Orthanc server
  * @param configuration The orthanc server where the medical studies are stored.
  */
-export async function getLinkStudies (
+export async function useLinkStudies(
   fetchOption: string,
   configuration: OrthancConfiguration,
-  abortController: AbortController
-){
-  const linkUrl = `${imagingUrl}/linkstudies`
+  abortController: AbortController,
+) {
+  const linkUrl = `${imagingUrl}/linkstudies`;
 
-  const formData = new FormData()
-  formData.append("configurationId", configuration.id.toString())
-  formData.append("fetchOption", fetchOption) 
+  const formData = new FormData();
+  formData.append('configurationId', configuration.id.toString());
+  formData.append('fetchOption', fetchOption);
 
   const response = await openmrsFetch(linkUrl, {
     method: 'POST',
     signal: abortController.signal,
     body: formData,
-  })
+  });
 
   if (!response.ok) {
-    throw new Error(await response.text() || "Link studies failed")
+    throw new Error((await response.text()) || 'Link studies failed');
   }
 }
 
 /**
- * 
+ *
  * @param patientUuid The UUID of the patient whose requests should be fetched
  */
-export function getRequestsByPatient(patientUuid: string) {
-  const requestsUrl = `${worklistUrl}/patientrequests?patient=${patientUuid}`
-  
-  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<RequestProcedure>>, Error>(
+export function useRequestsByPatient(patientUuid: string) {
+  const requestsUrl = `${worklistUrl}/patientrequests?patient=${patientUuid}`;
+
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<RequestProcedure>>, Error>(
     patientUuid ? requestsUrl : null,
     openmrsFetch,
   );
@@ -145,19 +154,18 @@ export function getRequestsByPatient(patientUuid: string) {
     error: error,
     isLoading: isLoading,
     isValidating: isValidating,
-    mutate:mutate,
+    mutate: mutate,
   };
 }
 
 /**
- * 
+ *
  * @param requestId The UID of the request procedure whose step should be fetched
  */
-export function getProcedureStep(requestId: number) {
+export function useProcedureStep(requestId: number) {
+  const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${requestId}`;
 
-  const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${requestId}`
-
-  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<RequestProcedureStep>>, Error>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<RequestProcedureStep>>, Error>(
     procedureStepUrl,
     openmrsFetch,
   );
@@ -169,18 +177,16 @@ export function getProcedureStep(requestId: number) {
     isValidating: isValidating,
     mutate: mutate,
   };
-
 }
 
 /**
- * 
+ *
  * @param studyId The medical study series that should be retrieved.
  */
-export function getStudySeries(studyId: number) {
+export function useStudySeries(studyId: number) {
+  const seriesUrl = `${imagingUrl}/studyseries?studyId=${studyId}`;
 
-  const seriesUrl = `${imagingUrl}/studyseries?studyId=${studyId}`
-
-  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<Series>>, Error>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<Series>>, Error>(
     seriesUrl,
     openmrsFetch,
   );
@@ -195,14 +201,14 @@ export function getStudySeries(studyId: number) {
 }
 
 /**
- * 
+ *
  * @param studyId The medical study instances that should be retrieved.
  * @param seriesInstanceUID The UID of the series of the medical studies
  */
-export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
-  const instancesUrl = `${imagingUrl}/studyinstances?studyId=${studyId}&seriesInstanceUID=${seriesInstanceUID}`
+export function useStudyInstances(studyId: number, seriesInstanceUID: string) {
+  const instancesUrl = `${imagingUrl}/studyinstances?studyId=${studyId}&seriesInstanceUID=${seriesInstanceUID}`;
 
-  const { data, error, isLoading, isValidating, mutate} = useSWR<FetchResponse<Array<Instance>>, Error>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<Instance>>, Error>(
     instancesUrl,
     openmrsFetch,
   );
@@ -217,79 +223,79 @@ export function getStudyInstances(studyId: number, seriesInstanceUID: string) {
 }
 
 /**
- * 
+ *
  * @param studyId The medical study that should be assigned to the patient.
  * @param patientUuid The UUID of the patient to whom the study belongs.
  * @param isAssign Is the study assigned to the patient?
  */
 export async function assignStudy(
-    studyId: number, 
-    patientUuid: string, 
-    isAssign: boolean,
-    abortController: AbortController
-  ) {
-    const mappingUrl = `${imagingUrl}/assingstudy`
+  studyId: number,
+  patientUuid: string,
+  isAssign: boolean,
+  abortController: AbortController,
+) {
+  const mappingUrl = `${imagingUrl}/assingstudy`;
 
-    const formData = new FormData()
-    formData.append("studyId", studyId.toString())
-    formData.append("patient", patientUuid)
-    formData.append("isAssign", isAssign.toString())
+  const formData = new FormData();
+  formData.append('studyId', studyId.toString());
+  formData.append('patient', patientUuid);
+  formData.append('isAssign', isAssign.toString());
 
-    const response = await openmrsFetch(mappingUrl, {
-      method: 'POST',
-      signal: abortController.signal,
-      body: formData,
-    })
+  const response = await openmrsFetch(mappingUrl, {
+    method: 'POST',
+    signal: abortController.signal,
+    body: formData,
+  });
 
-    if (!response.ok) {
-      throw new Error(await response.text() || "Save patient request procedure failed")
-    }
+  if (!response.ok) {
+    throw new Error((await response.text()) || 'Save patient request procedure failed');
+  }
 }
 
 /**
- * 
+ *
  * @param request The new request procedure should be stored.
  * @param patientUuid The UUID of the patient to whom the request belongs
  */
 export async function saveRequestProcedure(
-    request: CreateRequestProcedure, 
-    patientUuid: string,
-    abortController: AbortController
-  ){
-    const saveRequstUrl = `${worklistUrl}/saverequest`;
+  request: CreateRequestProcedure,
+  patientUuid: string,
+  abortController: AbortController,
+) {
+  const saveRequstUrl = `${worklistUrl}/saverequest`;
 
-    const requestPostData = {
-      configurationId: request.orthancConfiguration.id,
-      patientUuid: patientUuid,
-      accessionNumber: request.accessionNumber,
-      requestingPhysician: request.requestingPhysician,
-      requestDescription: request.requestDescription,
-      priority: request.priority
-    };
+  const requestPostData = {
+    configurationId: request.orthancConfiguration.id,
+    patientUuid: patientUuid,
+    accessionNumber: request.accessionNumber,
+    requestingPhysician: request.requestingPhysician,
+    requestDescription: request.requestDescription,
+    priority: request.priority,
+  };
 
-    const response = await openmrsFetch(saveRequstUrl,{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: abortController.signal,
-      body: JSON.stringify(requestPostData)
-    });
+  const response = await openmrsFetch(saveRequstUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    signal: abortController.signal,
+    body: JSON.stringify(requestPostData),
+  });
 
-    if (!response.ok) {
-      throw new Error(await response.text() || "Save patient request procedure failed")
-    }
+  if (!response.ok) {
+    throw new Error((await response.text()) || 'Save patient request procedure failed');
+  }
 }
 
 /**
- * 
+ *
  * @param step The new procedure step should be add to the request procedure
  * @param requestId The UID of the request procedure should be updated to include the new step.
  */
-export async function saveRequestProcedureStep (
+export async function saveRequestProcedureStep(
   step: CreateRequestProcedureStep,
   requestId: number,
-  abortController: AbortController
+  abortController: AbortController,
 ) {
   const saveProcedureStepUrl = `${worklistUrl}/savestep`;
 
@@ -302,81 +308,81 @@ export async function saveRequestProcedureStep (
     stepStartDate: step.stepStartDate,
     stepStartTime: step.stepStartTime,
     stationName: step.stationName,
-    procedureStepLocation: step.procedureStepLocation
-  }
+    procedureStepLocation: step.procedureStepLocation,
+  };
 
-  const response = await openmrsFetch(saveProcedureStepUrl,{
+  const response = await openmrsFetch(saveProcedureStepUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     signal: abortController.signal,
-    body: JSON.stringify(stepPostData)
+    body: JSON.stringify(stepPostData),
   });
 
   if (!response.ok) {
-    throw new Error(await response.text() || "Save patient request procedure step failed")
+    throw new Error((await response.text()) || 'Save patient request procedure step failed');
   }
 }
 
 /**
- * 
+ *
  * @param studyId The medical study should be deleted
- * @param deleteOption The delete option should allow the user to choose whether to delete data only from OpenMRS 
+ * @param deleteOption The delete option should allow the user to choose whether to delete data only from OpenMRS
  *                     or from both OpenMRS and the Orthanc server.
  */
 export function deleteStudy(studyId: number, deleteOption: string, abortController: AbortController) {
-  return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}&deleteOption=${deleteOption}`,{
+  return openmrsFetch(`${imagingUrl}/study?studyId=${studyId}&deleteOption=${deleteOption}`, {
     method: 'DELETE',
-    signal: abortController.signal
-  })
+    signal: abortController.signal,
+  });
 }
 
 /**
- * 
- * @param orthancSeriesUID 
- * @param studyId 
- * @param abortController 
- * @returns 
+ *
+ * @param orthancSeriesUID
+ * @param studyId
+ * @param abortController
+ * @returns
  */
 export function deleteSeries(orthancSeriesUID: string, studyId: number, abortController: AbortController) {
   return openmrsFetch(`${imagingUrl}/series?orthancSeriesUID=${orthancSeriesUID}&studyId=${studyId}`, {
     method: 'DELETE',
-    signal: abortController.signal
-  })
+    signal: abortController.signal,
+  });
 }
 
 /**
- * 
+ *
  * @param requestId The request procedure should be deleted
  */
 export function deleteRequest(requestId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/request?requestId=${requestId}`, {
     method: 'DELETE',
-    signal: abortController.signal
-  })
+    signal: abortController.signal,
+  });
 }
 
 /**
- * 
+ *
  * @param stepId The procedure step should be deleted
  */
 export function deleteProcedureStep(stepId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/requeststep?stepId=${stepId}`, {
     method: 'DELETE',
-    signal: abortController.signal
-  })
+    signal: abortController.signal,
+  });
 }
 
 /**
- * 
+ *
  * @param orthancInstanceUID The orthanc server where the study is stored
  * @param studyId The UID of the medical study for which instances should be previewed.
  */
 export function previewInstance(orthancInstanceUID: string, studyId: number, abortController: AbortController) {
-   const previewUrl = `${imagingUrl}/previewinstance?orthancInstanceUID=${orthancInstanceUID}&studyId=${studyId}`
-   return openmrsFetch(previewUrl, {
+  const previewUrl = `${imagingUrl}/previewinstance?orthancInstanceUID=${orthancInstanceUID}&studyId=${studyId}`;
+  return openmrsFetch(previewUrl, {
     method: 'GET',
-    signal: abortController.signal
-   })
+    signal: abortController.signal,
+  });
 }
