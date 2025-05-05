@@ -70,7 +70,7 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({ patientU
   }, [setValue, fetchOptions]);
 
   const onSubmit = useCallback(
-    (data: LinkStudiesFormData) => {
+    async (data: LinkStudiesFormData) => {
       const { fetchOption, orthancConfiguration } = data;
 
       const abortController = new AbortController();
@@ -82,25 +82,22 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({ patientU
         orthancProxyUrl: orthancConfiguration.orthancProxyUrl,
       };
 
-      useLinkStudies(fetchOption, serverConfig, abortController)
-        .then((response) => {
-          closeWorkspace();
-          launchWorkspace(assignStudiesFormWorkspace, { configuration: serverConfig });
-          return () => abortController.abort();
-        })
-        .catch((err) => {
-          createErrorHandler();
-          showSnackbar({
-            title: t('linkStudiesError', 'Link studies error'),
-            kind: 'error',
-            isLowContrast: false,
-            subtitle: t('checkForConnection', 'Check connection') + ': ' + err?.message,
-          });
-        })
-        .finally(() => {
-          abortController.abort();
-          setIsLoading(false);
+      try {
+        await useLinkStudies(fetchOption, serverConfig, abortController);
+        closeWorkspace();
+        launchWorkspace(assignStudiesFormWorkspace, { configuration: serverConfig });
+      } catch (err) {
+        createErrorHandler();
+        showSnackbar({
+          title: t('linkStudiesError', 'Link studies error'),
+          kind: 'error',
+          isLowContrast: false,
+          subtitle: t('checkForConnection', 'Check connection') + ': ' + err?.message,
         });
+      } finally {
+        abortController.abort();
+        setIsLoading(false);
+      }
     },
     [closeWorkspace, t],
   );

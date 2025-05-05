@@ -1,19 +1,11 @@
-import {
-  getAsyncLifecycle,
-  getSyncLifecycle,
-  defineConfigSchema,
-  fhirBaseUrl,
-  messageOmrsServiceWorker,
-  restBaseUrl,
-  translateFrom,
-  } from '@openmrs/esm-framework';
+import { getAsyncLifecycle, getSyncLifecycle, defineConfigSchema } from '@openmrs/esm-framework';
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { dashboardMeta } from './dashboard.meta';
 import { configSchema } from './config-schema';
 import ImagingDetailedSummaryComponent from './imaging/imaging-summary/imaging-detailed-summary.component';
 
-
-const moduleName = '@openmrs/esm-patient-imaging-app';
+// const moduleName = '@openmrs/esm-patient-imaging-app';
+const moduleName = '@sadrezhao/openmrs-esm-patient-imaging-app';
 
 const options = {
   featureName: 'patient-imaging',
@@ -34,31 +26,30 @@ export const imagingDashboardLink = getSyncLifecycle(
   options,
 );
 
-
 export const uploadStudiesFormWorkspace = getAsyncLifecycle(
- () => import('./imaging/studies/upload-studies.workspace'),
- options,
+  () => import('./imaging/studies/upload-studies.workspace'),
+  options,
 );
 
 export const linkStudiesFormWorkspace = getAsyncLifecycle(
   () => import('./imaging/studies/link-studies.workspace'),
   options,
- );
+);
 
- export const assignStudiesFormWorkspace = getAsyncLifecycle(
+export const assignStudiesFormWorkspace = getAsyncLifecycle(
   () => import('./imaging/studies/assign-studies.workspace'),
   options,
- );
+);
 
 export const addNewRequestWorkspace = getAsyncLifecycle(
- () => import('./imaging/worklist/add-request-form.workspace'),
- options,
+  () => import('./imaging/worklist/add-request-form.workspace'),
+  options,
 );
 
 export const addNewProcedureStepWorkspace = getAsyncLifecycle(
   () => import('./imaging/worklist/add-procedureStep-form.workspace'),
   options,
- );
+);
 
 export const studyDeleteConfirmationDialog = getAsyncLifecycle(
   () => import('./imaging/components/delete-study.modal'),
