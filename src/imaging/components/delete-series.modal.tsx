@@ -32,17 +32,15 @@ const DeleteSeriesModal: React.FC<DeleteSeriesModalProps> = ({
           showSnackbar({
             isLowContrast: true,
             kind: 'success',
-            title: t('studySeries', 'Series deleted'),
+            title: t('studySeries', 'Study Series is deleted'),
           });
         }
       })
       .catch((error) => {
-        console.error('Error deleting series: ', error);
-
         showSnackbar({
           isLowContrast: false,
           kind: 'error',
-          title: t('errorDeletingSeries', 'Error deleting series'),
+          title: t('errorDeletingSeries', 'An error occurred while deleting the study series'),
           subtitle: error?.message,
         });
       });
@@ -50,9 +48,9 @@ const DeleteSeriesModal: React.FC<DeleteSeriesModalProps> = ({
 
   return (
     <div>
-      <ModalHeader closeModal={closeDeleteModal} title={t('deletePatientSeries', 'Delete series')} />
+      <ModalHeader closeModal={closeDeleteModal} title={t('deleteStudySeries', 'Delete study series')} />
       <ModalBody>
-        <p>{t('deleteModalConfirmationText', 'Are you sure you want to delete this study series?')}</p>
+        <p>{t('deleteModalConfirmationTextStudySeries', 'Are you sure you want to delete this study series?')}</p>
       </ModalBody>
       <ModalFooter>
         <Button kind="secondary" onClick={closeDeleteModal}>

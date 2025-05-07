@@ -42,17 +42,17 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
 
   const procedureStepFormSchema = useMemo(() => {
     return z.object({
-      modality: z.string().min(1, { message: 'Modality is required' }),
-      aetTitle: z.string().min(1, { message: 'AET title is required' }),
+      modality: z.string().min(1, { message: t('modalityRequiredWarn', 'Modality is required') }),
+      aetTitle: z.string().min(1, { message: t('aetTitleWarn', 'AET title is required') }),
       scheduledReferringPhysician: z.string().refine((value) => !!value, {
-        message: t('scheduledReferringPhysician', 'Referring physician is required'),
+        message: t('scheduledReferringPhysicianWarn', 'Referring physician is required'),
       }),
       requestedProcedureDescription: z.string().refine((value) => !!value, {
-        message: t('requestedProcedureDescription', 'Procedure description is required'),
+        message: t('requestedProcedureDescriptionWarn', 'Procedure description is required'),
       }),
-      stepStartDate: z.date().refine((value) => !!value, t('stepDateRequired', 'Step date is required')),
-      stepStartTime: z.string().refine((value) => !!value, t('stepTimeRequired', 'Step start time is required')),
-      timeFormat: z.string().refine((value) => !!value, t('seletTimeFormat', 'Time format is required')),
+      stepStartDate: z.date().refine((value) => !!value, t('stepDateWarn', 'Step date is required')),
+      stepStartTime: z.string().refine((value) => !!value, t('stepTimeWarn', 'Step start time is required')),
+      timeFormat: z.string().refine((value) => !!value, t('seletTimeFormatWarn', 'Time format is required')),
       stationName: z.string().nullable().optional(),
       procedureStepLocation: z.string().nullable().optional(),
     });
@@ -113,12 +113,12 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
         closeWorkspaceWithSavedChanges();
         showSnackbar({
           kind: 'success',
-          title: t('requestSaved', 'Request saved successfully'),
+          title: t('procedureStepSaved', 'Procedure step is saved successfully'),
         });
         requestMutate();
       } catch (err: any) {
         showSnackbar({
-          title: t('errorSaving', 'Error saving request'),
+          title: t('errorSavingProcedureStep', 'An error occurred while saving the procedure step'),
           kind: 'error',
           subtitle: err?.message,
           isLowContrast: false,
@@ -149,7 +149,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                         aria-label={t('modality', 'Modality')}
                         selectedItem={modalityOptions.find((opt) => opt.code === value)}
                         invalid={!!errors?.modality}
-                        invalidText={errors?.modality?.message || t('selectModality', 'Modality is required')}
+                        invalidText={errors?.modality?.message || t('modalityRequiredWarn', 'Modality is required')}
                       />
                     </div>
                   )}
@@ -171,7 +171,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
                       invalid={!!errors?.aetTitle}
-                      invalidText={errors?.aetTitle?.message || t('enterAetTitle', 'AetTitle is required')}
+                      invalidText={errors?.aetTitle?.message || t('aetTitleWarn', 'Aet Title is required')}
                     />
                   </div>
                 )}

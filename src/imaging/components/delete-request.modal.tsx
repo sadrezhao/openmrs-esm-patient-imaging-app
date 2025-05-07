@@ -31,12 +31,10 @@ const DeleteRequestModal: React.FC<DeleteRequestModalProps> = ({ closeDeleteModa
         }
       })
       .catch((error) => {
-        console.error('Error deleting request: ', error);
-
         showSnackbar({
           isLowContrast: false,
           kind: 'error',
-          title: t('errorDeletingRequest', 'Error deleting request'),
+          title: t('errorDeletingRequest', 'An error occurred while deleting the requested procedure'),
           subtitle: error?.message,
         });
       });
@@ -44,9 +42,9 @@ const DeleteRequestModal: React.FC<DeleteRequestModalProps> = ({ closeDeleteModa
 
   return (
     <div>
-      <ModalHeader closeModal={closeDeleteModal} title={t('deletePatientRequest', 'Delete request')} />
+      <ModalHeader closeModal={closeDeleteModal} title={t('deletePatientRequest', 'Delete requested procedure')} />
       <ModalBody>
-        <p>{t('deleteModalConfirmationText', 'Are you sure you want to delete this request?')}</p>
+        <p>{t('deleteModalConfirmationTextRequest', 'Are you sure you want to delete this requested procdure?')}</p>
       </ModalBody>
       <ModalFooter>
         <Button kind="secondary" onClick={closeDeleteModal}>

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   DataTable,
   IconButton,
@@ -48,28 +48,38 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
     });
   };
 
-  const tableHeaders = [
-    { key: 'id', header: t('stepID', 'StepID') },
-    { key: 'performedProcedureStepStatus', header: t('status', 'Status') },
-    { key: 'modality', header: t('modality', 'Modality'), isSortable: true, isVisible: true },
-    { key: 'aetTitle', header: t('aetTitle', 'Aet Title') },
-    {
-      key: 'scheduledReferringPhysician',
-      header: t('scheduledReferringPhysician', 'Scheduled referring physician'),
-      isSortable: true,
-      isVisible: true,
-    },
-    { key: 'requestedProcedureDescription', header: t('description', 'Description') },
-    { key: 'stepStartDate', header: t('stepStartDate', 'Start date of the step'), isSortable: true, isVisible: true },
-    { key: 'stepStartTime', header: t('time', 'Time') },
-    { key: 'stationName', header: t('stationName', 'Sation name') },
-    { key: 'procedureStepLocation', header: t('procedureStepLocation', 'Procedure step location') },
-    { key: 'action', header: t('action', 'Action') },
-  ];
+  const tableHeaders = useMemo(
+    () => [
+      { key: 'id', header: t('stepID', 'StepID'), isSortable: true },
+      { key: 'performedProcedureStepStatus', header: t('status', 'Status'), isSortable: true },
+      { key: 'modality', header: t('modality', 'Modality'), isSortable: true, isVisible: true },
+      { key: 'aetTitle', header: t('aetTitle', 'Aet Title'), isSortable: true },
+      {
+        key: 'scheduledReferringPhysician',
+        header: t('scheduledReferringPhysician', 'Scheduled referring physician'),
+        isSortable: true,
+        isVisible: true,
+      },
+      { key: 'requestedProcedureDescription', header: t('description', 'Description'), isSortable: true },
+      { key: 'stepStartDate', header: t('stepStartDate', 'Start date of the step'), isSortable: true, isVisible: true },
+      { key: 'stepStartTime', header: t('time', 'Time') },
+      { key: 'stationName', header: t('stationName', 'Sation name'), isSortable: true },
+      { key: 'procedureStepLocation', header: t('procedureStepLocation', 'Procedure step location'), isSortable: true },
+      { key: 'action', header: t('action', 'Action') },
+    ],
+    [t],
+  );
 
-  const tableRows = results?.map((step, id) => ({
+  const statusText = useMemo(() => {
+    return {
+      completed: t('procedureStepStatusCompleted', 'completed'),
+      scheduled: t('procedureStepStatusScheduled', 'scheduled'),
+    };
+  }, [t]);
+
+  const tableRows = results?.map((step) => ({
     id: step.id,
-    performedProcedureStepStatus: step.performedProcedureStepStatus,
+    performedProcedureStepStatus: statusText[step.performedProcedureStepStatus],
     modality: {
       sortKey: step.modality,
       content: (
@@ -118,7 +128,7 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
       : compare(cellA.sortKey, cellB.sortKey);
   };
 
-  if (isLoadingStep || isValidatingStep) {
+  if (isLoadingStep) {
     return <div>Loading ...</div>;
   }
 

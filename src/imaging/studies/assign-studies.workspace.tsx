@@ -45,14 +45,14 @@ const AssignStudiesWorkspace: React.FC<AssignStudiesWorkspaceProps> = ({
       showSnackbar({
         kind: 'success',
         title: isAssign
-          ? t('studyAssigned', 'Study is assigned successfully')
+          ? t('studyAssigned', 'The study has been successfully assigned')
           : t('removeAssign', 'Assignment of the study is removed'),
       });
     } catch (err: any) {
       showSnackbar({
         title: isAssign
-          ? t('errorAssign', 'Error assigning study')
-          : t('errorRemoveAssign', 'Error: Failed to remove the study assignment.'),
+          ? t('errorAssignStudy', 'An error occurred while assign the study to the patient')
+          : t('errorRemoveAssignStudy', 'An error occurred while removing the assigned study from the patient'),
         kind: 'error',
         subtitle: err?.message,
         isLowContrast: false,

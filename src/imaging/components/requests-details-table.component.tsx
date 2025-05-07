@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   DataTable,
   Button,
@@ -39,6 +39,7 @@ import {
 } from '../constants';
 import ProcedureStepTable from './procedureStep-details-table.component';
 import styles from './details-table.scss';
+import { scheduled } from 'rxjs';
 
 export interface RequestProcedureTableProps {
   isValidating?: boolean;
@@ -66,29 +67,40 @@ const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({ isValidat
     });
   };
 
-  const tableHeaders = [
-    { key: 'id', header: t('requestID', 'RequestID') },
-    { key: 'status', header: t('status', 'Status'), isSortable: true, isVisible: true },
-    { key: 'priority', header: t('priority', 'Priority'), isSortable: true, isVisible: true },
-    {
-      key: 'requestingPhysician',
-      header: t('requestingPhysician', 'requestingPhysician'),
-      isSortable: true,
-      isVisible: true,
-    },
-    { key: 'studyInstanceUID', header: t('studyInstanceUID', 'StudyInstanceUID') },
-    { key: 'requestDescription', header: t('description', 'description') },
-    { key: 'orthancConfiguration', header: t('orthancBaseUrl', 'OrthancBaseUrl') },
-    { key: 'action', header: t('action', 'Action') },
-  ];
+  const tableHeaders = useMemo(
+    () => [
+      { key: 'id', header: t('requestID', 'RequestID'), isSortable: true },
+      { key: 'status', header: t('status', 'Status'), isSortable: true, isVisible: true },
+      { key: 'priority', header: t('priority', 'Priority'), isSortable: true, isVisible: true },
+      {
+        key: 'requestingPhysician',
+        header: t('requestingPhysician', 'requestingPhysician'),
+        isSortable: true,
+        isVisible: true,
+      },
+      { key: 'studyInstanceUID', header: t('studyInstanceUID', 'StudyInstanceUID'), isSortable: true },
+      { key: 'requestDescription', header: t('description', 'description'), isSortable: true },
+      { key: 'orthancConfiguration', header: t('orthancBaseUrl', 'OrthancBaseUrl'), isSortable: true },
+      { key: 'action', header: t('action', 'Action'), isSortable: false },
+    ],
+    [t],
+  );
+
+  const statusText = useMemo(() => {
+    return {
+      completed: t('requestStatusCompleted', 'completed'),
+      progress: t('requestStatusInProgress', 'in progress'),
+      scheduled: t('requestStatusInScheduled', 'scheduled'),
+    };
+  }, [t]);
 
   const tableRows = results?.map((request, id) => ({
     id: request.id,
     status: {
-      sortKey: request.status,
+      sortKey: statusText[request.status],
       content: (
         <div>
-          <span>{request.status}</span>
+          <span>{statusText[request.status]}</span>
         </div>
       ),
     },

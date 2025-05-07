@@ -30,14 +30,14 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         orthancBaseUrl: z.string(),
         orthancProxyUrl: z.string().nullable().optional(),
       }),
-      accessionNumber: z.string().nonempty({ message: 'Accession number is required' }),
+      accessionNumber: z.string().nonempty({ message: t('accessNumberWarn', 'Accession number is required') }),
       requestingPhysician: z.string().refine((value) => !!value, {
         message: t('requestingPhysicianMsg', 'Enter the requesting physician name'),
       }),
       requestDescription: z.string().refine((value) => !!value, {
         message: t('requestDescriptionMsg', 'Enter the request description'),
       }),
-      priority: z.string().min(1, { message: 'Priority is required' }),
+      priority: z.string().min(1, { message: t('priorityWarn', 'Priority is required') }),
     });
   }, [t]);
 
@@ -85,7 +85,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         });
       } catch (err: any) {
         showSnackbar({
-          title: t('errorSaving', 'Error saving request'),
+          title: t('errorSavingRequest', 'An error occurred while saving the request procedure'),
           kind: 'error',
           subtitle: err?.message,
           isLowContrast: false,
@@ -161,13 +161,13 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                     <TextInput
                       type="text"
                       id="requestingPhysician"
-                      labelText={t('requestingPhysician', 'requestingPhysician')}
+                      labelText={t('requestingPhysician', 'Physician')}
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
                       invalid={!!errors.requestingPhysician}
                       invalidText={
                         errors.requestingPhysician?.message ||
-                        t('enterRequestingPhysician', 'Please enter the physician')
+                        t('enterRequestingPhysician', 'Please enter the physician name')
                       }
                     />
                   </div>
@@ -185,13 +185,13 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                     <TextArea
                       type="text"
                       id="requestDescription"
-                      labelText={t('requestDescription', 'Request description')}
+                      labelText={t('requestDescription', 'Request procedure description')}
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
                       invalid={!!errors?.requestDescription}
                       invalidText={
                         errors?.requestDescription?.message ||
-                        t('enterRequestDescription', 'Please enter the request description')
+                        t('enterRequestDescription', 'Please enter the request procedure description')
                       }
                     />
                   </div>
@@ -215,7 +215,7 @@ const AddNewRequestWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
                       placeholder={t('selectPriority', 'Select the request priority')}
                       selectedItem={value}
                       invalid={!!errors.priority}
-                      invalidText={errors.priority?.message || t('selectPriority', 'Please enter the priority')}
+                      invalidText={errors.priority?.message || t('selectPriority', 'Select the request priority')}
                     />
                   )}
                 />

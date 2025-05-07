@@ -61,15 +61,15 @@ const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
   const isTablet = layout === 'tablet';
 
   const tableHeaders = [
-    { key: 'sopInstanceUID', header: t('sopInstanceUID', 'SOP Instance UID') },
-    { key: 'instanceNumber', header: t('instanceNumber', 'Instance number') },
+    { key: 'sopInstanceUID', header: t('sopInstanceUID', 'SOP Instance UID'), isSortable: true },
+    { key: 'instanceNumber', header: t('instanceNumber', 'Instance number'), isSortable: true },
     {
       key: 'imagePositionPatient',
       header: t('imagePositionPatient', 'Image position of Patient'),
       isSortable: true,
       isVisible: true,
     },
-    { key: 'numberOfFrames', header: t('numberOfFrames', 'Number of frames') },
+    { key: 'numberOfFrames', header: t('numberOfFrames', 'Number of frames'), isSortable: true },
     { key: 'action', header: t('action', 'Action') },
   ];
 

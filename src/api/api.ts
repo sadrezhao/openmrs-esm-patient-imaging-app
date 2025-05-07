@@ -147,6 +147,7 @@ export function useRequestsByPatient(patientUuid: string) {
   const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<RequestProcedure>>, Error>(
     patientUuid ? requestsUrl : null,
     openmrsFetch,
+    { refreshInterval: 30000 },
   );
 
   return {
@@ -160,7 +161,7 @@ export function useRequestsByPatient(patientUuid: string) {
 
 /**
  *
- * @param requestId The UID of the request procedure whose step should be fetched
+ * @param requestId The UID of the requested procedure whose step should be fetched
  */
 export function useProcedureStep(requestId: number) {
   const procedureStepUrl = `${worklistUrl}/requeststep?&requestId=${requestId}`;
@@ -168,6 +169,7 @@ export function useProcedureStep(requestId: number) {
   const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<Array<RequestProcedureStep>>, Error>(
     procedureStepUrl,
     openmrsFetch,
+    { refreshInterval: 30000 },
   );
 
   return {
@@ -248,13 +250,13 @@ export async function assignStudy(
   });
 
   if (!response.ok) {
-    throw new Error((await response.text()) || 'Save patient request procedure failed');
+    throw new Error((await response.text()) || 'Save requested procedure failed');
   }
 }
 
 /**
  *
- * @param request The new request procedure should be stored.
+ * @param request The new requested procedure should be stored.
  * @param patientUuid The UUID of the patient to whom the request belongs
  */
 export async function saveRequestProcedure(
@@ -283,14 +285,14 @@ export async function saveRequestProcedure(
   });
 
   if (!response.ok) {
-    throw new Error((await response.text()) || 'Save patient request procedure failed');
+    throw new Error((await response.text()) || 'Save requested procedure failed');
   }
 }
 
 /**
  *
- * @param step The new procedure step should be add to the request procedure
- * @param requestId The UID of the request procedure should be updated to include the new step.
+ * @param step The new procedure step should be add to the requested procedure
+ * @param requestId The UID of the requested procedure should be updated to include the new step.
  */
 export async function saveRequestProcedureStep(
   step: CreateRequestProcedureStep,
@@ -321,7 +323,7 @@ export async function saveRequestProcedureStep(
   });
 
   if (!response.ok) {
-    throw new Error((await response.text()) || 'Save patient request procedure step failed');
+    throw new Error((await response.text()) || 'Save requested procedure step failed');
   }
 }
 
@@ -354,7 +356,7 @@ export function deleteSeries(orthancSeriesUID: string, studyId: number, abortCon
 
 /**
  *
- * @param requestId The request procedure should be deleted
+ * @param requestId The requested procedure should be deleted
  */
 export function deleteRequest(requestId: number, abortController: AbortController) {
   return openmrsFetch(`${worklistUrl}/request?requestId=${requestId}`, {

@@ -68,11 +68,11 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
   };
 
   const tableHeaders = [
-    { key: 'seriesInstanceUID', header: t('seriesUID', 'Series UID') },
-    { key: 'modality', header: t('modality', 'Modality') },
+    { key: 'seriesInstanceUID', header: t('seriesUID', 'Series UID'), isSortable: true },
+    { key: 'modality', header: t('modality', 'Modality'), isSortable: true },
     { key: 'seriesDate', header: t('seriesDate', 'Series date'), isSortable: true, isVisible: true },
-    { key: 'seriesDescription', header: t('description', 'description') },
-    { key: 'action', header: t('action', 'Action') },
+    { key: 'seriesDescription', header: t('description', 'description'), isSortable: true },
+    { key: 'action', header: t('action', 'Action'), isSortable: false },
   ];
 
   const tableRows = results?.map((series) => ({
@@ -226,9 +226,5 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
   }
   return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
 };
-
-function onRemoveClick() {
-  throw new Error('Function not implemented.');
-}
 
 export default SeriesDetailsTable;

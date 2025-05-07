@@ -33,17 +33,15 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({ closeDeleteModal, s
           showSnackbar({
             isLowContrast: true,
             kind: 'success',
-            title: t('studyDeleted', 'Study deleted'),
+            title: t('studyDeleted', 'Study is deleted'),
           });
         }
       })
       .catch((error) => {
-        console.error('Error deleting study: ', error);
-
         showSnackbar({
           isLowContrast: false,
           kind: 'error',
-          title: t('errorDeletingStudy', 'Error deleting study'),
+          title: t('errorDeletingStudy', 'An error occurred while deleting the study'),
           subtitle: error?.message,
         });
       });
@@ -51,16 +49,16 @@ const DeleteStudyModal: React.FC<DeleteStudyModalProps> = ({ closeDeleteModal, s
 
   return (
     <div>
-      <ModalHeader closeModal={closeDeleteModal} title={t('deletePatientStudy', 'Delete study')} />
+      <ModalHeader closeModal={closeDeleteModal} title={t('deletePatientStudy', 'Delete the image study')} />
       <ModalBody>
-        <p>{t('deleteModalConfirmationText', 'Are you sure you want to delete this study?')}</p>
+        <p>{t('deleteModalConfirmationTextStudy', 'Are you sure you want to delete this study?')}</p>
         <RadioButtonGroup
           className={styles.radioButtonGroup}
           onChange={(value) => handleOptionChange(value)}
           valueSelected={selectedOption}
         >
-          <RadioButton value="openmrs" id="openmrs" labelText="From OpenMRS" />
-          <RadioButton value="both" id="both" labelText="From Orthanc & OpenMRS" />
+          <RadioButton value="openmrs" id="openmrs" labelText={t('deleteFromOpenMRS', 'From OpenMRS')} />
+          <RadioButton value="both" id="both" labelText={t('deleteFromOrthancOpenMRS', 'From Orthanc & OpenMRS')} />
         </RadioButtonGroup>
       </ModalBody>
       <ModalFooter>

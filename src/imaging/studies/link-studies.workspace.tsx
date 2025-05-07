@@ -89,10 +89,10 @@ const LinkStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({ patientU
       } catch (err) {
         createErrorHandler();
         showSnackbar({
-          title: t('linkStudiesError', 'Link studies error'),
+          title: t('linkStudiesError', 'An error occurred while linking the studies to the patient'),
           kind: 'error',
           isLowContrast: false,
-          subtitle: t('checkForConnection', 'Check connection') + ': ' + err?.message,
+          subtitle: t('checkForConnection', 'Check the connection with the configured server') + ': ' + err?.message,
         });
       } finally {
         abortController.abort();

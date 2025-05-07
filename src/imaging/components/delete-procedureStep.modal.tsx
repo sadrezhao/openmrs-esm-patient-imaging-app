@@ -26,17 +26,15 @@ const DeleteProcedureStepModal: React.FC<DeleteProcedureStepModalProps> = ({ clo
           showSnackbar({
             isLowContrast: true,
             kind: 'success',
-            title: t('procedureStepDeleted', 'Procedure step deleted'),
+            title: t('procedureStepDeleted', 'Procedure step is deleted'),
           });
         }
       })
       .catch((error) => {
-        console.error('Error deleting procedure step: ', error);
-
         showSnackbar({
           isLowContrast: false,
           kind: 'error',
-          title: t('errorDeletingProcedureStep', 'Error deleting procedure step'),
+          title: t('errorDeletingProcedureStep', 'An error occurred while deleting the procedure step'),
           subtitle: error?.message,
         });
       });

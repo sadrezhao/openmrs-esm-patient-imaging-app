@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   DataTable,
   IconButton,
@@ -59,14 +59,18 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
     });
   };
 
-  const tableHeaders = [
-    { key: 'studyInstanceUID', header: t('studyInstanceUID', 'Study instance UID') },
-    { key: 'patientName', header: t('patientName', 'Patient name'), isSortable: true },
-    { key: 'studyDate', header: t('studyDate', 'Study date'), isSortable: true },
-    { key: 'studyDescription', header: t('description', 'description'), isSortable: false },
-    { key: 'orthancConfiguration', header: t('orthancBaseUrl', 'The configured Orthanc Url'), isSortable: true },
-    { key: 'action', header: t('action', 'Action') },
-  ].filter(Boolean);
+  const tableHeaders = useMemo(
+    () =>
+      [
+        { key: 'studyInstanceUID', header: t('studyInstanceUID', 'Study instance UID'), isSortable: true },
+        { key: 'patientName', header: t('patientName', 'Patient name'), isSortable: true },
+        { key: 'studyDate', header: t('studyDate', 'Study date'), isSortable: true },
+        { key: 'studyDescription', header: t('description', 'description'), isSortable: true },
+        { key: 'orthancConfiguration', header: t('orthancBaseUrl', 'The configured Orthanc Url'), isSortable: true },
+        { key: 'action', header: t('action', 'Action'), isSortable: false },
+      ].filter(Boolean),
+    [t],
+  );
 
   const tableRows = results?.map((study) => ({
     id: study.id.toString(),

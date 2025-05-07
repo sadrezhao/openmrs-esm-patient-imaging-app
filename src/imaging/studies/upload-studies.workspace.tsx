@@ -74,8 +74,10 @@ const UploadStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({ patien
       const oversized = selectedFiles.some((file) => file.size > maxUploadImageDataSize);
       if (oversized) {
         showSnackbar({
-          title: 'Upload stuies error',
-          subtitle: `One or more files exceed the size limit of ${maxUploadImageDataSize / 1000000} MB.`,
+          title: t('uploadStuiesError', 'Upload stuies error'),
+          subtitle:
+            t('uploadErrorMsg', 'One or more files exceed the size limit of ') +
+            `${maxUploadImageDataSize / 1000000} MB.`,
           kind: 'error',
           isLowContrast: false,
         });
@@ -137,10 +139,10 @@ const UploadStudiesWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({ patien
           <section>
             <div className={styles.container}>
               <FileUploader
-                labelTitle={t(
-                  'selectFilesToUpload',
-                  `Select files to upload (dicom or zip). Max size: ${maxUploadImageDataSize / 1000000} MB`,
-                )}
+                labelTitle={
+                  t('selectFilesToUpload', 'Select files to upload (dicom or zip). Max size:') +
+                  `${maxUploadImageDataSize / 1000000} MB`
+                }
                 name="files"
                 buttonLabel={t('chooseFiles', 'Choose Files')}
                 multiple
