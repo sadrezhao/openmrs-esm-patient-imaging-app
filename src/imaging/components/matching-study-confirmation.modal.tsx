@@ -58,7 +58,7 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
         subtitle: err?.message,
       });
     }
-  }, [closeMatchingStudyModal, matching, comparisonResult, studyId, mutate, t]);
+  }, [closeMatchingStudyModal, matching, comparisonResult, studyId, patientUuid, mutate, t]);
 
   const tableHeader = [
     { key: 'tag', header: t('dataName', 'Data Name') },
