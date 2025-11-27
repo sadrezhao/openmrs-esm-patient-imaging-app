@@ -97,7 +97,7 @@ describe('AddNewProcedureStepWorkspace', () => {
 
     expect(screen.getByLabelText('Modality')).toBeInTheDocument();
     expect(screen.getByLabelText('AetTitle')).toBeInTheDocument();
-    expect(screen.getByLabelText('scheduledReferringPhysician')).toBeInTheDocument();
+    expect(screen.getByLabelText('scheduledPerformingPhysician')).toBeInTheDocument();
     expect(screen.getByLabelText('Description')).toBeInTheDocument();
     expect(screen.getByTestId('stepStartDate')).toBeInTheDocument();
     expect(screen.getByText('Start time')).toBeInTheDocument();
@@ -111,8 +111,8 @@ describe('AddNewProcedureStepWorkspace', () => {
     fireEvent.click(screen.getByRole('button', { name: /save and close/i }));
 
     await waitFor(() => {
-      const scheduledReferringPhysician = screen.getByLabelText(/scheduledReferringPhysician/i);
-      expect(scheduledReferringPhysician).toHaveAttribute('invalidtext', 'Scheduled referring physician is required');
+      const scheduledPerformingPhysician = screen.getByLabelText(/scheduledPerformingPhysician/i);
+      expect(scheduledPerformingPhysician).toHaveAttribute('invalidtext', 'Scheduled performing physician is required');
     });
 
     await waitFor(() => {
@@ -140,7 +140,7 @@ describe('AddNewProcedureStepWorkspace', () => {
 
     // Fill required fields
     await user.type(screen.getByLabelText(/AetTitle/i), 'Test AET');
-    await user.type(screen.getByLabelText(/scheduledReferringPhysician/i), 'Dr. Smith');
+    await user.type(screen.getByLabelText(/scheduledPerformingPhysician/i), 'Dr. Smith');
     await user.type(screen.getByLabelText(/Description/i), 'Test procedure');
 
     // Mocked OpenmrsDatePicker -> returns a Date
@@ -182,7 +182,7 @@ describe('AddNewProcedureStepWorkspace', () => {
     render(<AddNewProcedureStepWorkspace {...defaultProps} />);
 
     fireEvent.change(screen.getByLabelText(/AetTitle/i), { target: { value: 'Test AET' } });
-    fireEvent.change(screen.getByLabelText(/scheduledReferringPhysician/i), { target: { value: 'Dr. Smith' } });
+    fireEvent.change(screen.getByLabelText(/scheduledPerformingPhysician/i), { target: { value: 'Dr. Smith' } });
     fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test procedure' } });
     fireEvent.change(screen.getByTestId('stepStartDate'), { target: { value: '2025-09-04' } });
     fireEvent.change(screen.getByLabelText(/Start time/i), { target: { value: '10:30' } });

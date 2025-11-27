@@ -55,6 +55,16 @@ export const studyDeleteConfirmationDialog = getAsyncLifecycle(
   options,
 );
 
+export const studyUnlinkConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/unlink-study.modal'),
+  options,
+);
+
+export const matchingStudyConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/matching-study-confirmation.modal'),
+  options,
+);
+
 export const seriesDeleteConfirmationDialog = getAsyncLifecycle(
   () => import('./imaging/components/delete-series.modal'),
   options,

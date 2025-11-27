@@ -40,6 +40,30 @@ describe('StudiesDetailsTable', () => {
     {
       id: 1,
       studyInstanceUID: 'STUDY-123',
+      matching: 1,
+      comparisonResult: JSON.stringify({
+        score: 85, // numeric score
+        differences: [
+          {
+            tag: 'PatientID',
+            fromOpenmrs: '12345',
+            fromPacs: '67890',
+            stepId: '1',
+          },
+          {
+            tag: 'Modality',
+            fromOpenmrs: 'CT',
+            fromPacs: 'MR',
+            stepId: '1',
+          },
+          {
+            tag: 'AccessionNumber',
+            fromOpenmrs: 'ACC-001',
+            fromPacs: 'ACC-002',
+            stepId: '1',
+          },
+        ],
+      }),
       orthancStudyUID: 'ORTHANC-UID-123',
       mrsPatientUuid: 'patientUuid-123',
       patientName: 'John Doe',

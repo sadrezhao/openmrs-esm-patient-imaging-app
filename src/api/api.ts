@@ -271,6 +271,22 @@ export async function assignStudy(
   }
 }
 
+export async function updateStudyMatchingStatus(matching: number, styudyId: number, abortController: AbortController) {
+  const updateMatchingUrl = `${imagingUrl}/updatestudymatchingstatus`;
+  const formData = new FormData();
+  formData.append('studyId', styudyId.toString());
+  formData.append('matching', matching.toString());
+
+  const response = await openmrsFetch(updateMatchingUrl, {
+    method: 'POST',
+    signal: abortController.signal,
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error((await response.text()) || 'Update study matching status failed');
+  }
+}
+
 /**
  *
  * @param request The new requested procedure should be stored.
@@ -322,7 +338,7 @@ export async function saveRequestProcedureStep(
     requestId: requestId,
     modality: step.modality,
     aetTitle: step.aetTitle,
-    scheduledReferringPhysician: step.scheduledReferringPhysician,
+    scheduledPerformingPhysician: step.scheduledPerformingPhysician,
     requestedProcedureDescription: step.requestedProcedureDescription,
     stepStartDate: step.stepStartDate,
     stepStartTime: step.stepStartTime,

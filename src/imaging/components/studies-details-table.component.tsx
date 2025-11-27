@@ -21,9 +21,15 @@ import stoneview from '../../assets/stoneViewer.png';
 import ohifview from '../../assets/ohifViewer.png';
 import orthancExplorer from '../../assets/orthanc.png';
 import SeriesDetailsTable from './series-details-table.component';
-import { studiesCount, studyDeleteConfirmationDialog } from '../constants';
+import {
+  studiesCount,
+  studyDeleteConfirmationDialog,
+  matchingStudyConfirmationDialog,
+  unlinkStudyConfirmationDialog,
+} from '../constants';
 import styles from './details-table.scss';
 import { buildURL } from '../utils/help';
+import { set } from 'zod';
 
 export interface StudyDetailsTableProps {
   isValidating?: boolean;
@@ -80,6 +86,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   const tableHeaders = useMemo(
     () => [
       { key: 'studyInstanceUID', header: t('studyInstanceUID', 'Study instance UID'), isSortable: true },
+      { key: 'matching', header: t('matching', 'Linking'), isSortable: true },
       { key: 'patientName', header: t('patientName', 'Patient name'), isSortable: true },
       { key: 'studyDate', header: t('studyDate', 'Study date'), isSortable: true },
       { key: 'studyDescription', header: t('description', 'description'), isSortable: true },
@@ -92,6 +99,35 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   const tableRows = results?.map((study) => ({
     id: study.id.toString(),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
+    matching: (
+      <select
+        defaultValue={study.matching}
+        className={styles.matchingSelect}
+        onChange={(e) => {
+          const newMatching = parseInt(e.target.value);
+          if (newMatching == -1) {
+            const dispose = showModal(unlinkStudyConfirmationDialog, {
+              closeUnlinkModal: () => dispose(),
+              studyId: study.id,
+              patientUuid,
+            });
+          } else {
+            const dispose = showModal(matchingStudyConfirmationDialog, {
+              closeMatchingStudyModal: () => dispose(),
+              matching: newMatching,
+              comparisonResult: study.comparisonResult,
+              studyId: study.id,
+              patientUuid,
+            });
+          }
+        }}
+      >
+        <option value="0">Manual</option>
+        <option value="1">Auto. unsure</option>
+        <option value="2">Auto. 100%</option>
+        <option value="-1">Unlink</option>
+      </select>
+    ),
     patientName: {
       sortKey: study.patientName,
       content: (

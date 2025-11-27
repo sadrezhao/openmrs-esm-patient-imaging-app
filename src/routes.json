@@ -34,6 +34,14 @@
       "component": "studyDeleteConfirmationDialog"
     },
     {
+      "name": "study-unlink-confirmation-dialog",
+      "component": "studyUnlinkConfirmationDialog"
+    },
+    {
+      "name": "matching-study-confirmation-dialog",
+      "component": "matchingStudyConfirmationDialog"
+    },
+    {
       "name": "series-delete-confirmation-dialog",
       "component": "seriesDeleteConfirmationDialog"
     },
@@ -66,7 +74,7 @@
     },
     {
       "name": "assign-studies-form-workspace",
-      "title": "Assign studies",
+      "title": "Link studies",
       "component": "assignStudiesFormWorkspace",
       "type": "form",
       "canMaximize": true,

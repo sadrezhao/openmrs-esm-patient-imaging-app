@@ -52,6 +52,30 @@ describe('AssignStudiesTable', () => {
         {
           id: 1,
           studyInstanceUID: '1.2.3',
+          matching: 1,
+          comparisonResult: JSON.stringify({
+            score: 85, // numeric score
+            differences: [
+              {
+                tag: 'PatientID',
+                fromOpenmrs: '12345',
+                fromPacs: '67890',
+                stepId: '1',
+              },
+              {
+                tag: 'Modality',
+                fromOpenmrs: 'CT',
+                fromPacs: 'MR',
+                stepId: '1',
+              },
+              {
+                tag: 'AccessionNumber',
+                fromOpenmrs: 'ACC-001',
+                fromPacs: 'ACC-002',
+                stepId: '1',
+              },
+            ],
+          }),
           patientName: 'John Doe',
           studyDate: '2023-01-01',
           studyDescription: 'Description of study 1',
@@ -62,6 +86,30 @@ describe('AssignStudiesTable', () => {
         {
           id: 2,
           studyInstanceUID: '4.5.6',
+          matching: 1,
+          comparisonResult: JSON.stringify({
+            score: 85, // numeric score
+            differences: [
+              {
+                tag: 'PatientID',
+                fromOpenmrs: '12345',
+                fromPacs: '67890',
+                stepId: '1',
+              },
+              {
+                tag: 'Modality',
+                fromOpenmrs: 'CT',
+                fromPacs: 'MR',
+                stepId: '1',
+              },
+              {
+                tag: 'AccessionNumber',
+                fromOpenmrs: 'ACC-001',
+                fromPacs: 'ACC-002',
+                stepId: '1',
+              },
+            ],
+          }),
           patientName: 'Jane Smith',
           studyDate: '2023-02-15',
           studyDescription: 'Description of study 2',

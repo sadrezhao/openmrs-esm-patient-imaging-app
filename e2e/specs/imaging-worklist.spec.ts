@@ -94,7 +94,7 @@ test.describe('ImagingWorklist - Manager worklist workflow', () => {
       requestId: createdRequest!.id,
       modality: 'CT',
       aetTitle: 'TEST_AET',
-      scheduledReferringPhysician: 'Dr. Scheduler',
+      scheduledPerformingPhysician: 'Dr. Scheduler',
       requestedProcedureDescription: 'Abdomen CT scan step',
       stepStartDate: `${Date.now()}`,
       stepStartTime: '10:30',
@@ -107,7 +107,7 @@ test.describe('ImagingWorklist - Manager worklist workflow', () => {
       requestId: createdRequest!.id,
       modality: 'MRI',
       aetTitle: 'TEST_AET',
-      scheduledReferringPhysician: 'Dr. Scheduler',
+      scheduledPerformingPhysician: 'Dr. Scheduler',
       requestedProcedureDescription: 'Abdomen MRI scan step',
       stepStartDate: `${Date.now()}`, // use today's date or dynamic
       stepStartTime: '10:30',

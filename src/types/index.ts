@@ -2,6 +2,8 @@ export interface DicomStudy {
   id: number;
   studyInstanceUID: string;
   orthancStudyUID: string;
+  matching: number;
+  comparisonResult?: string;
   orthancConfiguration: OrthancConfiguration;
   patientName: string;
   mrsPatientUuid: string;
@@ -65,7 +67,7 @@ export interface CreateRequestProcedureStep {
   requestId: number;
   modality: string;
   aetTitle: string;
-  scheduledReferringPhysician: string;
+  scheduledPerformingPhysician: string;
   requestedProcedureDescription: string;
   stepStartDate: string;
   stepStartTime: string;
@@ -78,7 +80,7 @@ export interface RequestProcedureStep {
   requestProcedureId: number;
   modality: string;
   aetTitle: string;
-  scheduledReferringPhysician: string;
+  scheduledPerformingPhysician: string;
   requestedProcedureDescription: string;
   stepStartDate: string;
   stepStartTime: string;

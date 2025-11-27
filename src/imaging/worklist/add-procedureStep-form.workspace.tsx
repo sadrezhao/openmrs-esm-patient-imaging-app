@@ -44,8 +44,8 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
     return z.object({
       modality: z.string().min(1, { message: t('modalityRequiredWarn', 'Modality is required') }),
       aetTitle: z.string().min(1, { message: t('aetTitleWarn', 'AET title is required') }),
-      scheduledReferringPhysician: z.string().refine((value) => !!value, {
-        message: t('scheduledReferringPhysicianWarn', 'Referring physician is required'),
+      scheduledPerformingPhysician: z.string().refine((value) => !!value, {
+        message: t('scheduledPerformingPhysicianWarn', 'Performing physician is required'),
       }),
       requestedProcedureDescription: z.string().refine((value) => !!value, {
         message: t('requestedProcedureDescriptionWarn', 'Procedure description is required'),
@@ -99,7 +99,7 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
         requestId: requestId,
         modality: data.modality,
         aetTitle: data.aetTitle,
-        scheduledReferringPhysician: data.scheduledReferringPhysician,
+        scheduledPerformingPhysician: data.scheduledPerformingPhysician,
         requestedProcedureDescription: data.requestedProcedureDescription,
         stepStartDate: toDICOMDateTime(data.stepStartDate),
         stepStartTime: fullTime,
@@ -182,20 +182,20 @@ const AddNewProcedureStepWorkspace: React.FC<AddNewProcedureStepWorkspaceProps> 
           <section>
             <ResponsiveWrapper>
               <Controller
-                name="scheduledReferringPhysician"
+                name="scheduledPerformingPhysician"
                 control={control}
                 render={({ field: { onChange, value } }) => (
                   <div className={styles.row}>
                     <TextInput
                       type="text"
-                      id="scheduledReferringPhysician"
-                      labelText={t('scheduledReferringPhysician', 'scheduledReferringPhysician')}
+                      id="scheduledPerformingPhysician"
+                      labelText={t('scheduledPerformingPhysician', 'scheduledPerformingPhysician')}
                       value={value}
                       onChange={(evt) => onChange(evt.target.value)}
-                      invalid={!!errors?.scheduledReferringPhysician}
+                      invalid={!!errors?.scheduledPerformingPhysician}
                       invalidText={
-                        errors?.scheduledReferringPhysician?.message ||
-                        t('enterScheduledReferringPhysician', 'Scheduled referring physician is required')
+                        errors?.scheduledPerformingPhysician?.message ||
+                        t('enterScheduledPerformingPhysician', 'Scheduled performing physician is required')
                       }
                     />
                   </div>
