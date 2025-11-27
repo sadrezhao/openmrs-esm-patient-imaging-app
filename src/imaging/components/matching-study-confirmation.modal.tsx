@@ -132,7 +132,7 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
         )}
       </ModalBody>
       <ModalFooter>
-        <Button kind="primary" onClick={closeMatchingStudyModal}>
+        <Button kind="primary" onClick={closeMatchingStudyModal} data-testid="footer-close-button">
           {t('close', 'Close')}
         </Button>
         <Button kind="secondary" onClick={handleConfirmMatchingStudy}>
