@@ -35,7 +35,7 @@ const UnlinkStudyModal: React.FC<UnlinkStudyModalProps> = ({ closeUnlinkModal, s
           subtitle: error?.message,
         });
       });
-  }, [closeUnlinkModal, studyId, mutate, t]);
+  }, [closeUnlinkModal, studyId, patientUuid, mutate, t]);
 
   return (
     <div>
