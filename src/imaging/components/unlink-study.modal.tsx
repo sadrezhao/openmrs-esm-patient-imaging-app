@@ -10,7 +10,7 @@ interface UnlinkStudyModalProps {
   patientUuid: string;
 }
 
-const DeleteStudyModal: React.FC<UnlinkStudyModalProps> = ({ closeUnlinkModal, studyId, patientUuid }) => {
+const UnlinkStudyModal: React.FC<UnlinkStudyModalProps> = ({ closeUnlinkModal, studyId, patientUuid }) => {
   const { t } = useTranslation();
   const { mutate } = useStudiesByPatient(patientUuid);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -64,4 +64,4 @@ const DeleteStudyModal: React.FC<UnlinkStudyModalProps> = ({ closeUnlinkModal, s
   );
 };
 
-export default DeleteStudyModal;
+export default UnlinkStudyModal;
