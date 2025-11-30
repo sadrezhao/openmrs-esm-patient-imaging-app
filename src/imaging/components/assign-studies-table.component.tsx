@@ -21,6 +21,7 @@ import ohifview from '../../assets/ohifViewer.png';
 import SeriesDetailsTable from './series-details-table.component';
 import styles from './details-table.scss';
 import { buildURL } from '../utils/help';
+import { updateStudyMatchingStatus } from '../../api';
 
 export interface AssignStudiesTableProps {
   data?: StudiesWithScores | null;
@@ -57,12 +58,17 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
     return !!study.mrsPatientUuid && study.mrsPatientUuid === patientUuid;
   };
 
-  const handleAssignChange = (study, checked) => {
+  const handleAssignChange = async (study, checked) => {
     assignStudyFunction(study, checked.toString());
     setAssignedStudy((prev) => ({
       ...prev,
       [study.id]: checked,
     }));
+    if (checked) {
+      await updateStudyMatchingStatus(0, study.id, new AbortController());
+    } else {
+      await updateStudyMatchingStatus(-1, study.Id, new AbortController());
+    }
   };
 
   const tableHeaders = [
