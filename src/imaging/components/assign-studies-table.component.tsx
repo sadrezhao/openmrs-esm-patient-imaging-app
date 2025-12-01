@@ -64,11 +64,6 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
       ...prev,
       [study.id]: checked,
     }));
-    if (checked) {
-      await updateStudyMatchingStatus(0, study.id, new AbortController());
-    } else {
-      await updateStudyMatchingStatus(-1, study.id, new AbortController());
-    }
   };
 
   const tableHeaders = [

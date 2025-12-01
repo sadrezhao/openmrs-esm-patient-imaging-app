@@ -187,43 +187,4 @@ describe('AssignStudiesTable', () => {
     render(<AssignStudiesTable {...defaultProps} />);
     expect(screen.getByTestId('pagination')).toHaveTextContent(`Page 1 of ${defaultProps.data!.studies.length}`);
   });
-
-  // it('assigns and unassigns studies correctly', async () => {
-  //   const assignMock = jest.fn();
-  //   (updateStudyMatchingStatus as jest.Mock).mockResolvedValue({});
-
-  //   render(<AssignStudiesTable {...defaultProps} assignStudyFunction={assignMock} />);
-
-  //   const johnCheckbox = screen.getByTestId('assign-checkbox-1') as HTMLInputElement;
-  //   const janeCheckbox = screen.getByTestId('assign-checkbox-2') as HTMLInputElement;
-
-  //   // Initial states
-  //   expect(johnCheckbox.checked).toBe(true);  // unassigned
-  //   expect(janeCheckbox.checked).toBe(true);   // assigned
-
-  //   // Assign John Doe
-  //   await act(async () => {
-  //     fireEvent.change(johnCheckbox);
-  //   });
-
-  //   console.log('+++++++++ study: ', defaultProps.data!.studies[0].id);
-  //   expect(assignMock).toHaveBeenCalledWith(defaultProps.data!.studies[0]);
-  //   expect(updateStudyMatchingStatus).toHaveBeenCalledWith(
-  //     0,
-  //     defaultProps.data!.studies[0].id,
-  //     expect.any(AbortController)
-  //   );
-
-  //   // Unassign Jane Smith
-  //   await act(async () => {
-  //     fireEvent.change(janeCheckbox);
-  //   });
-
-  //   expect(assignMock).toHaveBeenCalledWith(defaultProps.data!.studies[1]);
-  //   expect(updateStudyMatchingStatus).toHaveBeenCalledWith(
-  //     -1,
-  //     defaultProps.data!.studies[1].id,
-  //     expect.any(AbortController)
-  //   );
-  // });
 });
