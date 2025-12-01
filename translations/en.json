@@ -33,6 +33,7 @@
   "procedureStepLocation": "Location",
   "procedureStepStatusCompleted": "completed",
   "procedureStepStatusScheduled": "scheduled",
+  "comparisonResults": "Comparison results",
   "progress": "progress",
   "removeRequst": "Remove request",
   "removeSeries": "Remove series",

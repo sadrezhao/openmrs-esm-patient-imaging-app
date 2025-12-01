@@ -87,12 +87,15 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
 
   return (
     <div>
-      <ModalHeader closeModal={closeMatchingStudyModal} title={t('matchingImageStudy', 'Imaging study matching')} />
+      <ModalHeader closeModal={closeMatchingStudyModal} title={t('matchingImageStudy', 'Study matching')} />
       <ModalBody>
-        <div>
-          <h3 id="matchingScoreTitle">
-            {t('calculatedMatchingScore', 'Calculated matching score: ')} {parsedComparisonResult?.score}
-          </h3>
+        <div style={{ marginBottom: '10px' }}>
+          <h4 id="matchingScoreTitle">
+            {t('calculatedMatchingScore', 'Calculated matching score: ')} {parsedComparisonResult?.score + '%'}
+          </h4>
+        </div>
+        <div style={{ marginBottom: '10px' }}>
+          <h4 id="matchingTableTitle">{t('comparisonResults', 'Comparison results')}</h4>
         </div>
         {parsedComparisonResult?.differences.length > 0 ? (
           <DataTable

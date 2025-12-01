@@ -45,6 +45,30 @@ corresponding studies. In addition, image data can be uploaded directly from the
 - **Automatic status update on DICOM study upload**:
 The Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
+- **Automatic matching the new uploaded image data to the patient**:
+When the Orthanc server receives a new imaging study created as part of a requested procedure (worklist) from OpenMRS, it notifies the OpenMRS server.
+In the updated plugin, this notification does more than just signal the arrival of the study: it also collects the DICOM study metadata and sends it to the OpenMRS backend.
+
+The OpenMRS backend then compares the patient data retrieved from the database and requested procedure details with the study metadata stored in the PACS. After validation, the backend generates:
+  - a comparison score, and
+  - a list of differences between the worklist/request data and the DICOM metadata.
+
+These results are send back to the frontend. Based on the score, the system attempts to automatically match the study to the patient. The user only needs to review and confirm the result.
+
+#### Available Matching Statues:
+  - `Manual`: The user manually matches the study to the patient. This also confirms any automatic matching suggestions.
+  - `Auto. unsure`: The system attempted an automatic match, but the confidence score was below 100%. User confirmation is required.
+  - `Auto. 100%`: The system is highly confident in the match, with a score above the maximum threshold. The study can be linked automatically, pending user confirmation.
+  - `Unlink`: The study was previously linked, but this connection has now been intentionally severed.
+
+The following screenshot shows the matching status after completion of the request procedure. The study is automatically linked to the patient in the 'Imaging Study' table. The matching status is pre-selected in the dropdown widget. Users can then review the comparison results in the 'Study matching' dialog and confirm the matching.
+
+![Automatic patient image study matching](figures/studyMatching.png)
+
+![Matching confirmation](figures/matchingConfirmationModal.png)
+
+This allows the user to disconnect the study from the patient (with `Unlink`)if the image is rejected due to mismatching or errors. The study can be re-linked later using the 'Link studies' feature.
+
 
 ### Orthanc-Supported DICOM Worklist
 In the context of radiology, a worklist is a list of imaging studies or tasks that a radiologist needs to execute, review, or analyze.
@@ -53,7 +77,7 @@ However, in situations where an RIS system is not available or feasible (such as
 a simple radiology worklist can be sufficient.
 
 The Orthanc servers also act as DICOM worklist servers. Imaging procedure requests created in the frontend can be queried by modalities or the 
-radiology department from the Orthanc servers. When a DICOM study matching the `PerformedProcedureStepID` tag of a worklist procedure step is uploaded
+radiology department from the Orthanc servers. When a DICOM study matching the `ScheduledProcedureStepID` tag of a worklist procedure step is uploaded
 to an Orthanc server, the Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
 We have developed an Orthanc plugin that provides full support for the worklist feature. The plugin facilitates two-way communication for DICOM worklist management and ensures that image request status updates are synchronised with OpenMRS. Communication with OpenMRS is handled via HTTP Basic Authentication, with login credentials configured directly within the Orthanc settings. This ensures that the worklist status in OpenMRS always reflects the current state of the imaging data.
@@ -65,9 +89,9 @@ In the context of radiology, a worklist is a list of imaging studies or tasks th
 These tasks are typically retrieved from a radiology information system (RIS), a specialized database that manages patient and imaging information.
 However, in situations where an RIS system is not available or feasible (such as for smaller healthcare facilities, clinics, or specific locations), a simple radiology worklist can be sufficient.
 
-- **Monitor status of DICOM  worklist tasks via Orthanc plugin**:
+- **Monitor status of DICOM worklist tasks via Orthanc plugin**:
 The Orthanc servers also act as DICOM worklist servers. Imaging procedure requests created in the frontend can be queried by modalities or the 
-radiology department from the Orthanc servers. When a DICOM study matching the `PerformedProcedureStepID` tag of a worklist procedure step is uploaded
+radiology department from the Orthanc servers. When a DICOM study matching the `ScheduledProcedureStepID` tag of a worklist procedure step is uploaded
 to an Orthanc server. the Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
 

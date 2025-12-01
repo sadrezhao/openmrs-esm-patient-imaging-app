@@ -22,6 +22,7 @@
   "errorStudyMatching": "An error occured while matching image study",
   "matchingImageStudy": "Imaging study matching",
   "calculatedMatchingScore": "calculated matching score: ",
+  "comparisonResults": "Comparison results",
   "noComparisonData": "No comparison data available.",
   "confirm": "Confirm",
   "close": "Close",
