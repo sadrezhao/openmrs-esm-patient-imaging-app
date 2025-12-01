@@ -42,6 +42,9 @@ export interface RequestProcedureTableProps {
   patientUuid: string;
 }
 
+/**
+ * The worklist feature: The request procedure table
+ */
 const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({ isValidating, requests, patientUuid }) => {
   const { t } = useTranslation();
   const displayText = t('requestProcedureEmptyState', 'No requests found');

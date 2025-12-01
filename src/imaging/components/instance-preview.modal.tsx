@@ -11,6 +11,9 @@ interface InstancePreviewModalProps {
   instancePosition: string;
 }
 
+/**
+ * The DICOM instance preview of the image study
+ */
 const InstancePreviewModal: React.FC<InstancePreviewModalProps> = ({
   closeInstancePreviewModal,
   studyId,

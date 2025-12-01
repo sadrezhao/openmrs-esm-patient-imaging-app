@@ -38,6 +38,9 @@ export interface StudyDetailsTableProps {
   patientUuid: string;
 }
 
+/**
+ * The content of the DICOM study details.
+ */
 const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   isValidating,
   studies,
@@ -96,6 +99,12 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
     [t],
   );
 
+  /** The matching status:
+   * Manual - complete matched and confirmed
+   * Auto.unsure - Automatic matching is not 100% accurate when comparing the meta-patient data in OpenMRS and PACS. It needs confirmat to 'Manual'
+   * Auto.100%: Automatic matching is 100% accurate when comparing meta-patient data in OpenMRS and PACS. It needs to be confirmed as 'Manual'.
+   * Unlink: Remove matching.
+   */
   const tableRows = results?.map((study) => ({
     id: study.id.toString(),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,

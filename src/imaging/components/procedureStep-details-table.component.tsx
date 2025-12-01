@@ -24,6 +24,9 @@ export interface ProcedureStepTableProps {
   requestProcedure: RequestProcedure;
 }
 
+/**
+ * The worklist feature: Procedure step table for the request procedure.
+ */
 const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedure }) => {
   const {
     data: stepList,

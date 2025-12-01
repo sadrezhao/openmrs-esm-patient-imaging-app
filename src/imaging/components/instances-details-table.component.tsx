@@ -31,6 +31,9 @@ export interface InstancesDetailsTableProps {
   seriesModality: string;
 }
 
+/**
+ * The DICOM instance details of the image study
+ */
 const InstancesDetailsTable: React.FC<InstancesDetailsTableProps> = ({
   studyId,
   studyInstanceUID,

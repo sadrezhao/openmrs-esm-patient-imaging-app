@@ -67,7 +67,7 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
     if (checked) {
       await updateStudyMatchingStatus(0, study.id, new AbortController());
     } else {
-      await updateStudyMatchingStatus(-1, study.Id, new AbortController());
+      await updateStudyMatchingStatus(-1, study.id, new AbortController());
     }
   };
 
@@ -87,12 +87,12 @@ const AssignStudiesTable: React.FC<AssignStudiesTableProps> = ({
     assignCheckbox: (
       <input
         type="checkbox"
+        data-testid={`assign-checkbox-${study.id}`}
         value={study.id}
         checked={studyAssignStatus({ study })}
         onChange={(e) => {
-          const checked = e.target.checked;
-          handleAssignChange(study, checked);
-          study.mrsPatientUuid = checked ? patientUuid : null;
+          handleAssignChange(study, e.target.checked);
+          study.mrsPatientUuid = e.target.checked ? patientUuid : null;
         }}
       />
     ),
