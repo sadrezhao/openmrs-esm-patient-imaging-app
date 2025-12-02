@@ -18,9 +18,9 @@
   "nlinkModalConfirmationTextStudy": "Are you sure you want to unlink this study from the patient? If you proceed, the study will not appear anymore in the patient chart. You can link it again to this or another patient later.",
   "unlinking": "Unlinking",
   "unlink": "unlink",
-  "matchingStudy": "Study matching is confirmed",
-  "errorStudyMatching": "An error occured while matching image study",
-  "matchingImageStudy": "Imaging study matching",
+  "linkingStudy": "Study linking is confirmed",
+  "errorStudyLinking": "An error occured while linking image study",
+  "linkingImageStudy": "Study linking",
   "calculatedMatchingScore": "calculated matching score: ",
   "comparisonResults": "Comparison results",
   "noComparisonData": "No comparison data available.",
@@ -131,5 +131,8 @@
   "filterByStatus": "Filter by status",
   "filterByPriority": "Filter by priority",
   "filterByStudyDate": "Filter by study date",
-  "filterByStudyDescription": "Filter by study description"
+  "filterByStudyDescription": "Filter by study description",
+  "fromOpenmrs": "From OpenMRS",
+  "fromPacs": "From PACS",
+  "dataName": "Data name"
 }

@@ -283,7 +283,7 @@ export async function updateStudyMatchingStatus(matching: number, styudyId: numb
     body: formData,
   });
   if (!response.ok) {
-    throw new Error((await response.text()) || 'Update study matching status failed');
+    throw new Error((await response.text()) || 'Update study linking status failed');
   }
 }
 

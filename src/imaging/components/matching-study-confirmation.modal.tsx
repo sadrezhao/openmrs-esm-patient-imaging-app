@@ -48,13 +48,13 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
       showSnackbar({
         isLowContrast: true,
         kind: 'success',
-        title: t('matchingStudy', 'Study matching is confirmed'),
+        title: t('matchingStudy', 'Study linking is confirmed'),
       });
     } catch (err: any) {
       showSnackbar({
         isLowContrast: false,
         kind: 'error',
-        title: t('errorStudyMatching', 'An error occured while matching image study'),
+        title: t('errorStudyLinking', 'An error occured while linking image study'),
         subtitle: err?.message,
       });
     }
@@ -87,7 +87,7 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
 
   return (
     <div>
-      <ModalHeader closeModal={closeMatchingStudyModal} title={t('matchingImageStudy', 'Study matching')} />
+      <ModalHeader closeModal={closeMatchingStudyModal} title={t('linkingImageStudy', 'Study linking')} />
       <ModalBody>
         <div style={{ marginBottom: '10px' }}>
           <h4 id="matchingScoreTitle">
