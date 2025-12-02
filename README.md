@@ -38,36 +38,37 @@ corresponding studies. In addition, image data can be uploaded directly from the
 #### Features
 
 - **Upload, view, assign and delete medical images**:
-This is the heart of the Orthanc integration, allowing browsing and viewing of patient images through DICOM viewers available within Orthanc.
-The module retrieves the metadata of image studies stored on Orthan servers. A mapping function helps associating OpenMRS patient records with their
-corresponding studies. In addition, image data can be uploaded directly from the OpenMRS web client to Orthanc servers.
+
+  This is the heart of the Orthanc integration, allowing browsing and viewing of patient images through DICOM viewers available within Orthanc.
+  The module retrieves the metadata of image studies stored on Orthan servers. A mapping function helps associating OpenMRS patient records with their
+  corresponding studies. In addition, image data can be uploaded directly from the OpenMRS web client to Orthanc servers.
 
 - **Automatic status update on DICOM study upload**:
-The Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
+
+  The Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
 - **Automatic matching the new uploaded image data to the patient**:
-When the Orthanc server receives a new imaging study created as part of a requested procedure (worklist) from OpenMRS, it notifies the OpenMRS server.
-In the updated plugin, this notification does more than just signal the arrival of the study: it also collects the DICOM study metadata and sends it to the OpenMRS backend.
 
-The OpenMRS backend then compares the patient data retrieved from the database and requested procedure details with the study metadata stored in the PACS. After validation, the backend generates:
-  - a comparison score, and
-  - a list of differences between the worklist/request data and the DICOM metadata.
+  When the Orthanc server receives a new imaging study created as part of a requested procedure (worklist) from OpenMRS, it notifies the OpenMRS server.
+  In the updated plugin, this notification does more than just signal the arrival of the study: it also collects the DICOM study metadata and sends it to the OpenMRS backend.
 
-These results are send back to the frontend. Based on the score, the system attempts to automatically match the study to the patient. The user only needs to review and confirm the result.
+  The OpenMRS backend then compares the patient data retrieved from the database and requested procedure details with the study metadata stored in the PACS. After validation, the backend generates:
+    - a comparison score, and
+    - a list of differences between the worklist/request data and the DICOM metadata.
 
-#### Available Matching Statues:
-  - `Manual`: The user manually matches the study to the patient. This also confirms any automatic matching suggestions.
-  - `Auto. unsure`: The system attempted an automatic match, but the confidence score was below 100%. User confirmation is required.
-  - `Auto. 100%`: The system is highly confident in the match, with a score above the maximum threshold. The study can be linked automatically, pending user confirmation.
-  - `Unlink`: The study was previously linked, but this connection has now been intentionally severed.
+  These results are sent back to the frontend. Based on the score, the system attempts to automatically match the study to the patient. The user only needs to review and confirm the result.
 
-The following screenshot shows the matching status after completion of the request procedure. The study is automatically linked to the patient in the 'Imaging Study' table. The matching status is pre-selected in the dropdown widget. Users can then review the comparison results in the 'Study matching' dialog and confirm the matching.
+  #### Available Matching Statues:
+    - `Manual`: The user has manually matches the study to the patient. This also confirms any automatic matching suggestions.
+    - `Auto. unsure`: The system attempted an automatic match, but the confidence score was below 100%. User confirmation is required.
+    - `Auto. 100%`: The system is highly confident in the match, with a score above the maximum threshold. The study can be linked automatically, pending user confirmation.
+    - `Unlink`: This allows the user to disconnect the study from the patient (with `Unlink`)if the image is rejected due to mismatching or errors. The study can be re-linked later using the 'Link studies' feature.
 
-![Automatic patient image study matching](figures/studyMatching.png)
+    The following screenshot shows the link status once the request procedure has been completed. The study is automatically linked to the patient in the 'Imaging Study' table. The pre-selected linking status is displayed in the dropdown widget. Users can then review the comparison results in the 'Study Linking' dialogue box and confirm the link.
 
-![Matching confirmation](figures/matchingConfirmationModal.png)
+  ![Automatic patient image study matching](figures/studyMatching.png)
 
-This allows the user to disconnect the study from the patient (with `Unlink`)if the image is rejected due to mismatching or errors. The study can be re-linked later using the 'Link studies' feature.
+  ![Matching confirmation](figures/matchingConfirmationModal.png)
 
 
 ### Orthanc-Supported DICOM Worklist
