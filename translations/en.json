@@ -64,8 +64,5 @@
   "time": "Time",
   "upload": "Upload",
   "worklist": "Worklist",
-  "worklistNoFoundMessage": "No worklist found",
-  "fromOpenmrs": "From OpenMRS",
-  "fromPacs": "From PACS",
-  "dataName": "Data name"
+  "worklistNoFoundMessage": "No worklist found"
 }
