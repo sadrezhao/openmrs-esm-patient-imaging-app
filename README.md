@@ -67,7 +67,6 @@ corresponding studies. In addition, image data can be uploaded directly from the
     The following screenshot shows the link status once the request procedure has been completed. The study is automatically linked to the patient in the 'Imaging Study' table. The pre-selected linking status is displayed in the dropdown widget. Users can then review the comparison results in the 'Study Linking' dialogue box and confirm the link.
 
   ![Automatic patient image study matching](figures/studyLinking.png)
-
   ![Matching confirmation](figures/linkingConfirmationModal.png)
 
 
@@ -235,6 +234,30 @@ If you want to generate a `.wl` file, uncomment the following lines from the pyt
   # with open("/tmp/worklist_test.wl", 'wb') as f:
   # f.write(responseDicom)`
 ```
+
+## Independent, end-to-end testing of the OpenMRS module
+A full end-to-end workflow was used to test the OpenMRS Imaging integration module independently. All the test components can be found in the backend project, specifically in the orthanc-plugin/e2e_test_plugin directory. For reference, the complete project is available at: https://github.com/sadrezhao/openmrs-module-imaging
+
+- Modify the `run_openmrs_orthanc_test.sh` script so that the configured ports align with the ports used by your server environment.
+
+```bash
+#OPENMRS_BASE_URL=${OPENMRS_BASE_URL:-http://localhost/openmrs}  # OpeMRS server and frontend in Docker
+OPENMRS_BASE_URL=${OPENMRS_BASE_URL:-http://localhost:YOUR-SERVER-PORT/openmrs} # for local server
+```
+
+- Start the local backend server:
+
+```bash
+mvn openmrs-sdk:run -DserverId=your_server_id
+```
+- Or start the server using Docker:
+
+- Run the test script:
+
+```bash
+./run_openmrs_orthanc_test.sh
+``` 
+
 
 ## Repo links
 - Backend and GUI 2.x: https://github.com/sadrezhao/openmrs-module-imaging
