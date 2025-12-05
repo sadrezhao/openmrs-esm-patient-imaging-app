@@ -10,7 +10,7 @@ jest.mock('@openmrs/esm-framework', () => ({
 }));
 
 jest.mock('../../api', () => ({
-  updateStudyLinkingStatus: jest.fn(),
+  updateStudyLinkStatus: jest.fn(),
   useStudiesByPatient: jest.fn(),
 }));
 

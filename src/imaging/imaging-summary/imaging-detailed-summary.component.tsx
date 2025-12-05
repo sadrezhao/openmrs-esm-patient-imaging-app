@@ -47,7 +47,7 @@ export default function ImagingDetailedSummary({ patientUuid }: ImagingDetailedS
               iconDescription={t('linkStudies', 'Studies')}
               onClick={launchLinkStudiesWorkspace}
             >
-              <strong>{t('linkStudie', 'Link studies')}</strong>
+              <strong>{t('linkStudies', 'Link studies')}</strong>
             </Button>
             <Button
               kind="ghost"
