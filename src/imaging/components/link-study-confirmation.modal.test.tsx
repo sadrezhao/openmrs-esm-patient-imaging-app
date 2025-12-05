@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import MatchingStudyModal from './matching-study-confirmation.modal';
+import LinkingStudyModal from './link-study-confirmation.modal';
 import { showSnackbar } from '@openmrs/esm-framework';
-import { updateStudyMatchingStatus, useStudiesByPatient } from '../../api';
+import { updateStudyLinkStatus, useStudiesByPatient } from '../../api';
 
 jest.mock('@openmrs/esm-framework', () => ({
   showSnackbar: jest.fn(),
@@ -10,7 +10,7 @@ jest.mock('@openmrs/esm-framework', () => ({
 }));
 
 jest.mock('../../api', () => ({
-  updateStudyMatchingStatus: jest.fn(),
+  updateStudyLinkingStatus: jest.fn(),
   useStudiesByPatient: jest.fn(),
 }));
 
@@ -18,7 +18,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, fallback: string) => fallback }),
 }));
 
-describe('MatchingStudyModal', () => {
+describe('LinkingStudyModal', () => {
   const closeModalMock = jest.fn();
   const mutateMock = jest.fn();
 
@@ -28,8 +28,8 @@ describe('MatchingStudyModal', () => {
   });
 
   const defaultProps = {
-    closeMatchingStudyModal: closeModalMock,
-    matching: 1,
+    closeLinkingStudyModal: closeModalMock,
+    linkStatus: 1,
     comparisonResult: JSON.stringify({
       score: 85,
       differences: [
@@ -42,7 +42,7 @@ describe('MatchingStudyModal', () => {
   };
 
   it('renders modal with calculated score and table', () => {
-    render(<MatchingStudyModal {...defaultProps} />);
+    render(<LinkingStudyModal {...defaultProps} />);
 
     expect(screen.getByText(/Calculated matching score/i)).toHaveTextContent('Calculated matching score: 85');
     expect(screen.getByText('Name')).toBeInTheDocument();
@@ -52,24 +52,24 @@ describe('MatchingStudyModal', () => {
 
   it('shows empty state when no differences', () => {
     const props = { ...defaultProps, comparisonResult: JSON.stringify({ score: 0, differences: [] }) };
-    render(<MatchingStudyModal {...props} />);
+    render(<LinkingStudyModal {...props} />);
     expect(screen.getByText('No comparison data available.')).toBeInTheDocument();
   });
 
   it('calls closeModal when close button clicked', () => {
-    render(<MatchingStudyModal {...defaultProps} />);
+    render(<LinkingStudyModal {...defaultProps} />);
     fireEvent.click(screen.getByTestId('footer-close-button'));
     expect(closeModalMock).toHaveBeenCalled();
   });
 
   it('calls confirm API and shows success snackbar', async () => {
-    (updateStudyMatchingStatus as jest.Mock).mockResolvedValueOnce({});
-    render(<MatchingStudyModal {...defaultProps} />);
+    (updateStudyLinkStatus as jest.Mock).mockResolvedValueOnce({});
+    render(<LinkingStudyModal {...defaultProps} />);
 
     fireEvent.click(screen.getByText('Confirm'));
 
     await waitFor(() => {
-      expect(updateStudyMatchingStatus).toHaveBeenCalledWith(1, 123, expect.any(AbortController));
+      expect(updateStudyLinkStatus).toHaveBeenCalledWith(1, 123, expect.any(AbortController));
       expect(mutateMock).toHaveBeenCalled();
       expect(closeModalMock).toHaveBeenCalled();
       expect(showSnackbar).toHaveBeenCalledWith(expect.objectContaining({ kind: 'success' }));
@@ -77,8 +77,8 @@ describe('MatchingStudyModal', () => {
   });
 
   it('shows error snackbar on API failure', async () => {
-    (updateStudyMatchingStatus as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
-    render(<MatchingStudyModal {...defaultProps} />);
+    (updateStudyLinkStatus as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+    render(<LinkingStudyModal {...defaultProps} />);
 
     fireEvent.click(screen.getByText('Confirm'));
 

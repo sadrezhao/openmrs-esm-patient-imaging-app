@@ -14,7 +14,7 @@ export const testStudy: Array<DicomStudy> = [
     id: 0,
     studyInstanceUID: '2.16.840.1.113669.632.20.1211.10000098591',
     orthancStudyUID: 'abc123def456',
-    matching: 1,
+    linkStatus: 1,
     comparisonResult: JSON.stringify({
       score: 85, // numeric score
       differences: [

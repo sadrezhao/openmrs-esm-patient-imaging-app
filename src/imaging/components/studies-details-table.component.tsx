@@ -24,7 +24,7 @@ import SeriesDetailsTable from './series-details-table.component';
 import {
   studiesCount,
   studyDeleteConfirmationDialog,
-  matchingStudyConfirmationDialog,
+  linkStudyConfirmationDialog,
   unlinkStudyConfirmationDialog,
 } from '../constants';
 import styles from './details-table.scss';
@@ -89,7 +89,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
   const tableHeaders = useMemo(
     () => [
       { key: 'studyInstanceUID', header: t('studyInstanceUID', 'Study instance UID'), isSortable: true },
-      { key: 'matching', header: t('matching', 'Linking'), isSortable: true },
+      { key: 'linkStatus', header: t('linkStatus', 'Linking'), isSortable: true },
       { key: 'patientName', header: t('patientName', 'Patient name'), isSortable: true },
       { key: 'studyDate', header: t('studyDate', 'Study date'), isSortable: true },
       { key: 'studyDescription', header: t('description', 'description'), isSortable: true },
@@ -99,31 +99,31 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
     [t],
   );
 
-  /** The matching status:
+  /** The link status:
    * Manual - complete matched and confirmed
-   * Auto.unsure - Automatic matching is not 100% accurate when comparing the meta-patient data in OpenMRS and PACS. It needs confirmat to 'Manual'
-   * Auto.100%: Automatic matching is 100% accurate when comparing meta-patient data in OpenMRS and PACS. It needs to be confirmed as 'Manual'.
-   * Unlink: Remove matching.
+   * Auto.unsure - Automatic link is not 100% accurate when comparing the meta-patient data in OpenMRS and PACS. It needs confirmat to 'Manual'
+   * Auto.100%: Automatic link is 100% accurate when comparing meta-patient data in OpenMRS and PACS. It needs to be confirmed as 'Manual'.
+   * Unlink: Remove link.
    */
   const tableRows = results?.map((study) => ({
     id: study.id.toString(),
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
-    matching: (
+    linkStatus: (
       <select
-        defaultValue={study.matching}
+        defaultValue={study.linkStatus}
         className={styles.matchingSelect}
         onChange={(e) => {
-          const newMatching = parseInt(e.target.value);
-          if (newMatching == -1) {
+          const newLinkStatus = parseInt(e.target.value);
+          if (newLinkStatus == -1) {
             const dispose = showModal(unlinkStudyConfirmationDialog, {
               closeUnlinkModal: () => dispose(),
               studyId: study.id,
               patientUuid,
             });
           } else {
-            const dispose = showModal(matchingStudyConfirmationDialog, {
-              closeMatchingStudyModal: () => dispose(),
-              matching: newMatching,
+            const dispose = showModal(linkStudyConfirmationDialog, {
+              closeLinkingStudyModal: () => dispose(),
+              linkStatus: newLinkStatus,
               comparisonResult: study.comparisonResult,
               studyId: study.id,
               patientUuid,

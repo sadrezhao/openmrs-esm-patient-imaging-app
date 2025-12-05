@@ -47,7 +47,7 @@ corresponding studies. In addition, image data can be uploaded directly from the
 
   The Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
-- **Automatic linking the new uploaded image data to the patient**:
+- **Automatic link the new uploaded image data to the patient**:
 
   When the Orthanc server receives a new imaging study created as part of a requested procedure (worklist) from OpenMRS, it notifies the OpenMRS server.
   In the updated plugin, this notification does more than just signal the arrival of the study: it also collects the DICOM study metadata and sends it to the OpenMRS backend.
@@ -58,16 +58,16 @@ corresponding studies. In addition, image data can be uploaded directly from the
 
   These results are sent back to the frontend. Based on the score, the system attempts to automatically link the study to the patient. The user only needs to review and confirm the result.
 
-  #### Available Matching Statues:
-    - `Manual`: The user has manually linked the study to the patient. This also confirms any automatic linking suggestions.
+  #### Available link Statues:
+    - `Manual`: The user has manually linked the study to the patient. This also confirms any automatic link suggestions.
     - `Auto. unsure`: The system attempted an automatic link, but the confidence score was below 100%.
     - `Auto. 100%`: The system is highly confident in the link, as all the fields are identical.
     - `Unlink`: This allows the user to disconnect the study from the patient (with `Unlink`)if the image is rejected due to mismatching or errors. The study can be re-linked later using the 'Link studies' feature.
 
-    The following screenshot shows the link status once the request procedure has been completed. The study is automatically linked to the patient in the 'Imaging Study' table. The pre-selected linking status is displayed in the dropdown widget. Users can then review the comparison results in the 'Study Linking' dialogue box and confirm the link.
+    The following screenshot shows the link status once the request procedure has been completed. The study is automatically linked to the patient in the 'Imaging Study' table. The pre-selected link status is displayed in the dropdown widget. Users can then review the comparison results in the 'Study Linking' dialogue box and confirm the link.
 
-  ![Automatic patient image study matching](figures/studyLinking.png)
-  ![Matching confirmation](figures/linkingConfirmationModal.png)
+  ![Automatic patient image study link](figures/studyLinking.png)
+  ![Link confirmation](figures/linkingConfirmationModal.png)
 
 
 ### Orthanc-Supported DICOM Worklist

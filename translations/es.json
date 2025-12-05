@@ -26,7 +26,8 @@
   "noComparisonData": "No comparison data available.",
   "confirm": "Confirm",
   "close": "Close",
-  "managerStudies": "Manage Studies",
+  "managerStudies": "Manage studies",
+  "linkStatus": "Link status",
   "modality": "Modality",
   "numberOfFrames": "Number of frames",
   "ohifviewer": "Show image data in Orthanc explorer",
@@ -133,6 +134,6 @@
   "filterByStudyDate": "Filter by study date",
   "filterByStudyDescription": "Filter by study description",
   "fromOpenmrs": "From OpenMRS",
-  "fromPacs": "From PACS",
+  "fromPacs": "From Orthanc",
   "dataName": "Data name"
 }

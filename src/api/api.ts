@@ -271,13 +271,13 @@ export async function assignStudy(
   }
 }
 
-export async function updateStudyMatchingStatus(matching: number, styudyId: number, abortController: AbortController) {
-  const updateMatchingUrl = `${imagingUrl}/updatestudymatchingstatus`;
+export async function updateStudyLinkStatus(linkStatus: number, styudyId: number, abortController: AbortController) {
+  const updateLinkingUrl = `${imagingUrl}/updatestudyLinkStatus`;
   const formData = new FormData();
   formData.append('studyId', styudyId.toString());
-  formData.append('matching', matching.toString());
+  formData.append('linkStatus', linkStatus.toString());
 
-  const response = await openmrsFetch(updateMatchingUrl, {
+  const response = await openmrsFetch(updateLinkingUrl, {
     method: 'POST',
     signal: abortController.signal,
     body: formData,

@@ -38,8 +38,8 @@
       "component": "studyUnlinkConfirmationDialog"
     },
     {
-      "name": "matching-study-confirmation-dialog",
-      "component": "matchingStudyConfirmationDialog"
+      "name": "link-study-confirmation-dialog",
+      "component": "linkStudyConfirmationDialog"
     },
     {
       "name": "series-delete-confirmation-dialog",

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import AssignStudiesTable, { AssignStudiesTableProps } from './assign-studies-table.component';
-import { updateStudyMatchingStatus } from '../../api';
+import { updateStudyLinkStatus } from '../../api';
 import * as AssignStudiesModule from './assign-studies-table.component';
 
 jest.mock('react-i18next', () => ({
@@ -54,7 +54,7 @@ describe('AssignStudiesTable', () => {
         {
           id: 1,
           studyInstanceUID: '1.2.3',
-          matching: -1,
+          linkStatus: -1,
           comparisonResult: JSON.stringify({
             score: 85, // numeric score
             differences: [
@@ -88,7 +88,7 @@ describe('AssignStudiesTable', () => {
         {
           id: 2,
           studyInstanceUID: '4.5.6',
-          matching: 0,
+          linkStatus: 0,
           comparisonResult: JSON.stringify({
             score: 85, // numeric score
             differences: [

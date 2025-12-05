@@ -16,19 +16,19 @@ import {
   TableRow,
 } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
-import { updateStudyMatchingStatus, useStudiesByPatient } from '../../api';
+import { updateStudyLinkStatus, useStudiesByPatient } from '../../api';
 
-interface MatchingStudyModalProps {
-  closeMatchingStudyModal: () => void;
-  matching: number;
+interface LinkStudyModalProps {
+  closeLinkingStudyModal: () => void;
+  linkStatus: number;
   comparisonResult: string;
   studyId: number;
   patientUuid: string;
 }
 
-const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
-  closeMatchingStudyModal,
-  matching,
+const LinkingStudyModal: React.FC<LinkStudyModalProps> = ({
+  closeLinkingStudyModal: closeLinkingStudyModal,
+  linkStatus,
   comparisonResult,
   studyId,
   patientUuid,
@@ -40,15 +40,15 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
 
   const parsedComparisonResult = comparisonResult ? JSON.parse(comparisonResult) : { score: 0, differences: [] };
 
-  const handleConfirmMatchingStudy = useCallback(async () => {
+  const handleConfirmLinkingStudy = useCallback(async () => {
     try {
-      await updateStudyMatchingStatus(matching, studyId, new AbortController());
+      await updateStudyLinkStatus(linkStatus, studyId, new AbortController());
       mutate();
-      closeMatchingStudyModal();
+      closeLinkingStudyModal();
       showSnackbar({
         isLowContrast: true,
         kind: 'success',
-        title: t('matchingStudy', 'Study linking is confirmed'),
+        title: t('matchingStudy', 'Study link is confirmed'),
       });
     } catch (err: any) {
       showSnackbar({
@@ -58,12 +58,12 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
         subtitle: err?.message,
       });
     }
-  }, [closeMatchingStudyModal, matching, studyId, mutate, t]);
+  }, [closeLinkingStudyModal, linkStatus, studyId, mutate, t]);
 
   const tableHeader = [
     { key: 'tag', header: t('dataName', 'Data Name') },
     { key: 'fromOpenmrs', header: t('fromOpenmrs', 'From OpenMRS') },
-    { key: 'fromPacs', header: t('fromPacs', 'From PACS') },
+    { key: 'fromPacs', header: t('fromPacs', 'From Orthanc') },
   ];
 
   const tableRows = parsedComparisonResult?.differences.map((row, index) => ({
@@ -87,7 +87,7 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
 
   return (
     <div>
-      <ModalHeader closeModal={closeMatchingStudyModal} title={t('linkingImageStudy', 'Study linking')} />
+      <ModalHeader closeModal={closeLinkingStudyModal} title={t('linkingImageStudy', 'Study linking')} />
       <ModalBody>
         <div style={{ marginBottom: '10px' }}>
           <h4 id="matchingScoreTitle">
@@ -135,10 +135,10 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
         )}
       </ModalBody>
       <ModalFooter>
-        <Button kind="primary" onClick={closeMatchingStudyModal} data-testid="footer-close-button">
+        <Button kind="primary" onClick={closeLinkingStudyModal} data-testid="footer-close-button">
           {t('close', 'Close')}
         </Button>
-        <Button kind="secondary" onClick={handleConfirmMatchingStudy}>
+        <Button kind="secondary" onClick={handleConfirmLinkingStudy}>
           {t('confirm', 'Confirm')}
         </Button>
       </ModalFooter>
@@ -146,4 +146,4 @@ const MatchingStudyModal: React.FC<MatchingStudyModalProps> = ({
   );
 };
 
-export default MatchingStudyModal;
+export default LinkingStudyModal;

@@ -60,8 +60,8 @@ export const studyUnlinkConfirmationDialog = getAsyncLifecycle(
   options,
 );
 
-export const matchingStudyConfirmationDialog = getAsyncLifecycle(
-  () => import('./imaging/components/matching-study-confirmation.modal'),
+export const linkStudyConfirmationDialog = getAsyncLifecycle(
+  () => import('./imaging/components/link-study-confirmation.modal'),
   options,
 );
 

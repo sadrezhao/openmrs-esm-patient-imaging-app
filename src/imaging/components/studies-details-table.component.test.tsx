@@ -40,7 +40,7 @@ describe('StudiesDetailsTable', () => {
     {
       id: 1,
       studyInstanceUID: 'STUDY-123',
-      matching: 1,
+      linkStatus: 1,
       comparisonResult: JSON.stringify({
         score: 85, // numeric score
         differences: [

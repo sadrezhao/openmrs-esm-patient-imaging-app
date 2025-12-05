@@ -2,7 +2,7 @@ export interface DicomStudy {
   id: number;
   studyInstanceUID: string;
   orthancStudyUID: string;
-  matching: number;
+  linkStatus: number;
   comparisonResult?: string;
   orthancConfiguration: OrthancConfiguration;
   patientName: string;
