@@ -1,0 +1,60 @@
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button, ModalBody, ModalFooter, ModalHeader } from '@carbon/react';
+import { showSnackbar } from '@openmrs/esm-framework';
+import { updateProcedureStepStatus, useProcedureStep } from '../../api';
+
+interface RejectProcedureStepProps {
+  closeChangeStepStatusModel: () => void;
+  stepId: number;
+  status: string;
+}
+
+const RejectProcedureStepModal: React.FC<RejectProcedureStepProps> = ({
+  closeChangeStepStatusModel: closeChangeStepStatusModel,
+  stepId,
+  status,
+}) => {
+  const { t } = useTranslation();
+  const handleChangeStepStatus = useCallback(async () => {
+    try {
+      await updateProcedureStepStatus(status, stepId, new AbortController());
+      // mutate();
+      closeChangeStepStatusModel();
+      showSnackbar({
+        isLowContrast: true,
+        kind: 'success',
+        title: t('changeStepStatus', 'The performed status of procedure step is changed'),
+      });
+    } catch (err: any) {
+      showSnackbar({
+        isLowContrast: false,
+        kind: 'error',
+        title: t('errorChangeStepStatus', 'An error occurred while changing the procedure step performed status'),
+        subtitle: err?.message,
+      });
+    }
+  }, [closeChangeStepStatusModel, stepId, t]);
+
+  return (
+    <div>
+      <ModalHeader closeModal={closeChangeStepStatusModel} title={t('rejectStep', 'Reject procedure step')} />
+      <ModalBody>
+        <p>{t('changeProcedureStepMessage', 'Are you sure you want to change this procedure step?')}</p>
+        <p style={{ color: 'red', marginTop: '10px' }}>
+          {t('changeProcedureStepReject', 'You need to create a new procedure step to renew the rejected step!')}
+        </p>
+      </ModalBody>
+      <ModalFooter>
+        <Button kind="secondary" onClick={closeChangeStepStatusModel}>
+          {t('cancel', 'Cancel')}
+        </Button>
+        <Button kind="danger" onClick={handleChangeStepStatus}>
+          <span>{t('submit', 'submit')}</span>
+        </Button>
+      </ModalFooter>
+    </div>
+  );
+};
+
+export default RejectProcedureStepModal;

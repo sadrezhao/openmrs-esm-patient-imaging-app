@@ -42,6 +42,10 @@
       "component": "linkStudyConfirmationDialog"
     },
     {
+      "name": "reject-procedureStep-dialog",
+      "component": "rejectProcedureStepDialog"
+    },
+    {
       "name": "series-delete-confirmation-dialog",
       "component": "seriesDeleteConfirmationDialog"
     },

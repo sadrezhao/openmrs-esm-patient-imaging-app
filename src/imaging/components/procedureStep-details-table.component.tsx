@@ -16,7 +16,7 @@ import { useLayoutType, usePagination, TrashCanIcon, showModal } from '@openmrs/
 
 import { useTranslation } from 'react-i18next';
 import { type RequestProcedure } from '../../types';
-import { procedureStepCount, procedureSteptDeleteConfirmationDialog } from '../constants';
+import { procedureStepCount, procedureSteptDeleteConfirmationDialog, rejectProcedureStepDialog } from '../constants';
 import { useProcedureStep } from '../../api';
 import styles from './details-table.scss';
 
@@ -46,7 +46,6 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
   const launchDeleteProcedureStepDialog = (requestId: number, stepId: number) => {
     const dispose = showModal(procedureSteptDeleteConfirmationDialog, {
       closeDeleteModal: () => dispose(),
-      requestId,
       stepId,
     });
   };
@@ -77,12 +76,29 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
     return {
       completed: t('procedureStepStatusCompleted', 'completed'),
       scheduled: t('procedureStepStatusScheduled', 'scheduled'),
+      rejected: t('procedureStepStatusRejected', 'rejected'),
     };
   }, [t]);
 
   const tableRows = results?.map((step) => ({
     id: String(step.id),
-    performedProcedureStepStatus: statusText[step.performedProcedureStepStatus],
+    // performedProcedureStepStatus: statusText[step.performedProcedureStepStatus],
+    performedProcedureStepStatus: (
+      <select
+        defaultValue={statusText[step.performedProcedureStepStatus]}
+        className={styles.procedureStepStatusSelect}
+        onChange={(e) => {
+          const dispose = showModal(rejectProcedureStepDialog, {
+            closeChangeStepStatusModel: () => dispose(),
+            stepId: step.id,
+            status: e.target.value,
+          });
+        }}
+      >
+        <option value="completed">Completed</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    ),
     modality: {
       sortKey: step.modality,
       content: (

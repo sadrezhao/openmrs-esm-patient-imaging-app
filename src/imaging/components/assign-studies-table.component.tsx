@@ -21,7 +21,6 @@ import ohifview from '../../assets/ohifViewer.png';
 import SeriesDetailsTable from './series-details-table.component';
 import styles from './details-table.scss';
 import { buildURL } from '../utils/help';
-import { updateStudyLinkStatus } from '../../api';
 
 export interface AssignStudiesTableProps {
   data?: StudiesWithScores | null;

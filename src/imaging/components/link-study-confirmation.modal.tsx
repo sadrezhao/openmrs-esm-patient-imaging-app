@@ -131,7 +131,9 @@ const LinkingStudyModal: React.FC<LinkStudyModalProps> = ({
             )}
           </DataTable>
         ) : (
-          <div className={styles.emptyState}>{t('noComparisonData', 'No comparison data available.')}</div>
+          <div className={styles.emptyState} style={{ color: 'red' }}>
+            {t('noComparisonData', 'No comparison data available')}
+          </div>
         )}
       </ModalBody>
       <ModalFooter>

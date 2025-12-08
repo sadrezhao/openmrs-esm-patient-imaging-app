@@ -64,6 +64,10 @@ export const linkStudyConfirmationDialog = getAsyncLifecycle(
   () => import('./imaging/components/link-study-confirmation.modal'),
   options,
 );
+export const rejectProcedureStepDialog = getAsyncLifecycle(
+  () => import('./imaging/components/reject-procedureStep.modal'),
+  options,
+);
 
 export const seriesDeleteConfirmationDialog = getAsyncLifecycle(
   () => import('./imaging/components/delete-series.modal'),
