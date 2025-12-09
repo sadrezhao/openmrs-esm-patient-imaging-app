@@ -4,13 +4,13 @@ import { Button, ModalBody, ModalFooter, ModalHeader } from '@carbon/react';
 import { showSnackbar } from '@openmrs/esm-framework';
 import { updateProcedureStepStatus, useProcedureStep } from '../../api';
 
-interface RejectProcedureStepProps {
+interface UpdateProcedureStepStatusProps {
   closeChangeStepStatusModel: () => void;
   stepId: number;
   status: string;
 }
 
-const RejectProcedureStepModal: React.FC<RejectProcedureStepProps> = ({
+const UpdateProcedureStepStatusModal: React.FC<UpdateProcedureStepStatusProps> = ({
   closeChangeStepStatusModel: closeChangeStepStatusModel,
   stepId,
   status,
@@ -57,4 +57,4 @@ const RejectProcedureStepModal: React.FC<RejectProcedureStepProps> = ({
   );
 };
 
-export default RejectProcedureStepModal;
+export default UpdateProcedureStepStatusModal;

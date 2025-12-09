@@ -65,7 +65,7 @@ export const linkStudyConfirmationDialog = getAsyncLifecycle(
   options,
 );
 export const rejectProcedureStepDialog = getAsyncLifecycle(
-  () => import('./imaging/components/reject-procedureStep.modal'),
+  () => import('./imaging/components/update-procedureStep-status.modal'),
   options,
 );
 

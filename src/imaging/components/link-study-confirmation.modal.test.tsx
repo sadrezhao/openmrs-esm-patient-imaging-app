@@ -53,7 +53,7 @@ describe('LinkingStudyModal', () => {
   it('shows empty state when no differences', () => {
     const props = { ...defaultProps, comparisonResult: JSON.stringify({ score: 0, differences: [] }) };
     render(<LinkingStudyModal {...props} />);
-    expect(screen.getByText('No comparison data available.')).toBeInTheDocument();
+    expect(screen.getByText('No comparison data available')).toBeInTheDocument();
   });
 
   it('calls closeModal when close button clicked', () => {

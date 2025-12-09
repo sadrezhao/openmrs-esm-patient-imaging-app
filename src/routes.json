@@ -42,7 +42,7 @@
       "component": "linkStudyConfirmationDialog"
     },
     {
-      "name": "reject-procedureStep-dialog",
+      "name": "update-procedureStep-status-dialog",
       "component": "rejectProcedureStepDialog"
     },
     {

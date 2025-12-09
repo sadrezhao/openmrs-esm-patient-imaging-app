@@ -16,7 +16,11 @@ import { useLayoutType, usePagination, TrashCanIcon, showModal } from '@openmrs/
 
 import { useTranslation } from 'react-i18next';
 import { type RequestProcedure } from '../../types';
-import { procedureStepCount, procedureSteptDeleteConfirmationDialog, rejectProcedureStepDialog } from '../constants';
+import {
+  procedureStepCount,
+  procedureSteptDeleteConfirmationDialog,
+  updateProcedureStepStatusDialog,
+} from '../constants';
 import { useProcedureStep } from '../../api';
 import styles from './details-table.scss';
 
@@ -88,7 +92,7 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
         defaultValue={statusText[step.performedProcedureStepStatus]}
         className={styles.procedureStepStatusSelect}
         onChange={(e) => {
-          const dispose = showModal(rejectProcedureStepDialog, {
+          const dispose = showModal(updateProcedureStepStatusDialog, {
             closeChangeStepStatusModel: () => dispose(),
             stepId: step.id,
             status: e.target.value,
