@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, ModalBody, ModalFooter, ModalHeader } from '@carbon/react';
 import { showSnackbar } from '@openmrs/esm-framework';
-import { updateProcedureStepStatus, useProcedureStep } from '../../api';
+import { updateProcedureStepStatus } from '../../api';
 
 interface UpdateProcedureStepStatusProps {
   closeChangeStepStatusModel: () => void;
@@ -34,7 +34,7 @@ const UpdateProcedureStepStatusModal: React.FC<UpdateProcedureStepStatusProps> =
         subtitle: err?.message,
       });
     }
-  }, [closeChangeStepStatusModel, stepId, t]);
+  }, [closeChangeStepStatusModel, stepId, status, t]);
 
   return (
     <div>
