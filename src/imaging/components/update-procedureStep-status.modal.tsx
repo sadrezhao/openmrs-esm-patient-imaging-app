@@ -38,7 +38,7 @@ const UpdateProcedureStepStatusModal: React.FC<UpdateProcedureStepStatusProps> =
 
   return (
     <div>
-      <ModalHeader closeModal={closeChangeStepStatusModel} title={t('rejectStep', 'Reject procedure step')} />
+      <ModalHeader closeModal={closeChangeStepStatusModel} title={t('rejectStep', 'Update procedure step')} />
       <ModalBody>
         <p>{t('changeProcedureStepMessage', 'Are you sure you want to change this procedure step?')}</p>
         <p style={{ color: 'red', marginTop: '10px' }}>

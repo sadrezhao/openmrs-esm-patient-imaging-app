@@ -30,7 +30,7 @@ describe('UpdateProcedureStepStatusModal', () => {
   test('renders modal text correctly', () => {
     render(<UpdateProcedureStepStatusModal closeChangeStepStatusModel={closeMock} stepId={stepId} status={status} />);
 
-    expect(screen.getByText('Reject procedure step')).toBeInTheDocument();
+    expect(screen.getByText('Update procedure step')).toBeInTheDocument();
     expect(screen.getByText('Are you sure you want to change this procedure step?')).toBeInTheDocument();
     expect(screen.getByText('You need to create a new procedure step to renew the rejected step!')).toBeInTheDocument();
   });
