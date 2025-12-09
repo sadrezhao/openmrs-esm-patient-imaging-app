@@ -86,7 +86,6 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
 
   const tableRows = results?.map((step) => ({
     id: String(step.id),
-    // performedProcedureStepStatus: statusText[step.performedProcedureStepStatus],
     performedProcedureStepStatus: (
       <select
         defaultValue={statusText[step.performedProcedureStepStatus]}
