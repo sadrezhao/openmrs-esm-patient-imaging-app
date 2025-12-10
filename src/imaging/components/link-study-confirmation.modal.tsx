@@ -95,7 +95,7 @@ const LinkingStudyModal: React.FC<LinkStudyModalProps> = ({
           </h4>
         </div>
         <div style={{ marginBottom: '10px' }}>
-          <h4 id="matchingTableTitle">{t('comparisonResults', 'Comparison results')}</h4>
+          <h4 id="matchingTableTitle">{t('comparisonDifferences', 'Differences:')}</h4>
         </div>
         {parsedComparisonResult?.differences.length > 0 ? (
           <DataTable

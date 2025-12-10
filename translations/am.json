@@ -22,7 +22,7 @@
   "errorStudyLinking": "An error occured while linking image study",
   "linkingImageStudy": "Study linking",
   "calculatedMatchingScore": "calculated matching score: ",
-  "comparisonResults": "Comparison results",
+  "comparisonDifferences": "Differences:",
   "noComparisonData": "No comparison data available",
   "confirm": "Confirm",
   "close": "Close",

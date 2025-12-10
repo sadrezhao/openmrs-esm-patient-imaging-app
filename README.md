@@ -64,7 +64,7 @@ corresponding studies. In addition, image data can be uploaded directly from the
     - `Auto. 100%`: The system is highly confident in the link, as all the fields are identical.
     - `Unlink`: This allows the user to disconnect the study from the patient (with `Unlink`)if the image is rejected due to mismatching or errors. The study can be re-linked later using the 'Link studies' feature.
 
-    The following screenshot shows the link status once the request procedure has been completed. The study is automatically linked to the patient in the 'Imaging Study' table. The pre-selected link status is displayed in the dropdown widget. Users can then review the comparison results in the 'Study Linking' dialogue box and confirm the link.
+    The following screenshot shows the link status once the request procedure has been completed. The study is automatically linked to the patient in the 'Imaging Study' table. The pre-selected link status is displayed in the dropdown widget. Users can then review the comparison differences in the 'Study Linking' dialog and confirm the link.
 
   ![Automatic patient image study link](figures/studyLinking.png)
   ![Link confirmation](figures/linkingConfirmationModal.png)
@@ -85,15 +85,24 @@ We have developed an Orthanc plugin that provides full support for the worklist 
 #### Features
 
 - **Create and manage imaging procedure requests**:
-In the context of radiology, a worklist is a list of imaging studies or tasks that a radiologist needs to execute, review, or analyze.
-These tasks are typically retrieved from a radiology information system (RIS), a specialized database that manages patient and imaging information.
-However, in situations where an RIS system is not available or feasible (such as for smaller healthcare facilities, clinics, or specific locations), a simple radiology worklist can be sufficient.
+
+  In the context of radiology, a worklist is a list of imaging studies or tasks that a radiologist needs to execute, review, or analyze.
+  These tasks are typically retrieved from a radiology information system (RIS), a specialized database that manages patient and imaging information.
+  However, in situations where an RIS system is not available or feasible (such as for smaller healthcare facilities, clinics, or specific locations), a simple radiology worklist can be sufficient.
 
 - **Monitor status of DICOM worklist tasks via Orthanc plugin**:
-The Orthanc servers also act as DICOM worklist servers. Imaging procedure requests created in the frontend can be queried by modalities or the 
-radiology department from the Orthanc servers. When a DICOM study matching the `ScheduledProcedureStepID` tag of a worklist procedure step is uploaded
-to an Orthanc server. the Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
 
+  The Orthanc servers also act as DICOM worklist servers. Imaging procedure requests created in the frontend can be queried by modalities or the 
+  radiology department from the Orthanc servers. When a DICOM study matching the `ScheduledProcedureStepID` tag of a worklist procedure step is uploaded
+  to an Orthanc server. the Orthanc server will notify the OpenMRS server and the status of the procedure step will change in the frontend.
+
+- **Manage the status of each step of the request procedure within the DICOM worklist request procedure via OpenMRS**:
+
+  Once the procedure step has been created in OpenMRS and the radiologist has finished examining the patient, the resulting image study is stored on the Orthanc server. The worklist Orthanc plugin then informs OpenMRS that the study is available. At this point, the user can view the image study for the patient.
+
+  If the study does not meet the required standards — for example, due to poor quality or missing information — the user can mark it as rejected. Setting the status to `Rejected` means a new imaging request is needed, and a new procedure order must be created in OpenMRS to obtain a replacement study.
+
+![worklist management](figures/procedureStep-management.png)
 
 DICOM Worklist Query Processing `OnWorkList`: This function converts DICOM C-FIND worklist requests from a radiology workstation or a modality into JSON format and forwards them to the OpenMRS service. The response, which contains patient and procedure data, is matched to the request and sent back to the querying device that made the query.
 
