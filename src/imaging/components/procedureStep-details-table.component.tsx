@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DataTable,
   IconButton,
@@ -47,7 +47,7 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
   const isTablet = layout === 'tablet';
   const shouldOnClickBeCalled = useRef(true);
 
-  const launchDeleteProcedureStepDialog = (requestId: number, stepId: number) => {
+  const launchDeleteProcedureStepDialog = (stepId: number) => {
     const dispose = showModal(procedureSteptDeleteConfirmationDialog, {
       closeDeleteModal: () => dispose(),
       stepId,
@@ -98,6 +98,9 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
           });
         }}
       >
+        <option value="scheduled" disabled>
+          Scheduled
+        </option>
         <option value="completed">Completed</option>
         <option value="rejected">Rejected</option>
       </select>
@@ -134,7 +137,7 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
             label={t('removeStep', 'Remove step')}
             onClick={() => {
               shouldOnClickBeCalled.current = false;
-              launchDeleteProcedureStepDialog(requestProcedure.id, step.id);
+              launchDeleteProcedureStepDialog(step.id);
             }}
           >
             <TrashCanIcon className={styles.removeButton} />
