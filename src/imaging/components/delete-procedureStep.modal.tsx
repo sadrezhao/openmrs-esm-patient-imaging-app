@@ -38,7 +38,7 @@ const DeleteProcedureStepModal: React.FC<DeleteProcedureStepModalProps> = ({ clo
           subtitle: error?.message,
         });
       });
-  }, [closeDeleteModal, stepId, requestId, mutate, t]);
+  }, [closeDeleteModal, stepId, mutate, t]);
 
   return (
     <div>

@@ -72,7 +72,7 @@ const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({ isValidat
 
       return statusMatch && priorityMatch;
     });
-  }, [requests, statusFilter]);
+  }, [requests, statusFilter, priorityFilter]);
 
   const { results, goTo, currentPage } = usePagination(filteredRequests, requestCount);
 
