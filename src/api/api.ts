@@ -24,6 +24,7 @@ export function useStudiesByPatient(patientUuid: string) {
   const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: Array<DicomStudy> }, Error>(
     studiesUrl,
     openmrsFetch,
+    { refreshInterval: 30000 },
   );
 
   return {

@@ -12,6 +12,7 @@
   "instanceViewLocal": "Instance preview local",
   "linkStudies": "Link studies",
   "linkStudyConfirm": "Study link is confirmed",
+  "linkStudyChanged": "Study link is changed",
   "studyUnlinked": "Study is unlinked",
   "errorUnlinkingStudy": "An error occurred while unlinking the study",
   "unlinkPatientStudy": "Unlink the image study",

@@ -194,7 +194,7 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
                     <React.Fragment key={rowIndex}>
                       <TableRow>
                         {row.cells.map((cell, cellIndex) => (
-                          <TableCell className={styles.tableCell} key={cellIndex}>
+                          <TableCell className={styles.tableCell} key={cellIndex} style={{ marginLeft: '20px' }}>
                             {cell.value?.content ?? cell.value}
                           </TableCell>
                         ))}

@@ -110,7 +110,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
     studyInstanceUID: <div className={styles.wrapText}>{study.studyInstanceUID}</div>,
     linkStatus: (
       <select
-        defaultValue={study.linkStatus}
+        value={study.linkStatus}
         className={styles.matchingSelect}
         onChange={(e) => {
           const newLinkStatus = parseInt(e.target.value);

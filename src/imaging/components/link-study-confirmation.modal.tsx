@@ -48,7 +48,10 @@ const LinkingStudyModal: React.FC<LinkStudyModalProps> = ({
       showSnackbar({
         isLowContrast: true,
         kind: 'success',
-        title: t('linkStudyConfirm', 'Study link is confirmed'),
+        title:
+          linkStatus == 0
+            ? t('linkStudyConfirm', 'Study link is confirmed')
+            : t('linkStudyChanged', 'Study link is changed'),
       });
     } catch (err: any) {
       showSnackbar({
