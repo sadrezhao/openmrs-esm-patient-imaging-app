@@ -22,13 +22,21 @@ describe('UpdateProcedureStepStatusModal', () => {
   const closeMock = jest.fn();
   const stepId = 1;
   const status = 'rejected';
+  const mutateStepsMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('renders modal text correctly', () => {
-    render(<UpdateProcedureStepStatusModal closeChangeStepStatusModel={closeMock} stepId={stepId} status={status} />);
+    render(
+      <UpdateProcedureStepStatusModal
+        closeChangeStepStatusModel={closeMock}
+        stepId={stepId}
+        status={status}
+        mutateSteps={mutateStepsMock}
+      />,
+    );
 
     expect(screen.getByText('Update procedure step')).toBeInTheDocument();
     expect(screen.getByText('Are you sure you want to change this procedure step?')).toBeInTheDocument();
@@ -36,7 +44,14 @@ describe('UpdateProcedureStepStatusModal', () => {
   });
 
   test('clicking Cancel calls closeChangeStepStatusModel', () => {
-    render(<UpdateProcedureStepStatusModal closeChangeStepStatusModel={closeMock} stepId={stepId} status={status} />);
+    render(
+      <UpdateProcedureStepStatusModal
+        closeChangeStepStatusModel={closeMock}
+        stepId={stepId}
+        status={status}
+        mutateSteps={mutateStepsMock}
+      />,
+    );
 
     fireEvent.click(screen.getByText('Cancel'));
 
@@ -46,7 +61,14 @@ describe('UpdateProcedureStepStatusModal', () => {
   test('submitting calls updateProcedureStepStatus and shows success snackbar', async () => {
     (updateProcedureStepStatus as jest.Mock).mockResolvedValue({});
 
-    render(<UpdateProcedureStepStatusModal closeChangeStepStatusModel={closeMock} stepId={stepId} status={status} />);
+    render(
+      <UpdateProcedureStepStatusModal
+        closeChangeStepStatusModel={closeMock}
+        stepId={stepId}
+        status={status}
+        mutateSteps={mutateStepsMock}
+      />,
+    );
 
     fireEvent.click(screen.getByText('submit'));
 
@@ -60,7 +82,14 @@ describe('UpdateProcedureStepStatusModal', () => {
   test('shows error snackbar on failure', async () => {
     (updateProcedureStepStatus as jest.Mock).mockRejectedValueOnce(new Error('Update failed'));
 
-    render(<UpdateProcedureStepStatusModal closeChangeStepStatusModel={closeMock} stepId={stepId} status={status} />);
+    render(
+      <UpdateProcedureStepStatusModal
+        closeChangeStepStatusModel={closeMock}
+        stepId={stepId}
+        status={status}
+        mutateSteps={mutateStepsMock}
+      />,
+    );
 
     fireEvent.click(screen.getByText('submit'));
 

@@ -65,11 +65,14 @@ const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({ isValidat
     });
   };
 
-  const filteredRequests = requests.filter((item) => {
-    const statusMatch = statusFilter === 'all' || item.status.toLowerCase() === statusFilter;
-    const priorityMatch = priorityFilter === 'all' || item.priority.toLowerCase() === priorityFilter;
-    return statusMatch && priorityMatch;
-  });
+  const filteredRequests = useMemo(() => {
+    return requests.filter((item) => {
+      const statusMatch = statusFilter === 'all' || item.status.toLowerCase() === statusFilter;
+      const priorityMatch = priorityFilter === 'all' || item.priority.toLowerCase() === priorityFilter;
+
+      return statusMatch && priorityMatch;
+    });
+  }, [requests, statusFilter]);
 
   const { results, goTo, currentPage } = usePagination(filteredRequests, requestCount);
 
@@ -100,7 +103,7 @@ const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({ isValidat
     };
   }, [t]);
 
-  const tableRows = results?.map((request, id) => ({
+  const tableRows = results?.map((request) => ({
     id: String(request.id),
     status: {
       sortKey: statusText[request.status],
@@ -160,6 +163,7 @@ const RequestProcedureTable: React.FC<RequestProcedureTableProps> = ({ isValidat
       ),
     },
   }));
+
   const sortRow = (cellA, cellB, { sortDirection, sortStates }) => {
     return sortDirection === sortStates.DESC
       ? compare(cellB.sortKey, cellA.sortKey)

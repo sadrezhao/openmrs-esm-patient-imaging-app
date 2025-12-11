@@ -8,15 +8,9 @@ interface DeleteSeriesModalProps {
   closeDeleteModal: () => void;
   studyId: number;
   orthancSeriesUID: string;
-  patientUuid: string;
 }
 
-const DeleteSeriesModal: React.FC<DeleteSeriesModalProps> = ({
-  closeDeleteModal,
-  studyId,
-  orthancSeriesUID,
-  patientUuid,
-}) => {
+const DeleteSeriesModal: React.FC<DeleteSeriesModalProps> = ({ closeDeleteModal, studyId, orthancSeriesUID }) => {
   const { t } = useTranslation();
   const { mutate } = useStudySeries(studyId);
   const [isDeleting, setIsDeleting] = useState(false);

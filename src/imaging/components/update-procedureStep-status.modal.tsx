@@ -8,18 +8,20 @@ interface UpdateProcedureStepStatusProps {
   closeChangeStepStatusModel: () => void;
   stepId: number;
   status: string;
+  mutateSteps: () => void;
 }
 
 const UpdateProcedureStepStatusModal: React.FC<UpdateProcedureStepStatusProps> = ({
   closeChangeStepStatusModel: closeChangeStepStatusModel,
   stepId,
   status,
+  mutateSteps,
 }) => {
   const { t } = useTranslation();
   const handleChangeStepStatus = useCallback(async () => {
     try {
       await updateProcedureStepStatus(status, stepId, new AbortController());
-      // mutate();
+      mutateSteps();
       closeChangeStepStatusModel();
       showSnackbar({
         isLowContrast: true,
@@ -34,7 +36,7 @@ const UpdateProcedureStepStatusModal: React.FC<UpdateProcedureStepStatusProps> =
         subtitle: err?.message,
       });
     }
-  }, [closeChangeStepStatusModel, stepId, status, t]);
+  }, [closeChangeStepStatusModel, stepId, status, t, mutateSteps]);
 
   return (
     <div>

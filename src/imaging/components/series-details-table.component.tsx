@@ -31,12 +31,7 @@ export interface SeriesDetailsTableProps {
   orthancConfig: OrthancConfiguration;
 }
 
-const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
-  studyId,
-  studyInstanceUID,
-  patientUuid,
-  orthancConfig,
-}) => {
+const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({ studyId, studyInstanceUID, orthancConfig }) => {
   const {
     data: seriesList,
     error: seriesError,
@@ -63,7 +58,6 @@ const SeriesDetailsTable: React.FC<SeriesDetailsTableProps> = ({
       closeDeleteModal: () => dispose(),
       orthancSeriesUID,
       studyId,
-      patientUuid,
     });
   };
 

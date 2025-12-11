@@ -26,14 +26,7 @@ describe('DeleteSeriesModal', () => {
     (api.useStudySeries as jest.Mock).mockReturnValue({
       mutate: mutateMock,
     });
-    render(
-      <DeleteSeriesModal
-        closeDeleteModal={closeDeleteModal}
-        studyId={studyId}
-        orthancSeriesUID="series-123"
-        patientUuid={patientUuid}
-      />,
-    );
+    render(<DeleteSeriesModal closeDeleteModal={closeDeleteModal} studyId={studyId} orthancSeriesUID="series-123" />);
   };
 
   beforeEach(() => {

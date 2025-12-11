@@ -10,7 +10,7 @@ interface DeleteProcedureStepModalProps {
   stepId: number;
 }
 
-const DeleteProcedureStepModal: React.FC<DeleteProcedureStepModalProps> = ({ closeDeleteModal, requestId, stepId }) => {
+const DeleteProcedureStepModal: React.FC<DeleteProcedureStepModalProps> = ({ closeDeleteModal, stepId, requestId }) => {
   const { t } = useTranslation();
   const { mutate } = useProcedureStep(requestId);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -38,7 +38,7 @@ const DeleteProcedureStepModal: React.FC<DeleteProcedureStepModalProps> = ({ clo
           subtitle: error?.message,
         });
       });
-  }, [closeDeleteModal, stepId, mutate, t]);
+  }, [closeDeleteModal, stepId, requestId, mutate, t]);
 
   return (
     <div>

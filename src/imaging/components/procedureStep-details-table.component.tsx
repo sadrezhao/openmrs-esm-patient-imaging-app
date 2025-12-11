@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   DataTable,
   IconButton,
@@ -46,11 +46,25 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
   const shouldOnClickBeCalled = useRef(true);
+  const { data, mutate: mutateSteps } = useProcedureStep(requestProcedure.id);
 
   const launchDeleteProcedureStepDialog = (stepId: number) => {
     const dispose = showModal(procedureSteptDeleteConfirmationDialog, {
-      closeDeleteModal: () => dispose(),
+      closeDeleteModal: () => {
+        dispose();
+        mutateSteps();
+      },
       stepId,
+      requestId: requestProcedure.id,
+    });
+  };
+
+  const handleChangeStepStatus = (stepId: number, status: string) => {
+    const dispose = showModal(updateProcedureStepStatusDialog, {
+      closeChangeStepStatusModel: () => dispose(),
+      stepId,
+      status,
+      mutateSteps, // pass the mutation function
     });
   };
 
@@ -88,15 +102,9 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
     id: String(step.id),
     performedProcedureStepStatus: (
       <select
-        defaultValue={statusText[step.performedProcedureStepStatus]}
+        value={statusText[step.performedProcedureStepStatus]}
         className={styles.procedureStepStatusSelect}
-        onChange={(e) => {
-          const dispose = showModal(updateProcedureStepStatusDialog, {
-            closeChangeStepStatusModel: () => dispose(),
-            stepId: step.id,
-            status: e.target.value,
-          });
-        }}
+        onChange={(e) => handleChangeStepStatus(step.id, e.target.value)}
       >
         <option value="scheduled" disabled>
           Scheduled
@@ -157,65 +165,58 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
     return <div>Loading ...</div>;
   }
 
-  if (!stepList?.length) {
-    return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
+  if (stepList?.length) {
+    return (
+      <div className={'dataTableDiv'}>
+        <DataTable
+          rows={tableRows}
+          headers={tableHeaders}
+          sortRow={sortRow}
+          isSortable
+          useZebraStyles
+          data-floating-menu-container
+          size={isTablet ? 'lg' : 'sm'}
+        >
+          {({ rows, headers, getHeaderProps, getTableProps, getRowProps }) => (
+            <TableContainer>
+              <Table aria-label="Procedure step summary" className={styles.table} {...getTableProps()} />
+              <TableHead>
+                <TableRow>
+                  {headers.map((header) => (
+                    <TableHeader {...getHeaderProps({ header })}>{header.header}</TableHeader>
+                  ))}
+                  <TableHeader />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row, rowIndex) => {
+                  return (
+                    <React.Fragment key={rowIndex}>
+                      <TableRow>
+                        {row.cells.map((cell, cellIndex) => (
+                          <TableCell className={styles.tableCell} key={cellIndex}>
+                            {cell.value?.content ?? cell.value}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </React.Fragment>
+                  );
+                })}
+              </TableBody>
+            </TableContainer>
+          )}
+        </DataTable>
+        <PatientChartPagination
+          pageNumber={currentPage}
+          totalItems={stepList.length}
+          currentItems={results.length}
+          pageSize={procedureStepCount}
+          onPageNumberChange={({ page }) => goTo(page)}
+        />
+      </div>
+    );
   }
-
-  return (
-    <div className={styles.widgetCard}>
-      {stepList?.length ? (
-        <>
-          <DataTable
-            rows={tableRows}
-            headers={tableHeaders}
-            sortRow={sortRow}
-            isSortable
-            useZebraStyles
-            data-floating-menu-container
-            size={isTablet ? 'lg' : 'sm'}
-          >
-            {({ rows, headers, getHeaderProps, getTableProps, getRowProps }) => (
-              <TableContainer>
-                <Table aria-label="Procedure step summary" className={styles.table} {...getTableProps()} />
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header) => (
-                      <TableHeader {...getHeaderProps({ header })}>{header.header}</TableHeader>
-                    ))}
-                    <TableHeader />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row, rowIndex) => {
-                    return (
-                      <React.Fragment key={rowIndex}>
-                        <TableRow>
-                          {row.cells.map((cell, cellIndex) => (
-                            <TableCell className={styles.tableCell} key={cellIndex}>
-                              {cell.value?.content ?? cell.value}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      </React.Fragment>
-                    );
-                  })}
-                </TableBody>
-              </TableContainer>
-            )}
-          </DataTable>
-          <PatientChartPagination
-            pageNumber={currentPage}
-            totalItems={stepList.length}
-            currentItems={results.length}
-            pageSize={procedureStepCount}
-            onPageNumberChange={({ page }) => goTo(page)}
-          />
-        </>
-      ) : (
-        <EmptyState displayText={displayText} headerTitle={headerTitle} />
-      )}
-    </div>
-  );
+  return <EmptyState displayText={displayText} headerTitle={headerTitle} />;
 };
 
 export default ProcedureStepTable;

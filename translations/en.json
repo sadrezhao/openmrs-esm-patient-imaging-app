@@ -64,6 +64,5 @@
   "time": "Time",
   "upload": "Upload",
   "worklist": "Worklist",
-  "worklistNoFoundMessage": "No worklist found",
-  "comparisonDifferences": "Differences:"
+  "worklistNoFoundMessage": "No worklist found"
 }
