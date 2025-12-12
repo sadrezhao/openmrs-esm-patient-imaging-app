@@ -23,6 +23,7 @@ import {
 } from '../constants';
 import { useProcedureStep } from '../../api';
 import styles from './details-table.scss';
+import { convertToDate, convertToTime, formatDate } from '../utils/help';
 
 export interface ProcedureStepTableProps {
   requestProcedure: RequestProcedure;
@@ -131,8 +132,8 @@ const ProcedureStepTable: React.FC<ProcedureStepTableProps> = ({ requestProcedur
       ),
     },
     requestedProcedureDescription: step.requestedProcedureDescription,
-    stepStartDate: step.stepStartDate,
-    stepStartTime: step.stepStartTime,
+    stepStartDate: step.stepStartDate ? formatDate(convertToDate(step.stepStartDate)!) : '',
+    stepStartTime: convertToTime(step.stepStartTime),
     stationName: step.stationName,
     procedureStepLocation: step.procedureStepLocation,
     action: {

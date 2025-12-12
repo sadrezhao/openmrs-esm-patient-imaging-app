@@ -28,7 +28,7 @@ import {
   unlinkStudyConfirmationDialog,
 } from '../constants';
 import styles from './details-table.scss';
-import { buildURL } from '../utils/help';
+import { buildURL, convertToDate, formatDate } from '../utils/help';
 import { set } from 'zod';
 
 export interface StudyDetailsTableProps {
@@ -146,9 +146,7 @@ const StudiesDetailTable: React.FC<StudyDetailsTableProps> = ({
       ),
     },
     studyDate: (
-      <div className={'studyDateColumn'}>
-        <span>{study.studyDate}</span>
-      </div>
+      <div className={'studyDateColumn'}>{study.studyDate ? formatDate(convertToDate(study.studyDate)!) : ''}</div>
     ),
     studyDescription: study.studyDescription,
     orthancConfiguration: study.orthancConfiguration.orthancBaseUrl,

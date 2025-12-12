@@ -25,6 +25,35 @@ export function toDICOMDateTime(date: Date): string {
 }
 
 /**
+ * Converts a DICOM date or datetime string to a JavaScript Date object.
+ * @param {string} dicomDate - DICOM date or datetime string, e.g., "20251212" or "20251212153045"
+ * @returns {Date|null} - JS Date object or null if input is invalid
+ */
+export function convertToDate(dicomDate: string): Date | null {
+  if (!dicomDate || dicomDate.length < 8) return null;
+
+  const year = parseInt(dicomDate.substring(0, 4), 10);
+  const month = parseInt(dicomDate.substring(4, 6), 10) - 1; // JS months are 0-based
+  const day = parseInt(dicomDate.substring(6, 8), 10);
+
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+
+  return new Date(year, month, day);
+}
+
+export function convertToTime(dicomTime) {
+  if (!dicomTime || dicomTime.length < 2) return '';
+  const hour = dicomTime.substring(0, 2);
+  const minute = dicomTime.length >= 4 ? dicomTime.substring(2, 4) : '00';
+  const second = dicomTime.length >= 6 ? dicomTime.substring(4, 6) : '00';
+  return `${hour}:${minute}:${second}`;
+}
+
+export function formatDate(date: Date): string {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+}
+
+/**
  *
  * @returns The generated access number
  */
