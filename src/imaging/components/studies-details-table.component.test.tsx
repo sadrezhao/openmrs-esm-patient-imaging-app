@@ -67,7 +67,7 @@ describe('StudiesDetailsTable', () => {
       orthancStudyUID: 'ORTHANC-UID-123',
       mrsPatientUuid: 'patientUuid-123',
       patientName: 'John Doe',
-      studyDate: '2025-08-29',
+      studyDate: '20091022',
       studyDescription: 'Brain MRI',
       orthancConfiguration: { id: 1, orthancBaseUrl: 'http://localhost:8042' },
     },
@@ -104,7 +104,7 @@ describe('StudiesDetailsTable', () => {
     expect(screen.getByRole('table', { name: /Studies summary/i })).toBeInTheDocument();
     expect(screen.getByText(/STUDY-123/i)).toBeInTheDocument();
     expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-    expect(screen.getByText(/2025-08-29/i)).toBeInTheDocument();
+    expect(screen.getByText(/2009-10-22/i)).toBeInTheDocument();
     expect(screen.getByText(/Brain MRI/i)).toBeInTheDocument();
   });
 
